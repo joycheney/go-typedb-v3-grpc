@@ -1,0 +1,119 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+syntax = "proto3";
+
+import "proto/error.proto";
+import "proto/options.proto";
+import "proto/query.proto";
+
+package typedb.protocol;
+
+option go_package = "github.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pb";
+
+message Transaction {
+
+    message Client {
+        repeated Req reqs = 1;
+    }
+
+    message Server {
+        oneof server {
+            Res res = 1;
+            ResPart res_part = 2;
+        }
+    }
+
+    message Req {
+        bytes req_id = 1;
+        map<string, string> metadata = 2;
+        oneof req {
+            Open.Req open_req = 3;
+            Query.Req query_req = 4;
+            StreamSignal.Req stream_req = 5;
+            Commit.Req commit_req = 6;
+            Rollback.Req rollback_req = 7;
+            Close.Req close_req = 8;
+        }
+    }
+
+    message Res {
+        bytes req_id = 1;
+        oneof res {
+            Open.Res open_res = 2;
+            Query.InitialRes query_initial_res = 3;
+            Commit.Res commit_res = 5;
+            Rollback.Res rollback_res = 6;
+        }
+    }
+
+    message ResPart {
+        bytes req_id = 1;
+        oneof res_part {
+            Query.ResPart query_res = 2;
+            StreamSignal.ResPart stream_res = 3;
+        }
+    }
+
+    enum Type {
+        READ = 0;
+        WRITE = 1;
+        SCHEMA = 2;
+    }
+
+    message Open {
+        message Req {
+            string database = 1;
+            Type type = 2;
+            Options.Transaction options = 3;
+            uint64 network_latency_millis = 4;
+        }
+        message Res {
+            uint64 server_duration_millis = 2;
+        }
+    }
+
+    message Commit {
+        message Req {}
+        message Res {}
+    }
+
+    message Rollback {
+        message Req {}
+        message Res {}
+    }
+
+    message Close {
+        message Req {}
+        message Res {}
+    }
+
+    message GetSchemaExceptions { // TODO: When actually used, should be probably merged with Error from error.proto
+        message Req {}
+        message Res {
+            repeated SchemaException exceptions = 1;
+        }
+    }
+
+    message SchemaException {
+        string code = 1;
+        string message = 2;
+    }
+
+    message StreamSignal {
+        message Req {}
+
+        message ResPart {
+            oneof state {
+                Continue continue = 1;
+                Done done = 2;
+                Error error = 3;
+            }
+
+            message Continue {}
+
+            message Done {}
+        }
+    }
+}

@@ -1,0 +1,82 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+syntax = "proto3";
+
+import "proto/concept.proto";
+
+package typedb.protocol;
+
+option go_package = "github.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pb";
+
+message ConceptRow {
+    repeated RowEntry row = 1;
+}
+
+message RowEntry {
+    oneof entry {
+        Empty empty = 1;
+        Concept concept = 2;
+        Value value = 3;
+        ConceptList concept_list = 4;
+        ValueList value_list = 5;
+    }
+
+    message Empty {}
+
+    message ConceptList {
+        repeated Concept concepts = 1;
+    }
+
+    message ValueList {
+        repeated Value values = 1;
+    }
+}
+
+message ConceptDocument {
+
+    Node root = 1;
+
+    message Node {
+        oneof node {
+            Map map = 1;
+            List list = 2;
+            Leaf leaf = 3;
+        }
+
+        message Map {
+            map<string, Node> map = 1;
+        }
+
+        message List {
+            repeated Node list = 1;
+        }
+
+        message Leaf {
+            oneof leaf {
+                Empty empty = 1;
+
+                EntityType entity_type = 10;
+                RelationType relation_type = 11;
+                AttributeType attribute_type = 12;
+                RoleType role_type = 13;
+                ValueType value_type = 15;
+
+                Attribute attribute = 20;
+                Value value = 21;
+
+                Kind kind = 30;
+            }
+
+            message Empty {}
+
+            enum Kind {
+                Entity = 0;
+                Relation = 1;
+                AttributeKind = 3;  // Renamed to avoid conflict with Attribute message
+                Role = 4;
+            }
+        }
+    }
+}

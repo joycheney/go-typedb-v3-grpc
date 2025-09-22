@@ -1,0 +1,22 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+syntax = "proto3";
+
+package typedb.protocol;
+
+option go_package = "github.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pb";
+
+message Options {
+    message Transaction {
+        optional bool parallel = 1;
+        optional uint64 transaction_timeout_millis = 2;
+        optional uint64 schema_lock_acquire_timeout_millis = 3;
+    }
+
+    message Query {
+        optional bool include_instance_types = 1;
+        optional uint64 prefetch_size = 2;
+    }
+}

@@ -1,0 +1,59 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+syntax = "proto3";
+
+import "proto/authentication.proto";
+import "proto/connection.proto";
+import "proto/database.proto";
+import "proto/server.proto";
+import "proto/user.proto";
+import "proto/transaction.proto";
+import "proto/migration.proto";
+
+package typedb.protocol;
+
+option go_package = "github.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pb";
+
+service TypeDB {
+
+    // Connection API
+    rpc connection_open (Connection.Open.Req) returns (Connection.Open.Res);
+
+    // Authentication API
+    rpc authentication_token_create (Authentication.Token.Create.Req) returns (Authentication.Token.Create.Res);
+
+    // Server Manager API
+    rpc servers_all (ServerManager.All.Req) returns (ServerManager.All.Res);
+
+    // User Manager API
+    rpc users_get (UserManager.Get.Req) returns (UserManager.Get.Res);
+    rpc users_all (UserManager.All.Req) returns (UserManager.All.Res);
+    rpc users_contains (UserManager.Contains.Req) returns (UserManager.Contains.Res);
+    rpc users_create (UserManager.Create.Req) returns (UserManager.Create.Res);
+
+    // User API
+    rpc users_update (User.Update.Req) returns (User.Update.Res);
+    rpc users_delete (User.Delete.Req) returns (User.Delete.Res);
+
+    // Database Manager API
+    rpc databases_get (DatabaseManager.Get.Req) returns (DatabaseManager.Get.Res);
+    rpc databases_all (DatabaseManager.All.Req) returns (DatabaseManager.All.Res);
+    rpc databases_contains (DatabaseManager.Contains.Req) returns (DatabaseManager.Contains.Res);
+    rpc databases_create (DatabaseManager.Create.Req) returns (DatabaseManager.Create.Res);
+    rpc databases_import (stream DatabaseManager.Import.Client) returns (stream DatabaseManager.Import.Server);
+
+    // Database API
+    rpc database_schema (Database.Schema.Req) returns (Database.Schema.Res);
+    rpc database_type_schema (Database.TypeSchema.Req) returns (Database.TypeSchema.Res);
+    rpc database_delete (Database.Delete.Req) returns (Database.Delete.Res);
+    rpc database_export (Database.Export.Req) returns (stream Database.Export.Server);
+
+    // Transaction Streaming API
+    // Opens a bi-directional stream representing a stateful transaction, streaming
+    // requests and responses back-and-forth. The first transaction client message must
+    // be {Transaction.Open.Req}. Closing the stream closes the transaction.
+    rpc transaction (stream Transaction.Client) returns (stream Transaction.Server);
+
+}

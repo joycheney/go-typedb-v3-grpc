@@ -1,0 +1,114 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+syntax = "proto3";
+
+package typedb.protocol;
+
+option go_package = "github.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pb";
+
+import "proto/migration.proto";
+
+message DatabaseManager {
+
+    message Get {
+        message Req {
+            string name = 1;
+        }
+
+        message Res {
+            DatabaseReplicas database = 1;
+        }
+    }
+
+    message All {
+        message Req {}
+        message Res {
+            repeated DatabaseReplicas databases = 1;
+        }
+    }
+
+    message Contains {
+        message Req {
+            string name = 1;
+        }
+
+        message Res {
+            bool contains = 1;
+        }
+    }
+
+    message Create {
+        message Req {
+            string name = 1;
+        }
+
+        message Res {
+            DatabaseReplicas database = 1;
+        }
+    }
+
+    message Import {
+        message Client {
+            Migration.Import.Client client = 1;
+        }
+
+        message Server {
+            Migration.Import.Server server = 1;
+        }
+    }
+}
+
+message DatabaseReplicas {
+
+    string name = 1;
+    repeated Replica replicas = 2;
+
+    message Replica {
+        string address = 1;
+        bool primary = 2;
+        bool preferred = 3;
+        int64 term = 4;
+    }
+}
+
+message Database {
+
+    message Schema {
+        message Req {
+            string name = 1;
+        }
+
+        message Res {
+            string schema = 1;
+        }
+    }
+
+    message TypeSchema {
+        message Req {
+            string name = 1;
+        }
+
+        message Res {
+            string schema = 1;
+        }
+    }
+
+    message Export {
+        message Req {
+            Migration.Export.Req req = 1;
+        }
+
+        message Server {
+            Migration.Export.Server server = 1;
+        }
+    }
+
+    message Delete {
+        message Req {
+            string name = 1;
+        }
+        message Res {}
+    }
+}

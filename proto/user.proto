@@ -1,0 +1,69 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+syntax = "proto3";
+
+package typedb.protocol;
+
+option go_package = "github.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pb";
+
+message UserManager {
+    message All {
+        message Req {}
+
+        message Res {
+            repeated User users = 1;
+        }
+    }
+
+    message Contains {
+        message Req {
+            string name = 1;
+        }
+
+        message Res {
+            bool contains = 1;
+        }
+    }
+
+    message Get {
+        message Req {
+            string name = 1;
+        }
+
+        message Res {
+            User user = 1;
+        }
+    }
+
+    message Create {
+        message Req {
+            User user = 1;
+        }
+
+        message Res {}
+    }
+}
+
+message User {
+    string name = 1;
+    optional string password = 2;
+
+    message Update {
+        message Req {
+            string name = 1;
+            User user = 2;
+        }
+
+        message Res {}
+    }
+
+    message Delete {
+        message Req {
+            string name = 1;
+        }
+
+        message Res {}
+    }
+}

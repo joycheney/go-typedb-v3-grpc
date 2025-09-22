@@ -1,0 +1,23 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+syntax = "proto3";
+
+package typedb.protocol;
+
+option go_package = "github.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pb";
+
+message ServerManager {
+
+    message All {
+        message Req {}
+        message Res {
+            repeated Server servers = 1;
+        }
+    }
+}
+
+message Server {
+    string address = 1;
+}
