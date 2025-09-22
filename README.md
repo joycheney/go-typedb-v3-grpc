@@ -182,9 +182,18 @@ This client powers Go applications in:
 ## System Requirements
 
 - **Go**: 1.19 or later (we support the latest 3 Go versions)
-- **TypeDB Server**: 3.0 or later
+- **TypeDB Server**: 3.0+ (tested with v3.4.4, v3.5.0, and compatible with all v3.x releases)
 - **OS**: Linux, macOS, Windows (cross-platform)
 - **Architecture**: amd64, arm64
+
+### TypeDB Version Compatibility
+
+| TypeDB Version | Compatibility | Notes |
+|----------------|---------------|-------|
+| v3.0.x - v3.x.x | ✅ Fully Supported | All features work as expected |
+| v2.x | ❌ Not Supported | Use TypeDB v2 Go client instead |
+
+> **Tested Versions**: This client has been specifically tested and verified with TypeDB v3.4.4 and v3.5.0
 
 ## Getting Help
 
