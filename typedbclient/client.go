@@ -105,13 +105,20 @@ func (c *Client) authenticate() error {
 		// Another goroutine is authenticating, wait for completion
 		for i := 0; i < 50; i++ {
 			time.Sleep(100 * time.Millisecond)
-			if !c.authInProgress.Load() {
-				// Check if authentication was successful
-				if token := c.getToken(); token != "" {
-					return nil
-				}
-				break
+
+			// 先检查是否还在认证中
+			if c.authInProgress.Load() {
+				continue
 			}
+
+			// 认证已结束，再次检查token（添加短暂延迟确保token已被设置）
+			time.Sleep(10 * time.Millisecond)
+			if token := c.getToken(); token != "" {
+				return nil
+			}
+
+			// 如果没有token，说明其他goroutine的认证失败了
+			return fmt.Errorf("authentication failed by other goroutine")
 		}
 		return fmt.Errorf("authentication timeout")
 	}
@@ -162,58 +169,10 @@ func (c *Client) authenticate() error {
 
 // refreshToken refreshes authentication token (used for token expiration)
 func (c *Client) refreshToken() error {
-	// Use CAS operation to prevent concurrent refresh
-	if !c.authInProgress.CompareAndSwap(false, true) {
-		// Another goroutine is refreshing, wait for completion
-		for i := 0; i < 50; i++ {
-			time.Sleep(100 * time.Millisecond)
-			if !c.authInProgress.Load() {
-				// Check if refresh was successful
-				if token := c.getToken(); token != "" {
-					return nil
-				}
-				break
-			}
-		}
-		return fmt.Errorf("token refresh timeout")
-	}
-	defer c.authInProgress.Store(false)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	c.connMu.RLock()
-	client := c.grpcClient
-	c.connMu.RUnlock()
-
-	if client == nil {
-		return fmt.Errorf("gRPC client not initialized")
-	}
-
-	// Use AuthenticationTokenCreate for token refresh (not ConnectionOpen)
-	req := &pb.Authentication_Token_Create_Req{
-		Credentials: &pb.Authentication_Token_Create_Req_Password_{
-			Password: &pb.Authentication_Token_Create_Req_Password{
-				Username: c.username,
-				Password: c.password,
-			},
-		},
-	}
-
-	resp, err := client.AuthenticationTokenCreate(ctx, req)
-	if err != nil {
-		// If token refresh fails, might need full reconnection
-		return fmt.Errorf("token refresh failed: %w", err)
-	}
-
-	if resp.Token == "" {
-		return fmt.Errorf("received empty refresh token")
-	}
-
-	// Store new token (lock-free)
-	c.tokenValue.Store(resp.Token)
-
-	return nil
+	// When token expires completely, we cannot use it to refresh
+	// Instead, we must re-authenticate from scratch
+	// This avoids the paradox where we need a valid token to get a new token
+	return c.authenticate()
 }
 
 // getToken safely gets token (lock-free access)
@@ -245,13 +204,27 @@ func (c *Client) tryReconnect() error {
 		// Another goroutine is reconnecting, wait
 		for i := 0; i < 30; i++ {
 			time.Sleep(100 * time.Millisecond)
-			if !c.reconnecting.Load() {
+
+			// 检查是否还在重连中
+			if c.reconnecting.Load() {
+				continue
+			}
+
+			// 重连已完成，检查是否成功（通过检查token）
+			time.Sleep(10 * time.Millisecond)
+			if token := c.getToken(); token != "" {
 				return nil
 			}
+
+			// 重连失败
+			return fmt.Errorf("reconnection failed by other goroutine")
 		}
 		return fmt.Errorf("reconnection timeout")
 	}
 	defer c.reconnecting.Store(false)
+
+	// 清空旧token，确保重新认证
+	c.tokenValue.Store("")
 
 	// Close old connection
 	c.connMu.Lock()
@@ -272,7 +245,7 @@ func (c *Client) tryReconnect() error {
 		return err
 	}
 
-	// Reauthenticate
+	// Reauthenticate（authenticate已有CAS保护，防止并发）
 	return c.authenticate()
 }
 
@@ -311,19 +284,31 @@ func (c *Client) executeWithRetry(ctx context.Context, operation func(context.Co
 
 		lastErr = err
 
-		// Check if reauthentication is needed
+		// 检查协议错误（token过期时服务器返回HTTP而非gRPC）
+		// 协议错误通常表示token已完全失效，需要重新连接
+		if isProtocolError(err) {
+			// 直接重连并重新认证，避免token刷新悖论
+			// tryReconnect内部已有CAS保护，确保只有一个goroutine执行重连
+			if reconnErr := c.tryReconnect(); reconnErr != nil {
+				return fmt.Errorf("reconnection after protocol error failed: %w", reconnErr)
+			}
+			continue
+		}
+
+		// 检查认证错误
 		if isAuthError(err) {
-			// Try to refresh token first (for existing connections)
+			// 认证错误也需要重新连接获取新token
+			// refreshToken现在直接调用authenticate，有CAS保护
 			if refreshErr := c.refreshToken(); refreshErr != nil {
-				// If token refresh fails, try full reconnection
+				// 如果刷新失败，尝试完全重连
 				if reconnErr := c.tryReconnect(); reconnErr != nil {
-					return fmt.Errorf("both token refresh and reconnection failed: refresh=%w, reconnect=%w", refreshErr, reconnErr)
+					return fmt.Errorf("reconnection after auth error failed: %w", reconnErr)
 				}
 			}
 			continue
 		}
 
-		// Check if reconnection is needed
+		// Check if reconnection is needed for network issues
 		if isConnectionError(err) {
 			// Try to reconnect
 			if reconnErr := c.tryReconnect(); reconnErr != nil {
@@ -354,12 +339,27 @@ func isAuthError(err error) bool {
 		}
 	}
 
-	// Check error message content - according to documentation line 230: "Invalid token"
-	errMsg := err.Error()
-	return strings.Contains(errMsg, "Invalid token") ||
+	// Check error message content
+	errMsg := strings.ToLower(err.Error())
+	return strings.Contains(errMsg, "invalid token") ||
 		   strings.Contains(errMsg, "token expired") ||
 		   strings.Contains(errMsg, "authentication failed") ||
 		   strings.Contains(errMsg, "unauthorized")
+}
+
+// isProtocolError checks if it's a protocol mismatch error (e.g., HTTP response to gRPC request)
+// 当token过期时，服务器可能返回HTTP响应而不是gRPC，导致协议不匹配错误
+func isProtocolError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	errMsg := strings.ToLower(err.Error())
+	return strings.Contains(errMsg, "malformed header") ||
+		   strings.Contains(errMsg, "unexpected http") ||
+		   strings.Contains(errMsg, "missing http content-type") ||
+		   strings.Contains(errMsg, "unimplemented") ||
+		   strings.Contains(errMsg, "404 (not found)")
 }
 
 // isConnectionError checks if it's a connection error
