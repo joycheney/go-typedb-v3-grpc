@@ -6,9 +6,9 @@
 // versions:
 // 	protoc-gen-go v1.36.9
 // 	protoc        v3.21.12
-// source: proto/database.proto
+// source: database.proto
 
-package pb
+package proto
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -33,7 +33,7 @@ type DatabaseManager struct {
 
 func (x *DatabaseManager) Reset() {
 	*x = DatabaseManager{}
-	mi := &file_proto_database_proto_msgTypes[0]
+	mi := &file_database_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -45,7 +45,7 @@ func (x *DatabaseManager) String() string {
 func (*DatabaseManager) ProtoMessage() {}
 
 func (x *DatabaseManager) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[0]
+	mi := &file_database_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -58,7 +58,7 @@ func (x *DatabaseManager) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DatabaseManager.ProtoReflect.Descriptor instead.
 func (*DatabaseManager) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{0}
+	return file_database_proto_rawDescGZIP(), []int{0}
 }
 
 type DatabaseReplicas struct {
@@ -71,7 +71,7 @@ type DatabaseReplicas struct {
 
 func (x *DatabaseReplicas) Reset() {
 	*x = DatabaseReplicas{}
-	mi := &file_proto_database_proto_msgTypes[1]
+	mi := &file_database_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -83,7 +83,7 @@ func (x *DatabaseReplicas) String() string {
 func (*DatabaseReplicas) ProtoMessage() {}
 
 func (x *DatabaseReplicas) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[1]
+	mi := &file_database_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -96,7 +96,7 @@ func (x *DatabaseReplicas) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DatabaseReplicas.ProtoReflect.Descriptor instead.
 func (*DatabaseReplicas) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{1}
+	return file_database_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *DatabaseReplicas) GetName() string {
@@ -121,7 +121,7 @@ type Database struct {
 
 func (x *Database) Reset() {
 	*x = Database{}
-	mi := &file_proto_database_proto_msgTypes[2]
+	mi := &file_database_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -133,7 +133,7 @@ func (x *Database) String() string {
 func (*Database) ProtoMessage() {}
 
 func (x *Database) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[2]
+	mi := &file_database_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -146,7 +146,7 @@ func (x *Database) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Database.ProtoReflect.Descriptor instead.
 func (*Database) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{2}
+	return file_database_proto_rawDescGZIP(), []int{2}
 }
 
 type DatabaseManager_Get struct {
@@ -157,7 +157,7 @@ type DatabaseManager_Get struct {
 
 func (x *DatabaseManager_Get) Reset() {
 	*x = DatabaseManager_Get{}
-	mi := &file_proto_database_proto_msgTypes[3]
+	mi := &file_database_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -169,7 +169,7 @@ func (x *DatabaseManager_Get) String() string {
 func (*DatabaseManager_Get) ProtoMessage() {}
 
 func (x *DatabaseManager_Get) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[3]
+	mi := &file_database_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -182,7 +182,7 @@ func (x *DatabaseManager_Get) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DatabaseManager_Get.ProtoReflect.Descriptor instead.
 func (*DatabaseManager_Get) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{0, 0}
+	return file_database_proto_rawDescGZIP(), []int{0, 0}
 }
 
 type DatabaseManager_All struct {
@@ -193,7 +193,7 @@ type DatabaseManager_All struct {
 
 func (x *DatabaseManager_All) Reset() {
 	*x = DatabaseManager_All{}
-	mi := &file_proto_database_proto_msgTypes[4]
+	mi := &file_database_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -205,7 +205,7 @@ func (x *DatabaseManager_All) String() string {
 func (*DatabaseManager_All) ProtoMessage() {}
 
 func (x *DatabaseManager_All) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[4]
+	mi := &file_database_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -218,7 +218,7 @@ func (x *DatabaseManager_All) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DatabaseManager_All.ProtoReflect.Descriptor instead.
 func (*DatabaseManager_All) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{0, 1}
+	return file_database_proto_rawDescGZIP(), []int{0, 1}
 }
 
 type DatabaseManager_Contains struct {
@@ -229,7 +229,7 @@ type DatabaseManager_Contains struct {
 
 func (x *DatabaseManager_Contains) Reset() {
 	*x = DatabaseManager_Contains{}
-	mi := &file_proto_database_proto_msgTypes[5]
+	mi := &file_database_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -241,7 +241,7 @@ func (x *DatabaseManager_Contains) String() string {
 func (*DatabaseManager_Contains) ProtoMessage() {}
 
 func (x *DatabaseManager_Contains) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[5]
+	mi := &file_database_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -254,7 +254,7 @@ func (x *DatabaseManager_Contains) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DatabaseManager_Contains.ProtoReflect.Descriptor instead.
 func (*DatabaseManager_Contains) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{0, 2}
+	return file_database_proto_rawDescGZIP(), []int{0, 2}
 }
 
 type DatabaseManager_Create struct {
@@ -265,7 +265,7 @@ type DatabaseManager_Create struct {
 
 func (x *DatabaseManager_Create) Reset() {
 	*x = DatabaseManager_Create{}
-	mi := &file_proto_database_proto_msgTypes[6]
+	mi := &file_database_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -277,7 +277,7 @@ func (x *DatabaseManager_Create) String() string {
 func (*DatabaseManager_Create) ProtoMessage() {}
 
 func (x *DatabaseManager_Create) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[6]
+	mi := &file_database_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -290,7 +290,7 @@ func (x *DatabaseManager_Create) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DatabaseManager_Create.ProtoReflect.Descriptor instead.
 func (*DatabaseManager_Create) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{0, 3}
+	return file_database_proto_rawDescGZIP(), []int{0, 3}
 }
 
 type DatabaseManager_Import struct {
@@ -301,7 +301,7 @@ type DatabaseManager_Import struct {
 
 func (x *DatabaseManager_Import) Reset() {
 	*x = DatabaseManager_Import{}
-	mi := &file_proto_database_proto_msgTypes[7]
+	mi := &file_database_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -313,7 +313,7 @@ func (x *DatabaseManager_Import) String() string {
 func (*DatabaseManager_Import) ProtoMessage() {}
 
 func (x *DatabaseManager_Import) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[7]
+	mi := &file_database_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -326,7 +326,7 @@ func (x *DatabaseManager_Import) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DatabaseManager_Import.ProtoReflect.Descriptor instead.
 func (*DatabaseManager_Import) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{0, 4}
+	return file_database_proto_rawDescGZIP(), []int{0, 4}
 }
 
 type DatabaseManager_Get_Req struct {
@@ -338,7 +338,7 @@ type DatabaseManager_Get_Req struct {
 
 func (x *DatabaseManager_Get_Req) Reset() {
 	*x = DatabaseManager_Get_Req{}
-	mi := &file_proto_database_proto_msgTypes[8]
+	mi := &file_database_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -350,7 +350,7 @@ func (x *DatabaseManager_Get_Req) String() string {
 func (*DatabaseManager_Get_Req) ProtoMessage() {}
 
 func (x *DatabaseManager_Get_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[8]
+	mi := &file_database_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -363,7 +363,7 @@ func (x *DatabaseManager_Get_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DatabaseManager_Get_Req.ProtoReflect.Descriptor instead.
 func (*DatabaseManager_Get_Req) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{0, 0, 0}
+	return file_database_proto_rawDescGZIP(), []int{0, 0, 0}
 }
 
 func (x *DatabaseManager_Get_Req) GetName() string {
@@ -382,7 +382,7 @@ type DatabaseManager_Get_Res struct {
 
 func (x *DatabaseManager_Get_Res) Reset() {
 	*x = DatabaseManager_Get_Res{}
-	mi := &file_proto_database_proto_msgTypes[9]
+	mi := &file_database_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -394,7 +394,7 @@ func (x *DatabaseManager_Get_Res) String() string {
 func (*DatabaseManager_Get_Res) ProtoMessage() {}
 
 func (x *DatabaseManager_Get_Res) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[9]
+	mi := &file_database_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -407,7 +407,7 @@ func (x *DatabaseManager_Get_Res) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DatabaseManager_Get_Res.ProtoReflect.Descriptor instead.
 func (*DatabaseManager_Get_Res) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{0, 0, 1}
+	return file_database_proto_rawDescGZIP(), []int{0, 0, 1}
 }
 
 func (x *DatabaseManager_Get_Res) GetDatabase() *DatabaseReplicas {
@@ -425,7 +425,7 @@ type DatabaseManager_All_Req struct {
 
 func (x *DatabaseManager_All_Req) Reset() {
 	*x = DatabaseManager_All_Req{}
-	mi := &file_proto_database_proto_msgTypes[10]
+	mi := &file_database_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -437,7 +437,7 @@ func (x *DatabaseManager_All_Req) String() string {
 func (*DatabaseManager_All_Req) ProtoMessage() {}
 
 func (x *DatabaseManager_All_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[10]
+	mi := &file_database_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -450,7 +450,7 @@ func (x *DatabaseManager_All_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DatabaseManager_All_Req.ProtoReflect.Descriptor instead.
 func (*DatabaseManager_All_Req) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{0, 1, 0}
+	return file_database_proto_rawDescGZIP(), []int{0, 1, 0}
 }
 
 type DatabaseManager_All_Res struct {
@@ -462,7 +462,7 @@ type DatabaseManager_All_Res struct {
 
 func (x *DatabaseManager_All_Res) Reset() {
 	*x = DatabaseManager_All_Res{}
-	mi := &file_proto_database_proto_msgTypes[11]
+	mi := &file_database_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -474,7 +474,7 @@ func (x *DatabaseManager_All_Res) String() string {
 func (*DatabaseManager_All_Res) ProtoMessage() {}
 
 func (x *DatabaseManager_All_Res) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[11]
+	mi := &file_database_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -487,7 +487,7 @@ func (x *DatabaseManager_All_Res) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DatabaseManager_All_Res.ProtoReflect.Descriptor instead.
 func (*DatabaseManager_All_Res) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{0, 1, 1}
+	return file_database_proto_rawDescGZIP(), []int{0, 1, 1}
 }
 
 func (x *DatabaseManager_All_Res) GetDatabases() []*DatabaseReplicas {
@@ -506,7 +506,7 @@ type DatabaseManager_Contains_Req struct {
 
 func (x *DatabaseManager_Contains_Req) Reset() {
 	*x = DatabaseManager_Contains_Req{}
-	mi := &file_proto_database_proto_msgTypes[12]
+	mi := &file_database_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -518,7 +518,7 @@ func (x *DatabaseManager_Contains_Req) String() string {
 func (*DatabaseManager_Contains_Req) ProtoMessage() {}
 
 func (x *DatabaseManager_Contains_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[12]
+	mi := &file_database_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -531,7 +531,7 @@ func (x *DatabaseManager_Contains_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DatabaseManager_Contains_Req.ProtoReflect.Descriptor instead.
 func (*DatabaseManager_Contains_Req) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{0, 2, 0}
+	return file_database_proto_rawDescGZIP(), []int{0, 2, 0}
 }
 
 func (x *DatabaseManager_Contains_Req) GetName() string {
@@ -550,7 +550,7 @@ type DatabaseManager_Contains_Res struct {
 
 func (x *DatabaseManager_Contains_Res) Reset() {
 	*x = DatabaseManager_Contains_Res{}
-	mi := &file_proto_database_proto_msgTypes[13]
+	mi := &file_database_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -562,7 +562,7 @@ func (x *DatabaseManager_Contains_Res) String() string {
 func (*DatabaseManager_Contains_Res) ProtoMessage() {}
 
 func (x *DatabaseManager_Contains_Res) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[13]
+	mi := &file_database_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -575,7 +575,7 @@ func (x *DatabaseManager_Contains_Res) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DatabaseManager_Contains_Res.ProtoReflect.Descriptor instead.
 func (*DatabaseManager_Contains_Res) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{0, 2, 1}
+	return file_database_proto_rawDescGZIP(), []int{0, 2, 1}
 }
 
 func (x *DatabaseManager_Contains_Res) GetContains() bool {
@@ -594,7 +594,7 @@ type DatabaseManager_Create_Req struct {
 
 func (x *DatabaseManager_Create_Req) Reset() {
 	*x = DatabaseManager_Create_Req{}
-	mi := &file_proto_database_proto_msgTypes[14]
+	mi := &file_database_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -606,7 +606,7 @@ func (x *DatabaseManager_Create_Req) String() string {
 func (*DatabaseManager_Create_Req) ProtoMessage() {}
 
 func (x *DatabaseManager_Create_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[14]
+	mi := &file_database_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -619,7 +619,7 @@ func (x *DatabaseManager_Create_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DatabaseManager_Create_Req.ProtoReflect.Descriptor instead.
 func (*DatabaseManager_Create_Req) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{0, 3, 0}
+	return file_database_proto_rawDescGZIP(), []int{0, 3, 0}
 }
 
 func (x *DatabaseManager_Create_Req) GetName() string {
@@ -638,7 +638,7 @@ type DatabaseManager_Create_Res struct {
 
 func (x *DatabaseManager_Create_Res) Reset() {
 	*x = DatabaseManager_Create_Res{}
-	mi := &file_proto_database_proto_msgTypes[15]
+	mi := &file_database_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -650,7 +650,7 @@ func (x *DatabaseManager_Create_Res) String() string {
 func (*DatabaseManager_Create_Res) ProtoMessage() {}
 
 func (x *DatabaseManager_Create_Res) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[15]
+	mi := &file_database_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -663,7 +663,7 @@ func (x *DatabaseManager_Create_Res) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DatabaseManager_Create_Res.ProtoReflect.Descriptor instead.
 func (*DatabaseManager_Create_Res) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{0, 3, 1}
+	return file_database_proto_rawDescGZIP(), []int{0, 3, 1}
 }
 
 func (x *DatabaseManager_Create_Res) GetDatabase() *DatabaseReplicas {
@@ -682,7 +682,7 @@ type DatabaseManager_Import_Client struct {
 
 func (x *DatabaseManager_Import_Client) Reset() {
 	*x = DatabaseManager_Import_Client{}
-	mi := &file_proto_database_proto_msgTypes[16]
+	mi := &file_database_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -694,7 +694,7 @@ func (x *DatabaseManager_Import_Client) String() string {
 func (*DatabaseManager_Import_Client) ProtoMessage() {}
 
 func (x *DatabaseManager_Import_Client) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[16]
+	mi := &file_database_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -707,7 +707,7 @@ func (x *DatabaseManager_Import_Client) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DatabaseManager_Import_Client.ProtoReflect.Descriptor instead.
 func (*DatabaseManager_Import_Client) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{0, 4, 0}
+	return file_database_proto_rawDescGZIP(), []int{0, 4, 0}
 }
 
 func (x *DatabaseManager_Import_Client) GetClient() *Migration_Import_Client {
@@ -726,7 +726,7 @@ type DatabaseManager_Import_Server struct {
 
 func (x *DatabaseManager_Import_Server) Reset() {
 	*x = DatabaseManager_Import_Server{}
-	mi := &file_proto_database_proto_msgTypes[17]
+	mi := &file_database_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -738,7 +738,7 @@ func (x *DatabaseManager_Import_Server) String() string {
 func (*DatabaseManager_Import_Server) ProtoMessage() {}
 
 func (x *DatabaseManager_Import_Server) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[17]
+	mi := &file_database_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -751,7 +751,7 @@ func (x *DatabaseManager_Import_Server) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DatabaseManager_Import_Server.ProtoReflect.Descriptor instead.
 func (*DatabaseManager_Import_Server) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{0, 4, 1}
+	return file_database_proto_rawDescGZIP(), []int{0, 4, 1}
 }
 
 func (x *DatabaseManager_Import_Server) GetServer() *Migration_Import_Server {
@@ -773,7 +773,7 @@ type DatabaseReplicas_Replica struct {
 
 func (x *DatabaseReplicas_Replica) Reset() {
 	*x = DatabaseReplicas_Replica{}
-	mi := &file_proto_database_proto_msgTypes[18]
+	mi := &file_database_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -785,7 +785,7 @@ func (x *DatabaseReplicas_Replica) String() string {
 func (*DatabaseReplicas_Replica) ProtoMessage() {}
 
 func (x *DatabaseReplicas_Replica) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[18]
+	mi := &file_database_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -798,7 +798,7 @@ func (x *DatabaseReplicas_Replica) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DatabaseReplicas_Replica.ProtoReflect.Descriptor instead.
 func (*DatabaseReplicas_Replica) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{1, 0}
+	return file_database_proto_rawDescGZIP(), []int{1, 0}
 }
 
 func (x *DatabaseReplicas_Replica) GetAddress() string {
@@ -837,7 +837,7 @@ type Database_Schema struct {
 
 func (x *Database_Schema) Reset() {
 	*x = Database_Schema{}
-	mi := &file_proto_database_proto_msgTypes[19]
+	mi := &file_database_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -849,7 +849,7 @@ func (x *Database_Schema) String() string {
 func (*Database_Schema) ProtoMessage() {}
 
 func (x *Database_Schema) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[19]
+	mi := &file_database_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -862,7 +862,7 @@ func (x *Database_Schema) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Database_Schema.ProtoReflect.Descriptor instead.
 func (*Database_Schema) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{2, 0}
+	return file_database_proto_rawDescGZIP(), []int{2, 0}
 }
 
 type Database_TypeSchema struct {
@@ -873,7 +873,7 @@ type Database_TypeSchema struct {
 
 func (x *Database_TypeSchema) Reset() {
 	*x = Database_TypeSchema{}
-	mi := &file_proto_database_proto_msgTypes[20]
+	mi := &file_database_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -885,7 +885,7 @@ func (x *Database_TypeSchema) String() string {
 func (*Database_TypeSchema) ProtoMessage() {}
 
 func (x *Database_TypeSchema) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[20]
+	mi := &file_database_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -898,7 +898,7 @@ func (x *Database_TypeSchema) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Database_TypeSchema.ProtoReflect.Descriptor instead.
 func (*Database_TypeSchema) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{2, 1}
+	return file_database_proto_rawDescGZIP(), []int{2, 1}
 }
 
 type Database_Export struct {
@@ -909,7 +909,7 @@ type Database_Export struct {
 
 func (x *Database_Export) Reset() {
 	*x = Database_Export{}
-	mi := &file_proto_database_proto_msgTypes[21]
+	mi := &file_database_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -921,7 +921,7 @@ func (x *Database_Export) String() string {
 func (*Database_Export) ProtoMessage() {}
 
 func (x *Database_Export) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[21]
+	mi := &file_database_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -934,7 +934,7 @@ func (x *Database_Export) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Database_Export.ProtoReflect.Descriptor instead.
 func (*Database_Export) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{2, 2}
+	return file_database_proto_rawDescGZIP(), []int{2, 2}
 }
 
 type Database_Delete struct {
@@ -945,7 +945,7 @@ type Database_Delete struct {
 
 func (x *Database_Delete) Reset() {
 	*x = Database_Delete{}
-	mi := &file_proto_database_proto_msgTypes[22]
+	mi := &file_database_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -957,7 +957,7 @@ func (x *Database_Delete) String() string {
 func (*Database_Delete) ProtoMessage() {}
 
 func (x *Database_Delete) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[22]
+	mi := &file_database_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -970,7 +970,7 @@ func (x *Database_Delete) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Database_Delete.ProtoReflect.Descriptor instead.
 func (*Database_Delete) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{2, 3}
+	return file_database_proto_rawDescGZIP(), []int{2, 3}
 }
 
 type Database_Schema_Req struct {
@@ -982,7 +982,7 @@ type Database_Schema_Req struct {
 
 func (x *Database_Schema_Req) Reset() {
 	*x = Database_Schema_Req{}
-	mi := &file_proto_database_proto_msgTypes[23]
+	mi := &file_database_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -994,7 +994,7 @@ func (x *Database_Schema_Req) String() string {
 func (*Database_Schema_Req) ProtoMessage() {}
 
 func (x *Database_Schema_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[23]
+	mi := &file_database_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1007,7 +1007,7 @@ func (x *Database_Schema_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Database_Schema_Req.ProtoReflect.Descriptor instead.
 func (*Database_Schema_Req) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{2, 0, 0}
+	return file_database_proto_rawDescGZIP(), []int{2, 0, 0}
 }
 
 func (x *Database_Schema_Req) GetName() string {
@@ -1026,7 +1026,7 @@ type Database_Schema_Res struct {
 
 func (x *Database_Schema_Res) Reset() {
 	*x = Database_Schema_Res{}
-	mi := &file_proto_database_proto_msgTypes[24]
+	mi := &file_database_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1038,7 +1038,7 @@ func (x *Database_Schema_Res) String() string {
 func (*Database_Schema_Res) ProtoMessage() {}
 
 func (x *Database_Schema_Res) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[24]
+	mi := &file_database_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1051,7 +1051,7 @@ func (x *Database_Schema_Res) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Database_Schema_Res.ProtoReflect.Descriptor instead.
 func (*Database_Schema_Res) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{2, 0, 1}
+	return file_database_proto_rawDescGZIP(), []int{2, 0, 1}
 }
 
 func (x *Database_Schema_Res) GetSchema() string {
@@ -1070,7 +1070,7 @@ type Database_TypeSchema_Req struct {
 
 func (x *Database_TypeSchema_Req) Reset() {
 	*x = Database_TypeSchema_Req{}
-	mi := &file_proto_database_proto_msgTypes[25]
+	mi := &file_database_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1082,7 +1082,7 @@ func (x *Database_TypeSchema_Req) String() string {
 func (*Database_TypeSchema_Req) ProtoMessage() {}
 
 func (x *Database_TypeSchema_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[25]
+	mi := &file_database_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1095,7 +1095,7 @@ func (x *Database_TypeSchema_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Database_TypeSchema_Req.ProtoReflect.Descriptor instead.
 func (*Database_TypeSchema_Req) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{2, 1, 0}
+	return file_database_proto_rawDescGZIP(), []int{2, 1, 0}
 }
 
 func (x *Database_TypeSchema_Req) GetName() string {
@@ -1114,7 +1114,7 @@ type Database_TypeSchema_Res struct {
 
 func (x *Database_TypeSchema_Res) Reset() {
 	*x = Database_TypeSchema_Res{}
-	mi := &file_proto_database_proto_msgTypes[26]
+	mi := &file_database_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1126,7 +1126,7 @@ func (x *Database_TypeSchema_Res) String() string {
 func (*Database_TypeSchema_Res) ProtoMessage() {}
 
 func (x *Database_TypeSchema_Res) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[26]
+	mi := &file_database_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1139,7 +1139,7 @@ func (x *Database_TypeSchema_Res) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Database_TypeSchema_Res.ProtoReflect.Descriptor instead.
 func (*Database_TypeSchema_Res) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{2, 1, 1}
+	return file_database_proto_rawDescGZIP(), []int{2, 1, 1}
 }
 
 func (x *Database_TypeSchema_Res) GetSchema() string {
@@ -1158,7 +1158,7 @@ type Database_Export_Req struct {
 
 func (x *Database_Export_Req) Reset() {
 	*x = Database_Export_Req{}
-	mi := &file_proto_database_proto_msgTypes[27]
+	mi := &file_database_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1170,7 +1170,7 @@ func (x *Database_Export_Req) String() string {
 func (*Database_Export_Req) ProtoMessage() {}
 
 func (x *Database_Export_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[27]
+	mi := &file_database_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1183,7 +1183,7 @@ func (x *Database_Export_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Database_Export_Req.ProtoReflect.Descriptor instead.
 func (*Database_Export_Req) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{2, 2, 0}
+	return file_database_proto_rawDescGZIP(), []int{2, 2, 0}
 }
 
 func (x *Database_Export_Req) GetReq() *Migration_Export_Req {
@@ -1202,7 +1202,7 @@ type Database_Export_Server struct {
 
 func (x *Database_Export_Server) Reset() {
 	*x = Database_Export_Server{}
-	mi := &file_proto_database_proto_msgTypes[28]
+	mi := &file_database_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1214,7 +1214,7 @@ func (x *Database_Export_Server) String() string {
 func (*Database_Export_Server) ProtoMessage() {}
 
 func (x *Database_Export_Server) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[28]
+	mi := &file_database_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1227,7 +1227,7 @@ func (x *Database_Export_Server) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Database_Export_Server.ProtoReflect.Descriptor instead.
 func (*Database_Export_Server) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{2, 2, 1}
+	return file_database_proto_rawDescGZIP(), []int{2, 2, 1}
 }
 
 func (x *Database_Export_Server) GetServer() *Migration_Export_Server {
@@ -1246,7 +1246,7 @@ type Database_Delete_Req struct {
 
 func (x *Database_Delete_Req) Reset() {
 	*x = Database_Delete_Req{}
-	mi := &file_proto_database_proto_msgTypes[29]
+	mi := &file_database_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1258,7 +1258,7 @@ func (x *Database_Delete_Req) String() string {
 func (*Database_Delete_Req) ProtoMessage() {}
 
 func (x *Database_Delete_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[29]
+	mi := &file_database_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1271,7 +1271,7 @@ func (x *Database_Delete_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Database_Delete_Req.ProtoReflect.Descriptor instead.
 func (*Database_Delete_Req) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{2, 3, 0}
+	return file_database_proto_rawDescGZIP(), []int{2, 3, 0}
 }
 
 func (x *Database_Delete_Req) GetName() string {
@@ -1289,7 +1289,7 @@ type Database_Delete_Res struct {
 
 func (x *Database_Delete_Res) Reset() {
 	*x = Database_Delete_Res{}
-	mi := &file_proto_database_proto_msgTypes[30]
+	mi := &file_database_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1301,7 +1301,7 @@ func (x *Database_Delete_Res) String() string {
 func (*Database_Delete_Res) ProtoMessage() {}
 
 func (x *Database_Delete_Res) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_database_proto_msgTypes[30]
+	mi := &file_database_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1314,14 +1314,14 @@ func (x *Database_Delete_Res) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Database_Delete_Res.ProtoReflect.Descriptor instead.
 func (*Database_Delete_Res) Descriptor() ([]byte, []int) {
-	return file_proto_database_proto_rawDescGZIP(), []int{2, 3, 1}
+	return file_database_proto_rawDescGZIP(), []int{2, 3, 1}
 }
 
-var File_proto_database_proto protoreflect.FileDescriptor
+var File_database_proto protoreflect.FileDescriptor
 
-const file_proto_database_proto_rawDesc = "" +
+const file_database_proto_rawDesc = "" +
 	"\n" +
-	"\x14proto/database.proto\x12\x0ftypedb.protocol\x1a\x15proto/migration.proto\"\xa7\x04\n" +
+	"\x0edatabase.proto\x12\x0ftypedb.protocol\x1a\x0fmigration.proto\"\xa7\x04\n" +
 	"\x0fDatabaseManager\x1af\n" +
 	"\x03Get\x1a\x19\n" +
 	"\x03Req\x12\x12\n" +
@@ -1375,22 +1375,22 @@ const file_proto_database_proto_rawDesc = "" +
 	"\x06Delete\x1a\x19\n" +
 	"\x03Req\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x1a\x05\n" +
-	"\x03ResBCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
+	"\x03ResB1Z/github.com/joycheney/go-typedb-v3-grpc/pb/protob\x06proto3"
 
 var (
-	file_proto_database_proto_rawDescOnce sync.Once
-	file_proto_database_proto_rawDescData []byte
+	file_database_proto_rawDescOnce sync.Once
+	file_database_proto_rawDescData []byte
 )
 
-func file_proto_database_proto_rawDescGZIP() []byte {
-	file_proto_database_proto_rawDescOnce.Do(func() {
-		file_proto_database_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_database_proto_rawDesc), len(file_proto_database_proto_rawDesc)))
+func file_database_proto_rawDescGZIP() []byte {
+	file_database_proto_rawDescOnce.Do(func() {
+		file_database_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_database_proto_rawDesc), len(file_database_proto_rawDesc)))
 	})
-	return file_proto_database_proto_rawDescData
+	return file_database_proto_rawDescData
 }
 
-var file_proto_database_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
-var file_proto_database_proto_goTypes = []any{
+var file_database_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
+var file_database_proto_goTypes = []any{
 	(*DatabaseManager)(nil),               // 0: typedb.protocol.DatabaseManager
 	(*DatabaseReplicas)(nil),              // 1: typedb.protocol.DatabaseReplicas
 	(*Database)(nil),                      // 2: typedb.protocol.Database
@@ -1427,7 +1427,7 @@ var file_proto_database_proto_goTypes = []any{
 	(*Migration_Export_Req)(nil),          // 33: typedb.protocol.Migration.Export.Req
 	(*Migration_Export_Server)(nil),       // 34: typedb.protocol.Migration.Export.Server
 }
-var file_proto_database_proto_depIdxs = []int32{
+var file_database_proto_depIdxs = []int32{
 	18, // 0: typedb.protocol.DatabaseReplicas.replicas:type_name -> typedb.protocol.DatabaseReplicas.Replica
 	1,  // 1: typedb.protocol.DatabaseManager.Get.Res.database:type_name -> typedb.protocol.DatabaseReplicas
 	1,  // 2: typedb.protocol.DatabaseManager.All.Res.databases:type_name -> typedb.protocol.DatabaseReplicas
@@ -1443,27 +1443,27 @@ var file_proto_database_proto_depIdxs = []int32{
 	0,  // [0:8] is the sub-list for field type_name
 }
 
-func init() { file_proto_database_proto_init() }
-func file_proto_database_proto_init() {
-	if File_proto_database_proto != nil {
+func init() { file_database_proto_init() }
+func file_database_proto_init() {
+	if File_database_proto != nil {
 		return
 	}
-	file_proto_migration_proto_init()
+	file_migration_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_database_proto_rawDesc), len(file_proto_database_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_database_proto_rawDesc), len(file_database_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   31,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_proto_database_proto_goTypes,
-		DependencyIndexes: file_proto_database_proto_depIdxs,
-		MessageInfos:      file_proto_database_proto_msgTypes,
+		GoTypes:           file_database_proto_goTypes,
+		DependencyIndexes: file_database_proto_depIdxs,
+		MessageInfos:      file_database_proto_msgTypes,
 	}.Build()
-	File_proto_database_proto = out.File
-	file_proto_database_proto_goTypes = nil
-	file_proto_database_proto_depIdxs = nil
+	File_database_proto = out.File
+	file_database_proto_goTypes = nil
+	file_database_proto_depIdxs = nil
 }

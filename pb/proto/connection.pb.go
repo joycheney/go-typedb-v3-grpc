@@ -6,9 +6,9 @@
 // versions:
 // 	protoc-gen-go v1.36.9
 // 	protoc        v3.21.12
-// source: proto/connection.proto
+// source: connection.proto
 
-package pb
+package proto
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -33,7 +33,7 @@ type Connection struct {
 
 func (x *Connection) Reset() {
 	*x = Connection{}
-	mi := &file_proto_connection_proto_msgTypes[0]
+	mi := &file_connection_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -45,7 +45,7 @@ func (x *Connection) String() string {
 func (*Connection) ProtoMessage() {}
 
 func (x *Connection) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_connection_proto_msgTypes[0]
+	mi := &file_connection_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -58,7 +58,7 @@ func (x *Connection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Connection.ProtoReflect.Descriptor instead.
 func (*Connection) Descriptor() ([]byte, []int) {
-	return file_proto_connection_proto_rawDescGZIP(), []int{0}
+	return file_connection_proto_rawDescGZIP(), []int{0}
 }
 
 // Connection ID and Token are expected in all message metadata
@@ -71,7 +71,7 @@ type ConnectionID struct {
 
 func (x *ConnectionID) Reset() {
 	*x = ConnectionID{}
-	mi := &file_proto_connection_proto_msgTypes[1]
+	mi := &file_connection_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -83,7 +83,7 @@ func (x *ConnectionID) String() string {
 func (*ConnectionID) ProtoMessage() {}
 
 func (x *ConnectionID) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_connection_proto_msgTypes[1]
+	mi := &file_connection_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -96,7 +96,7 @@ func (x *ConnectionID) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConnectionID.ProtoReflect.Descriptor instead.
 func (*ConnectionID) Descriptor() ([]byte, []int) {
-	return file_proto_connection_proto_rawDescGZIP(), []int{1}
+	return file_connection_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *ConnectionID) GetId() []byte {
@@ -114,7 +114,7 @@ type Connection_Open struct {
 
 func (x *Connection_Open) Reset() {
 	*x = Connection_Open{}
-	mi := &file_proto_connection_proto_msgTypes[2]
+	mi := &file_connection_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -126,7 +126,7 @@ func (x *Connection_Open) String() string {
 func (*Connection_Open) ProtoMessage() {}
 
 func (x *Connection_Open) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_connection_proto_msgTypes[2]
+	mi := &file_connection_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -139,7 +139,7 @@ func (x *Connection_Open) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Connection_Open.ProtoReflect.Descriptor instead.
 func (*Connection_Open) Descriptor() ([]byte, []int) {
-	return file_proto_connection_proto_rawDescGZIP(), []int{0, 0}
+	return file_connection_proto_rawDescGZIP(), []int{0, 0}
 }
 
 type Connection_Open_Req struct {
@@ -154,7 +154,7 @@ type Connection_Open_Req struct {
 
 func (x *Connection_Open_Req) Reset() {
 	*x = Connection_Open_Req{}
-	mi := &file_proto_connection_proto_msgTypes[3]
+	mi := &file_connection_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -166,7 +166,7 @@ func (x *Connection_Open_Req) String() string {
 func (*Connection_Open_Req) ProtoMessage() {}
 
 func (x *Connection_Open_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_connection_proto_msgTypes[3]
+	mi := &file_connection_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -179,7 +179,7 @@ func (x *Connection_Open_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Connection_Open_Req.ProtoReflect.Descriptor instead.
 func (*Connection_Open_Req) Descriptor() ([]byte, []int) {
-	return file_proto_connection_proto_rawDescGZIP(), []int{0, 0, 0}
+	return file_connection_proto_rawDescGZIP(), []int{0, 0, 0}
 }
 
 func (x *Connection_Open_Req) GetVersion() Version {
@@ -223,7 +223,7 @@ type Connection_Open_Res struct {
 
 func (x *Connection_Open_Res) Reset() {
 	*x = Connection_Open_Res{}
-	mi := &file_proto_connection_proto_msgTypes[4]
+	mi := &file_connection_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -235,7 +235,7 @@ func (x *Connection_Open_Res) String() string {
 func (*Connection_Open_Res) ProtoMessage() {}
 
 func (x *Connection_Open_Res) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_connection_proto_msgTypes[4]
+	mi := &file_connection_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -248,7 +248,7 @@ func (x *Connection_Open_Res) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Connection_Open_Res.ProtoReflect.Descriptor instead.
 func (*Connection_Open_Res) Descriptor() ([]byte, []int) {
-	return file_proto_connection_proto_rawDescGZIP(), []int{0, 0, 1}
+	return file_connection_proto_rawDescGZIP(), []int{0, 0, 1}
 }
 
 func (x *Connection_Open_Res) GetServerDurationMillis() uint64 {
@@ -279,11 +279,11 @@ func (x *Connection_Open_Res) GetAuthentication() *Authentication_Token_Create_R
 	return nil
 }
 
-var File_proto_connection_proto protoreflect.FileDescriptor
+var File_connection_proto protoreflect.FileDescriptor
 
-const file_proto_connection_proto_rawDesc = "" +
+const file_connection_proto_rawDesc = "" +
 	"\n" +
-	"\x16proto/connection.proto\x12\x0ftypedb.protocol\x1a\x1aproto/authentication.proto\x1a\x14proto/database.proto\x1a\x13proto/version.proto\"\x9e\x04\n" +
+	"\x10connection.proto\x12\x0ftypedb.protocol\x1a\x14authentication.proto\x1a\x0edatabase.proto\x1a\rversion.proto\"\x9e\x04\n" +
 	"\n" +
 	"Connection\x1a\x8f\x04\n" +
 	"\x04Open\x1a\xdb\x01\n" +
@@ -299,22 +299,22 @@ const file_proto_connection_proto_rawDesc = "" +
 	"\rdatabases_all\x18\x03 \x01(\v2(.typedb.protocol.DatabaseManager.All.ResR\fdatabasesAll\x12X\n" +
 	"\x0eauthentication\x18\x04 \x01(\v20.typedb.protocol.Authentication.Token.Create.ResR\x0eauthentication\"\x1e\n" +
 	"\fConnectionID\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\fR\x02idBCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
+	"\x02id\x18\x01 \x01(\fR\x02idB1Z/github.com/joycheney/go-typedb-v3-grpc/pb/protob\x06proto3"
 
 var (
-	file_proto_connection_proto_rawDescOnce sync.Once
-	file_proto_connection_proto_rawDescData []byte
+	file_connection_proto_rawDescOnce sync.Once
+	file_connection_proto_rawDescData []byte
 )
 
-func file_proto_connection_proto_rawDescGZIP() []byte {
-	file_proto_connection_proto_rawDescOnce.Do(func() {
-		file_proto_connection_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_connection_proto_rawDesc), len(file_proto_connection_proto_rawDesc)))
+func file_connection_proto_rawDescGZIP() []byte {
+	file_connection_proto_rawDescOnce.Do(func() {
+		file_connection_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_connection_proto_rawDesc), len(file_connection_proto_rawDesc)))
 	})
-	return file_proto_connection_proto_rawDescData
+	return file_connection_proto_rawDescData
 }
 
-var file_proto_connection_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
-var file_proto_connection_proto_goTypes = []any{
+var file_connection_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_connection_proto_goTypes = []any{
 	(*Connection)(nil),                      // 0: typedb.protocol.Connection
 	(*ConnectionID)(nil),                    // 1: typedb.protocol.ConnectionID
 	(*Connection_Open)(nil),                 // 2: typedb.protocol.Connection.Open
@@ -325,7 +325,7 @@ var file_proto_connection_proto_goTypes = []any{
 	(*DatabaseManager_All_Res)(nil),         // 7: typedb.protocol.DatabaseManager.All.Res
 	(*Authentication_Token_Create_Res)(nil), // 8: typedb.protocol.Authentication.Token.Create.Res
 }
-var file_proto_connection_proto_depIdxs = []int32{
+var file_connection_proto_depIdxs = []int32{
 	5, // 0: typedb.protocol.Connection.Open.Req.version:type_name -> typedb.protocol.Version
 	6, // 1: typedb.protocol.Connection.Open.Req.authentication:type_name -> typedb.protocol.Authentication.Token.Create.Req
 	1, // 2: typedb.protocol.Connection.Open.Res.connection_id:type_name -> typedb.protocol.ConnectionID
@@ -338,29 +338,29 @@ var file_proto_connection_proto_depIdxs = []int32{
 	0, // [0:5] is the sub-list for field type_name
 }
 
-func init() { file_proto_connection_proto_init() }
-func file_proto_connection_proto_init() {
-	if File_proto_connection_proto != nil {
+func init() { file_connection_proto_init() }
+func file_connection_proto_init() {
+	if File_connection_proto != nil {
 		return
 	}
-	file_proto_authentication_proto_init()
-	file_proto_database_proto_init()
-	file_proto_version_proto_init()
+	file_authentication_proto_init()
+	file_database_proto_init()
+	file_version_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_connection_proto_rawDesc), len(file_proto_connection_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_connection_proto_rawDesc), len(file_connection_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_proto_connection_proto_goTypes,
-		DependencyIndexes: file_proto_connection_proto_depIdxs,
-		MessageInfos:      file_proto_connection_proto_msgTypes,
+		GoTypes:           file_connection_proto_goTypes,
+		DependencyIndexes: file_connection_proto_depIdxs,
+		MessageInfos:      file_connection_proto_msgTypes,
 	}.Build()
-	File_proto_connection_proto = out.File
-	file_proto_connection_proto_goTypes = nil
-	file_proto_connection_proto_depIdxs = nil
+	File_connection_proto = out.File
+	file_connection_proto_goTypes = nil
+	file_connection_proto_depIdxs = nil
 }

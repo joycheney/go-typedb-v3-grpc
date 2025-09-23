@@ -6,9 +6,9 @@
 // versions:
 // 	protoc-gen-go v1.36.9
 // 	protoc        v3.21.12
-// source: proto/query.proto
+// source: query.proto
 
-package pb
+package proto
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -58,11 +58,11 @@ func (x Query_Type) String() string {
 }
 
 func (Query_Type) Descriptor() protoreflect.EnumDescriptor {
-	return file_proto_query_proto_enumTypes[0].Descriptor()
+	return file_query_proto_enumTypes[0].Descriptor()
 }
 
 func (Query_Type) Type() protoreflect.EnumType {
-	return &file_proto_query_proto_enumTypes[0]
+	return &file_query_proto_enumTypes[0]
 }
 
 func (x Query_Type) Number() protoreflect.EnumNumber {
@@ -71,7 +71,7 @@ func (x Query_Type) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Query_Type.Descriptor instead.
 func (Query_Type) EnumDescriptor() ([]byte, []int) {
-	return file_proto_query_proto_rawDescGZIP(), []int{0, 0}
+	return file_query_proto_rawDescGZIP(), []int{0, 0}
 }
 
 type Query struct {
@@ -82,7 +82,7 @@ type Query struct {
 
 func (x *Query) Reset() {
 	*x = Query{}
-	mi := &file_proto_query_proto_msgTypes[0]
+	mi := &file_query_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -94,7 +94,7 @@ func (x *Query) String() string {
 func (*Query) ProtoMessage() {}
 
 func (x *Query) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_query_proto_msgTypes[0]
+	mi := &file_query_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -107,7 +107,7 @@ func (x *Query) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Query.ProtoReflect.Descriptor instead.
 func (*Query) Descriptor() ([]byte, []int) {
-	return file_proto_query_proto_rawDescGZIP(), []int{0}
+	return file_query_proto_rawDescGZIP(), []int{0}
 }
 
 type Query_Req struct {
@@ -120,7 +120,7 @@ type Query_Req struct {
 
 func (x *Query_Req) Reset() {
 	*x = Query_Req{}
-	mi := &file_proto_query_proto_msgTypes[1]
+	mi := &file_query_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -132,7 +132,7 @@ func (x *Query_Req) String() string {
 func (*Query_Req) ProtoMessage() {}
 
 func (x *Query_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_query_proto_msgTypes[1]
+	mi := &file_query_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -145,7 +145,7 @@ func (x *Query_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Query_Req.ProtoReflect.Descriptor instead.
 func (*Query_Req) Descriptor() ([]byte, []int) {
-	return file_proto_query_proto_rawDescGZIP(), []int{0, 0}
+	return file_query_proto_rawDescGZIP(), []int{0, 0}
 }
 
 func (x *Query_Req) GetOptions() *Options_Query {
@@ -175,7 +175,7 @@ type Query_InitialRes struct {
 
 func (x *Query_InitialRes) Reset() {
 	*x = Query_InitialRes{}
-	mi := &file_proto_query_proto_msgTypes[2]
+	mi := &file_query_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -187,7 +187,7 @@ func (x *Query_InitialRes) String() string {
 func (*Query_InitialRes) ProtoMessage() {}
 
 func (x *Query_InitialRes) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_query_proto_msgTypes[2]
+	mi := &file_query_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -200,7 +200,7 @@ func (x *Query_InitialRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Query_InitialRes.ProtoReflect.Descriptor instead.
 func (*Query_InitialRes) Descriptor() ([]byte, []int) {
-	return file_proto_query_proto_rawDescGZIP(), []int{0, 1}
+	return file_query_proto_rawDescGZIP(), []int{0, 1}
 }
 
 func (x *Query_InitialRes) GetRes() isQuery_InitialRes_Res {
@@ -257,7 +257,7 @@ type Query_ResPart struct {
 
 func (x *Query_ResPart) Reset() {
 	*x = Query_ResPart{}
-	mi := &file_proto_query_proto_msgTypes[3]
+	mi := &file_query_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -269,7 +269,7 @@ func (x *Query_ResPart) String() string {
 func (*Query_ResPart) ProtoMessage() {}
 
 func (x *Query_ResPart) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_query_proto_msgTypes[3]
+	mi := &file_query_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -282,7 +282,7 @@ func (x *Query_ResPart) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Query_ResPart.ProtoReflect.Descriptor instead.
 func (*Query_ResPart) Descriptor() ([]byte, []int) {
-	return file_proto_query_proto_rawDescGZIP(), []int{0, 2}
+	return file_query_proto_rawDescGZIP(), []int{0, 2}
 }
 
 func (x *Query_ResPart) GetRes() isQuery_ResPart_Res {
@@ -340,7 +340,7 @@ type Query_InitialRes_Ok struct {
 
 func (x *Query_InitialRes_Ok) Reset() {
 	*x = Query_InitialRes_Ok{}
-	mi := &file_proto_query_proto_msgTypes[4]
+	mi := &file_query_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -352,7 +352,7 @@ func (x *Query_InitialRes_Ok) String() string {
 func (*Query_InitialRes_Ok) ProtoMessage() {}
 
 func (x *Query_InitialRes_Ok) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_query_proto_msgTypes[4]
+	mi := &file_query_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -365,7 +365,7 @@ func (x *Query_InitialRes_Ok) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Query_InitialRes_Ok.ProtoReflect.Descriptor instead.
 func (*Query_InitialRes_Ok) Descriptor() ([]byte, []int) {
-	return file_proto_query_proto_rawDescGZIP(), []int{0, 1, 0}
+	return file_query_proto_rawDescGZIP(), []int{0, 1, 0}
 }
 
 func (x *Query_InitialRes_Ok) GetOk() isQuery_InitialRes_Ok_Ok {
@@ -433,7 +433,7 @@ type Query_InitialRes_Ok_Done struct {
 
 func (x *Query_InitialRes_Ok_Done) Reset() {
 	*x = Query_InitialRes_Ok_Done{}
-	mi := &file_proto_query_proto_msgTypes[5]
+	mi := &file_query_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -445,7 +445,7 @@ func (x *Query_InitialRes_Ok_Done) String() string {
 func (*Query_InitialRes_Ok_Done) ProtoMessage() {}
 
 func (x *Query_InitialRes_Ok_Done) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_query_proto_msgTypes[5]
+	mi := &file_query_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -458,7 +458,7 @@ func (x *Query_InitialRes_Ok_Done) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Query_InitialRes_Ok_Done.ProtoReflect.Descriptor instead.
 func (*Query_InitialRes_Ok_Done) Descriptor() ([]byte, []int) {
-	return file_proto_query_proto_rawDescGZIP(), []int{0, 1, 0, 0}
+	return file_query_proto_rawDescGZIP(), []int{0, 1, 0, 0}
 }
 
 func (x *Query_InitialRes_Ok_Done) GetQueryType() Query_Type {
@@ -480,7 +480,7 @@ type Query_InitialRes_Ok_ConceptDocumentStream struct {
 
 func (x *Query_InitialRes_Ok_ConceptDocumentStream) Reset() {
 	*x = Query_InitialRes_Ok_ConceptDocumentStream{}
-	mi := &file_proto_query_proto_msgTypes[6]
+	mi := &file_query_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -492,7 +492,7 @@ func (x *Query_InitialRes_Ok_ConceptDocumentStream) String() string {
 func (*Query_InitialRes_Ok_ConceptDocumentStream) ProtoMessage() {}
 
 func (x *Query_InitialRes_Ok_ConceptDocumentStream) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_query_proto_msgTypes[6]
+	mi := &file_query_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -505,7 +505,7 @@ func (x *Query_InitialRes_Ok_ConceptDocumentStream) ProtoReflect() protoreflect.
 
 // Deprecated: Use Query_InitialRes_Ok_ConceptDocumentStream.ProtoReflect.Descriptor instead.
 func (*Query_InitialRes_Ok_ConceptDocumentStream) Descriptor() ([]byte, []int) {
-	return file_proto_query_proto_rawDescGZIP(), []int{0, 1, 0, 1}
+	return file_query_proto_rawDescGZIP(), []int{0, 1, 0, 1}
 }
 
 func (x *Query_InitialRes_Ok_ConceptDocumentStream) GetQueryType() Query_Type {
@@ -526,7 +526,7 @@ type Query_InitialRes_Ok_ConceptRowStream struct {
 
 func (x *Query_InitialRes_Ok_ConceptRowStream) Reset() {
 	*x = Query_InitialRes_Ok_ConceptRowStream{}
-	mi := &file_proto_query_proto_msgTypes[7]
+	mi := &file_query_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -538,7 +538,7 @@ func (x *Query_InitialRes_Ok_ConceptRowStream) String() string {
 func (*Query_InitialRes_Ok_ConceptRowStream) ProtoMessage() {}
 
 func (x *Query_InitialRes_Ok_ConceptRowStream) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_query_proto_msgTypes[7]
+	mi := &file_query_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -551,7 +551,7 @@ func (x *Query_InitialRes_Ok_ConceptRowStream) ProtoReflect() protoreflect.Messa
 
 // Deprecated: Use Query_InitialRes_Ok_ConceptRowStream.ProtoReflect.Descriptor instead.
 func (*Query_InitialRes_Ok_ConceptRowStream) Descriptor() ([]byte, []int) {
-	return file_proto_query_proto_rawDescGZIP(), []int{0, 1, 0, 2}
+	return file_query_proto_rawDescGZIP(), []int{0, 1, 0, 2}
 }
 
 func (x *Query_InitialRes_Ok_ConceptRowStream) GetColumnVariableNames() []string {
@@ -577,7 +577,7 @@ type Query_ResPart_ConceptDocumentsRes struct {
 
 func (x *Query_ResPart_ConceptDocumentsRes) Reset() {
 	*x = Query_ResPart_ConceptDocumentsRes{}
-	mi := &file_proto_query_proto_msgTypes[8]
+	mi := &file_query_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -589,7 +589,7 @@ func (x *Query_ResPart_ConceptDocumentsRes) String() string {
 func (*Query_ResPart_ConceptDocumentsRes) ProtoMessage() {}
 
 func (x *Query_ResPart_ConceptDocumentsRes) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_query_proto_msgTypes[8]
+	mi := &file_query_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -602,7 +602,7 @@ func (x *Query_ResPart_ConceptDocumentsRes) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use Query_ResPart_ConceptDocumentsRes.ProtoReflect.Descriptor instead.
 func (*Query_ResPart_ConceptDocumentsRes) Descriptor() ([]byte, []int) {
-	return file_proto_query_proto_rawDescGZIP(), []int{0, 2, 0}
+	return file_query_proto_rawDescGZIP(), []int{0, 2, 0}
 }
 
 func (x *Query_ResPart_ConceptDocumentsRes) GetDocuments() []*ConceptDocument {
@@ -621,7 +621,7 @@ type Query_ResPart_ConceptRowsRes struct {
 
 func (x *Query_ResPart_ConceptRowsRes) Reset() {
 	*x = Query_ResPart_ConceptRowsRes{}
-	mi := &file_proto_query_proto_msgTypes[9]
+	mi := &file_query_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -633,7 +633,7 @@ func (x *Query_ResPart_ConceptRowsRes) String() string {
 func (*Query_ResPart_ConceptRowsRes) ProtoMessage() {}
 
 func (x *Query_ResPart_ConceptRowsRes) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_query_proto_msgTypes[9]
+	mi := &file_query_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -646,7 +646,7 @@ func (x *Query_ResPart_ConceptRowsRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Query_ResPart_ConceptRowsRes.ProtoReflect.Descriptor instead.
 func (*Query_ResPart_ConceptRowsRes) Descriptor() ([]byte, []int) {
-	return file_proto_query_proto_rawDescGZIP(), []int{0, 2, 1}
+	return file_query_proto_rawDescGZIP(), []int{0, 2, 1}
 }
 
 func (x *Query_ResPart_ConceptRowsRes) GetRows() []*ConceptRow {
@@ -656,11 +656,11 @@ func (x *Query_ResPart_ConceptRowsRes) GetRows() []*ConceptRow {
 	return nil
 }
 
-var File_proto_query_proto protoreflect.FileDescriptor
+var File_query_proto protoreflect.FileDescriptor
 
-const file_proto_query_proto_rawDesc = "" +
+const file_query_proto_rawDesc = "" +
 	"\n" +
-	"\x11proto/query.proto\x12\x0ftypedb.protocol\x1a\x12proto/answer.proto\x1a\x13proto/options.proto\x1a\x11proto/error.proto\"\xa2\t\n" +
+	"\vquery.proto\x12\x0ftypedb.protocol\x1a\fanswer.proto\x1a\roptions.proto\x1a\verror.proto\"\xa2\t\n" +
 	"\x05Query\x1aU\n" +
 	"\x03Req\x128\n" +
 	"\aoptions\x18\x01 \x01(\v2\x1e.typedb.protocol.Options.QueryR\aoptions\x12\x14\n" +
@@ -697,23 +697,23 @@ const file_proto_query_proto_rawDesc = "" +
 	"\x04READ\x10\x00\x12\t\n" +
 	"\x05WRITE\x10\x01\x12\n" +
 	"\n" +
-	"\x06SCHEMA\x10\x02BCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
+	"\x06SCHEMA\x10\x02B1Z/github.com/joycheney/go-typedb-v3-grpc/pb/protob\x06proto3"
 
 var (
-	file_proto_query_proto_rawDescOnce sync.Once
-	file_proto_query_proto_rawDescData []byte
+	file_query_proto_rawDescOnce sync.Once
+	file_query_proto_rawDescData []byte
 )
 
-func file_proto_query_proto_rawDescGZIP() []byte {
-	file_proto_query_proto_rawDescOnce.Do(func() {
-		file_proto_query_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_query_proto_rawDesc), len(file_proto_query_proto_rawDesc)))
+func file_query_proto_rawDescGZIP() []byte {
+	file_query_proto_rawDescOnce.Do(func() {
+		file_query_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_query_proto_rawDesc), len(file_query_proto_rawDesc)))
 	})
-	return file_proto_query_proto_rawDescData
+	return file_query_proto_rawDescData
 }
 
-var file_proto_query_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_proto_query_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
-var file_proto_query_proto_goTypes = []any{
+var file_query_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_query_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_query_proto_goTypes = []any{
 	(Query_Type)(0),                                   // 0: typedb.protocol.Query.Type
 	(*Query)(nil),                                     // 1: typedb.protocol.Query
 	(*Query_Req)(nil),                                 // 2: typedb.protocol.Query.Req
@@ -730,7 +730,7 @@ var file_proto_query_proto_goTypes = []any{
 	(*ConceptDocument)(nil),                           // 13: typedb.protocol.ConceptDocument
 	(*ConceptRow)(nil),                                // 14: typedb.protocol.ConceptRow
 }
-var file_proto_query_proto_depIdxs = []int32{
+var file_query_proto_depIdxs = []int32{
 	11, // 0: typedb.protocol.Query.Req.options:type_name -> typedb.protocol.Options.Query
 	12, // 1: typedb.protocol.Query.InitialRes.error:type_name -> typedb.protocol.Error
 	5,  // 2: typedb.protocol.Query.InitialRes.ok:type_name -> typedb.protocol.Query.InitialRes.Ok
@@ -751,23 +751,23 @@ var file_proto_query_proto_depIdxs = []int32{
 	0,  // [0:13] is the sub-list for field type_name
 }
 
-func init() { file_proto_query_proto_init() }
-func file_proto_query_proto_init() {
-	if File_proto_query_proto != nil {
+func init() { file_query_proto_init() }
+func file_query_proto_init() {
+	if File_query_proto != nil {
 		return
 	}
-	file_proto_answer_proto_init()
-	file_proto_options_proto_init()
-	file_proto_error_proto_init()
-	file_proto_query_proto_msgTypes[2].OneofWrappers = []any{
+	file_answer_proto_init()
+	file_options_proto_init()
+	file_error_proto_init()
+	file_query_proto_msgTypes[2].OneofWrappers = []any{
 		(*Query_InitialRes_Error)(nil),
 		(*Query_InitialRes_Ok_)(nil),
 	}
-	file_proto_query_proto_msgTypes[3].OneofWrappers = []any{
+	file_query_proto_msgTypes[3].OneofWrappers = []any{
 		(*Query_ResPart_DocumentsRes)(nil),
 		(*Query_ResPart_RowsRes)(nil),
 	}
-	file_proto_query_proto_msgTypes[4].OneofWrappers = []any{
+	file_query_proto_msgTypes[4].OneofWrappers = []any{
 		(*Query_InitialRes_Ok_Done_)(nil),
 		(*Query_InitialRes_Ok_ConceptDocumentStream_)(nil),
 		(*Query_InitialRes_Ok_ConceptRowStream_)(nil),
@@ -776,18 +776,18 @@ func file_proto_query_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_query_proto_rawDesc), len(file_proto_query_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_query_proto_rawDesc), len(file_query_proto_rawDesc)),
 			NumEnums:      1,
 			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_proto_query_proto_goTypes,
-		DependencyIndexes: file_proto_query_proto_depIdxs,
-		EnumInfos:         file_proto_query_proto_enumTypes,
-		MessageInfos:      file_proto_query_proto_msgTypes,
+		GoTypes:           file_query_proto_goTypes,
+		DependencyIndexes: file_query_proto_depIdxs,
+		EnumInfos:         file_query_proto_enumTypes,
+		MessageInfos:      file_query_proto_msgTypes,
 	}.Build()
-	File_proto_query_proto = out.File
-	file_proto_query_proto_goTypes = nil
-	file_proto_query_proto_depIdxs = nil
+	File_query_proto = out.File
+	file_query_proto_goTypes = nil
+	file_query_proto_depIdxs = nil
 }

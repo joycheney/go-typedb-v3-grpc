@@ -6,7 +6,7 @@ syntax = "proto3";
 
 package typedb.protocol;
 
-option go_package = "github.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pb";
+option go_package = "github.com/joycheney/go-typedb-v3-grpc/pb/proto";
 
 message Authentication {
   message Token {

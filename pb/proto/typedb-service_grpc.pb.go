@@ -6,9 +6,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v3.21.12
-// source: proto/typedb-service.proto
+// source: typedb-service.proto
 
-package pb
+package proto
 
 import (
 	context "context"
@@ -819,5 +819,5 @@ var TypeDB_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "proto/typedb-service.proto",
+	Metadata: "typedb-service.proto",
 }

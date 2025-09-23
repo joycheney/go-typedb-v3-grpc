@@ -6,9 +6,9 @@
 // versions:
 // 	protoc-gen-go v1.36.9
 // 	protoc        v3.21.12
-// source: proto/typedb-service.proto
+// source: typedb-service.proto
 
-package pb
+package proto
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -24,11 +24,12 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-var File_proto_typedb_service_proto protoreflect.FileDescriptor
+var File_typedb_service_proto protoreflect.FileDescriptor
 
-const file_proto_typedb_service_proto_rawDesc = "" +
+const file_typedb_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1aproto/typedb-service.proto\x12\x0ftypedb.protocol\x1a\x1aproto/authentication.proto\x1a\x16proto/connection.proto\x1a\x14proto/database.proto\x1a\x12proto/server.proto\x1a\x10proto/user.proto\x1a\x17proto/transaction.proto\x1a\x15proto/migration.proto2\xfd\x0e\n" +
+	"\x14typedb-service.proto\x12\x0ftypedb.protocol\x1a\x14authentication.proto\x1a\x10connection.proto\x1a\x0edatabase.proto\x1a\fserver.proto\x1a\n" +
+	"user.proto\x1a\x11transaction.proto\x1a\x0fmigration.proto2\xfd\x0e\n" +
 	"\x06TypeDB\x12]\n" +
 	"\x0fconnection_open\x12$.typedb.protocol.Connection.Open.Req\x1a$.typedb.protocol.Connection.Open.Res\x12\x81\x01\n" +
 	"\x1bauthentication_token_create\x120.typedb.protocol.Authentication.Token.Create.Req\x1a0.typedb.protocol.Authentication.Token.Create.Res\x12]\n" +
@@ -48,9 +49,9 @@ const file_proto_typedb_service_proto_rawDesc = "" +
 	"\x14database_type_schema\x12(.typedb.protocol.Database.TypeSchema.Req\x1a(.typedb.protocol.Database.TypeSchema.Res\x12]\n" +
 	"\x0fdatabase_delete\x12$.typedb.protocol.Database.Delete.Req\x1a$.typedb.protocol.Database.Delete.Res\x12b\n" +
 	"\x0fdatabase_export\x12$.typedb.protocol.Database.Export.Req\x1a'.typedb.protocol.Database.Export.Server0\x01\x12[\n" +
-	"\vtransaction\x12#.typedb.protocol.Transaction.Client\x1a#.typedb.protocol.Transaction.Server(\x010\x01BCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
+	"\vtransaction\x12#.typedb.protocol.Transaction.Client\x1a#.typedb.protocol.Transaction.Server(\x010\x01B1Z/github.com/joycheney/go-typedb-v3-grpc/pb/protob\x06proto3"
 
-var file_proto_typedb_service_proto_goTypes = []any{
+var file_typedb_service_proto_goTypes = []any{
 	(*Connection_Open_Req)(nil),             // 0: typedb.protocol.Connection.Open.Req
 	(*Authentication_Token_Create_Req)(nil), // 1: typedb.protocol.Authentication.Token.Create.Req
 	(*ServerManager_All_Req)(nil),           // 2: typedb.protocol.ServerManager.All.Req
@@ -90,7 +91,7 @@ var file_proto_typedb_service_proto_goTypes = []any{
 	(*Database_Export_Server)(nil),          // 36: typedb.protocol.Database.Export.Server
 	(*Transaction_Server)(nil),              // 37: typedb.protocol.Transaction.Server
 }
-var file_proto_typedb_service_proto_depIdxs = []int32{
+var file_typedb_service_proto_depIdxs = []int32{
 	0,  // 0: typedb.protocol.TypeDB.connection_open:input_type -> typedb.protocol.Connection.Open.Req
 	1,  // 1: typedb.protocol.TypeDB.authentication_token_create:input_type -> typedb.protocol.Authentication.Token.Create.Req
 	2,  // 2: typedb.protocol.TypeDB.servers_all:input_type -> typedb.protocol.ServerManager.All.Req
@@ -136,32 +137,32 @@ var file_proto_typedb_service_proto_depIdxs = []int32{
 	0,  // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_proto_typedb_service_proto_init() }
-func file_proto_typedb_service_proto_init() {
-	if File_proto_typedb_service_proto != nil {
+func init() { file_typedb_service_proto_init() }
+func file_typedb_service_proto_init() {
+	if File_typedb_service_proto != nil {
 		return
 	}
-	file_proto_authentication_proto_init()
-	file_proto_connection_proto_init()
-	file_proto_database_proto_init()
-	file_proto_server_proto_init()
-	file_proto_user_proto_init()
-	file_proto_transaction_proto_init()
-	file_proto_migration_proto_init()
+	file_authentication_proto_init()
+	file_connection_proto_init()
+	file_database_proto_init()
+	file_server_proto_init()
+	file_user_proto_init()
+	file_transaction_proto_init()
+	file_migration_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_typedb_service_proto_rawDesc), len(file_proto_typedb_service_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_typedb_service_proto_rawDesc), len(file_typedb_service_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   0,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_proto_typedb_service_proto_goTypes,
-		DependencyIndexes: file_proto_typedb_service_proto_depIdxs,
+		GoTypes:           file_typedb_service_proto_goTypes,
+		DependencyIndexes: file_typedb_service_proto_depIdxs,
 	}.Build()
-	File_proto_typedb_service_proto = out.File
-	file_proto_typedb_service_proto_goTypes = nil
-	file_proto_typedb_service_proto_depIdxs = nil
+	File_typedb_service_proto = out.File
+	file_typedb_service_proto_goTypes = nil
+	file_typedb_service_proto_depIdxs = nil
 }

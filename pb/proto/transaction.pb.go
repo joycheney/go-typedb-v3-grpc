@@ -6,9 +6,9 @@
 // versions:
 // 	protoc-gen-go v1.36.9
 // 	protoc        v3.21.12
-// source: proto/transaction.proto
+// source: transaction.proto
 
-package pb
+package proto
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -58,11 +58,11 @@ func (x Transaction_Type) String() string {
 }
 
 func (Transaction_Type) Descriptor() protoreflect.EnumDescriptor {
-	return file_proto_transaction_proto_enumTypes[0].Descriptor()
+	return file_transaction_proto_enumTypes[0].Descriptor()
 }
 
 func (Transaction_Type) Type() protoreflect.EnumType {
-	return &file_proto_transaction_proto_enumTypes[0]
+	return &file_transaction_proto_enumTypes[0]
 }
 
 func (x Transaction_Type) Number() protoreflect.EnumNumber {
@@ -71,7 +71,7 @@ func (x Transaction_Type) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Transaction_Type.Descriptor instead.
 func (Transaction_Type) EnumDescriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 0}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 0}
 }
 
 type Transaction struct {
@@ -82,7 +82,7 @@ type Transaction struct {
 
 func (x *Transaction) Reset() {
 	*x = Transaction{}
-	mi := &file_proto_transaction_proto_msgTypes[0]
+	mi := &file_transaction_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -94,7 +94,7 @@ func (x *Transaction) String() string {
 func (*Transaction) ProtoMessage() {}
 
 func (x *Transaction) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[0]
+	mi := &file_transaction_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -107,7 +107,7 @@ func (x *Transaction) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction.ProtoReflect.Descriptor instead.
 func (*Transaction) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0}
+	return file_transaction_proto_rawDescGZIP(), []int{0}
 }
 
 type Transaction_Client struct {
@@ -119,7 +119,7 @@ type Transaction_Client struct {
 
 func (x *Transaction_Client) Reset() {
 	*x = Transaction_Client{}
-	mi := &file_proto_transaction_proto_msgTypes[1]
+	mi := &file_transaction_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -131,7 +131,7 @@ func (x *Transaction_Client) String() string {
 func (*Transaction_Client) ProtoMessage() {}
 
 func (x *Transaction_Client) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[1]
+	mi := &file_transaction_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -144,7 +144,7 @@ func (x *Transaction_Client) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_Client.ProtoReflect.Descriptor instead.
 func (*Transaction_Client) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 0}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 0}
 }
 
 func (x *Transaction_Client) GetReqs() []*Transaction_Req {
@@ -167,7 +167,7 @@ type Transaction_Server struct {
 
 func (x *Transaction_Server) Reset() {
 	*x = Transaction_Server{}
-	mi := &file_proto_transaction_proto_msgTypes[2]
+	mi := &file_transaction_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -179,7 +179,7 @@ func (x *Transaction_Server) String() string {
 func (*Transaction_Server) ProtoMessage() {}
 
 func (x *Transaction_Server) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[2]
+	mi := &file_transaction_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -192,7 +192,7 @@ func (x *Transaction_Server) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_Server.ProtoReflect.Descriptor instead.
 func (*Transaction_Server) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 1}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 1}
 }
 
 func (x *Transaction_Server) GetServer() isTransaction_Server_Server {
@@ -255,7 +255,7 @@ type Transaction_Req struct {
 
 func (x *Transaction_Req) Reset() {
 	*x = Transaction_Req{}
-	mi := &file_proto_transaction_proto_msgTypes[3]
+	mi := &file_transaction_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -267,7 +267,7 @@ func (x *Transaction_Req) String() string {
 func (*Transaction_Req) ProtoMessage() {}
 
 func (x *Transaction_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[3]
+	mi := &file_transaction_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -280,7 +280,7 @@ func (x *Transaction_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_Req.ProtoReflect.Descriptor instead.
 func (*Transaction_Req) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 2}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 2}
 }
 
 func (x *Transaction_Req) GetReqId() []byte {
@@ -414,7 +414,7 @@ type Transaction_Res struct {
 
 func (x *Transaction_Res) Reset() {
 	*x = Transaction_Res{}
-	mi := &file_proto_transaction_proto_msgTypes[4]
+	mi := &file_transaction_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -426,7 +426,7 @@ func (x *Transaction_Res) String() string {
 func (*Transaction_Res) ProtoMessage() {}
 
 func (x *Transaction_Res) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[4]
+	mi := &file_transaction_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -439,7 +439,7 @@ func (x *Transaction_Res) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_Res.ProtoReflect.Descriptor instead.
 func (*Transaction_Res) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 3}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 3}
 }
 
 func (x *Transaction_Res) GetReqId() []byte {
@@ -534,7 +534,7 @@ type Transaction_ResPart struct {
 
 func (x *Transaction_ResPart) Reset() {
 	*x = Transaction_ResPart{}
-	mi := &file_proto_transaction_proto_msgTypes[5]
+	mi := &file_transaction_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -546,7 +546,7 @@ func (x *Transaction_ResPart) String() string {
 func (*Transaction_ResPart) ProtoMessage() {}
 
 func (x *Transaction_ResPart) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[5]
+	mi := &file_transaction_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -559,7 +559,7 @@ func (x *Transaction_ResPart) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_ResPart.ProtoReflect.Descriptor instead.
 func (*Transaction_ResPart) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 4}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 4}
 }
 
 func (x *Transaction_ResPart) GetReqId() []byte {
@@ -618,7 +618,7 @@ type Transaction_Open struct {
 
 func (x *Transaction_Open) Reset() {
 	*x = Transaction_Open{}
-	mi := &file_proto_transaction_proto_msgTypes[6]
+	mi := &file_transaction_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -630,7 +630,7 @@ func (x *Transaction_Open) String() string {
 func (*Transaction_Open) ProtoMessage() {}
 
 func (x *Transaction_Open) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[6]
+	mi := &file_transaction_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -643,7 +643,7 @@ func (x *Transaction_Open) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_Open.ProtoReflect.Descriptor instead.
 func (*Transaction_Open) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 5}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 5}
 }
 
 type Transaction_Commit struct {
@@ -654,7 +654,7 @@ type Transaction_Commit struct {
 
 func (x *Transaction_Commit) Reset() {
 	*x = Transaction_Commit{}
-	mi := &file_proto_transaction_proto_msgTypes[7]
+	mi := &file_transaction_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -666,7 +666,7 @@ func (x *Transaction_Commit) String() string {
 func (*Transaction_Commit) ProtoMessage() {}
 
 func (x *Transaction_Commit) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[7]
+	mi := &file_transaction_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -679,7 +679,7 @@ func (x *Transaction_Commit) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_Commit.ProtoReflect.Descriptor instead.
 func (*Transaction_Commit) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 6}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 6}
 }
 
 type Transaction_Rollback struct {
@@ -690,7 +690,7 @@ type Transaction_Rollback struct {
 
 func (x *Transaction_Rollback) Reset() {
 	*x = Transaction_Rollback{}
-	mi := &file_proto_transaction_proto_msgTypes[8]
+	mi := &file_transaction_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -702,7 +702,7 @@ func (x *Transaction_Rollback) String() string {
 func (*Transaction_Rollback) ProtoMessage() {}
 
 func (x *Transaction_Rollback) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[8]
+	mi := &file_transaction_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -715,7 +715,7 @@ func (x *Transaction_Rollback) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_Rollback.ProtoReflect.Descriptor instead.
 func (*Transaction_Rollback) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 7}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 7}
 }
 
 type Transaction_Close struct {
@@ -726,7 +726,7 @@ type Transaction_Close struct {
 
 func (x *Transaction_Close) Reset() {
 	*x = Transaction_Close{}
-	mi := &file_proto_transaction_proto_msgTypes[9]
+	mi := &file_transaction_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -738,7 +738,7 @@ func (x *Transaction_Close) String() string {
 func (*Transaction_Close) ProtoMessage() {}
 
 func (x *Transaction_Close) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[9]
+	mi := &file_transaction_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -751,7 +751,7 @@ func (x *Transaction_Close) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_Close.ProtoReflect.Descriptor instead.
 func (*Transaction_Close) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 8}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 8}
 }
 
 type Transaction_GetSchemaExceptions struct {
@@ -762,7 +762,7 @@ type Transaction_GetSchemaExceptions struct {
 
 func (x *Transaction_GetSchemaExceptions) Reset() {
 	*x = Transaction_GetSchemaExceptions{}
-	mi := &file_proto_transaction_proto_msgTypes[10]
+	mi := &file_transaction_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -774,7 +774,7 @@ func (x *Transaction_GetSchemaExceptions) String() string {
 func (*Transaction_GetSchemaExceptions) ProtoMessage() {}
 
 func (x *Transaction_GetSchemaExceptions) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[10]
+	mi := &file_transaction_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -787,7 +787,7 @@ func (x *Transaction_GetSchemaExceptions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_GetSchemaExceptions.ProtoReflect.Descriptor instead.
 func (*Transaction_GetSchemaExceptions) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 9}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 9}
 }
 
 type Transaction_SchemaException struct {
@@ -800,7 +800,7 @@ type Transaction_SchemaException struct {
 
 func (x *Transaction_SchemaException) Reset() {
 	*x = Transaction_SchemaException{}
-	mi := &file_proto_transaction_proto_msgTypes[11]
+	mi := &file_transaction_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -812,7 +812,7 @@ func (x *Transaction_SchemaException) String() string {
 func (*Transaction_SchemaException) ProtoMessage() {}
 
 func (x *Transaction_SchemaException) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[11]
+	mi := &file_transaction_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -825,7 +825,7 @@ func (x *Transaction_SchemaException) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_SchemaException.ProtoReflect.Descriptor instead.
 func (*Transaction_SchemaException) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 10}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 10}
 }
 
 func (x *Transaction_SchemaException) GetCode() string {
@@ -850,7 +850,7 @@ type Transaction_StreamSignal struct {
 
 func (x *Transaction_StreamSignal) Reset() {
 	*x = Transaction_StreamSignal{}
-	mi := &file_proto_transaction_proto_msgTypes[12]
+	mi := &file_transaction_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -862,7 +862,7 @@ func (x *Transaction_StreamSignal) String() string {
 func (*Transaction_StreamSignal) ProtoMessage() {}
 
 func (x *Transaction_StreamSignal) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[12]
+	mi := &file_transaction_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -875,7 +875,7 @@ func (x *Transaction_StreamSignal) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_StreamSignal.ProtoReflect.Descriptor instead.
 func (*Transaction_StreamSignal) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 11}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 11}
 }
 
 type Transaction_Open_Req struct {
@@ -890,7 +890,7 @@ type Transaction_Open_Req struct {
 
 func (x *Transaction_Open_Req) Reset() {
 	*x = Transaction_Open_Req{}
-	mi := &file_proto_transaction_proto_msgTypes[14]
+	mi := &file_transaction_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -902,7 +902,7 @@ func (x *Transaction_Open_Req) String() string {
 func (*Transaction_Open_Req) ProtoMessage() {}
 
 func (x *Transaction_Open_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[14]
+	mi := &file_transaction_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -915,7 +915,7 @@ func (x *Transaction_Open_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_Open_Req.ProtoReflect.Descriptor instead.
 func (*Transaction_Open_Req) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 5, 0}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 5, 0}
 }
 
 func (x *Transaction_Open_Req) GetDatabase() string {
@@ -955,7 +955,7 @@ type Transaction_Open_Res struct {
 
 func (x *Transaction_Open_Res) Reset() {
 	*x = Transaction_Open_Res{}
-	mi := &file_proto_transaction_proto_msgTypes[15]
+	mi := &file_transaction_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -967,7 +967,7 @@ func (x *Transaction_Open_Res) String() string {
 func (*Transaction_Open_Res) ProtoMessage() {}
 
 func (x *Transaction_Open_Res) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[15]
+	mi := &file_transaction_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -980,7 +980,7 @@ func (x *Transaction_Open_Res) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_Open_Res.ProtoReflect.Descriptor instead.
 func (*Transaction_Open_Res) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 5, 1}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 5, 1}
 }
 
 func (x *Transaction_Open_Res) GetServerDurationMillis() uint64 {
@@ -998,7 +998,7 @@ type Transaction_Commit_Req struct {
 
 func (x *Transaction_Commit_Req) Reset() {
 	*x = Transaction_Commit_Req{}
-	mi := &file_proto_transaction_proto_msgTypes[16]
+	mi := &file_transaction_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1010,7 +1010,7 @@ func (x *Transaction_Commit_Req) String() string {
 func (*Transaction_Commit_Req) ProtoMessage() {}
 
 func (x *Transaction_Commit_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[16]
+	mi := &file_transaction_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1023,7 +1023,7 @@ func (x *Transaction_Commit_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_Commit_Req.ProtoReflect.Descriptor instead.
 func (*Transaction_Commit_Req) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 6, 0}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 6, 0}
 }
 
 type Transaction_Commit_Res struct {
@@ -1034,7 +1034,7 @@ type Transaction_Commit_Res struct {
 
 func (x *Transaction_Commit_Res) Reset() {
 	*x = Transaction_Commit_Res{}
-	mi := &file_proto_transaction_proto_msgTypes[17]
+	mi := &file_transaction_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1046,7 +1046,7 @@ func (x *Transaction_Commit_Res) String() string {
 func (*Transaction_Commit_Res) ProtoMessage() {}
 
 func (x *Transaction_Commit_Res) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[17]
+	mi := &file_transaction_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1059,7 +1059,7 @@ func (x *Transaction_Commit_Res) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_Commit_Res.ProtoReflect.Descriptor instead.
 func (*Transaction_Commit_Res) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 6, 1}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 6, 1}
 }
 
 type Transaction_Rollback_Req struct {
@@ -1070,7 +1070,7 @@ type Transaction_Rollback_Req struct {
 
 func (x *Transaction_Rollback_Req) Reset() {
 	*x = Transaction_Rollback_Req{}
-	mi := &file_proto_transaction_proto_msgTypes[18]
+	mi := &file_transaction_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1082,7 +1082,7 @@ func (x *Transaction_Rollback_Req) String() string {
 func (*Transaction_Rollback_Req) ProtoMessage() {}
 
 func (x *Transaction_Rollback_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[18]
+	mi := &file_transaction_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1095,7 +1095,7 @@ func (x *Transaction_Rollback_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_Rollback_Req.ProtoReflect.Descriptor instead.
 func (*Transaction_Rollback_Req) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 7, 0}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 7, 0}
 }
 
 type Transaction_Rollback_Res struct {
@@ -1106,7 +1106,7 @@ type Transaction_Rollback_Res struct {
 
 func (x *Transaction_Rollback_Res) Reset() {
 	*x = Transaction_Rollback_Res{}
-	mi := &file_proto_transaction_proto_msgTypes[19]
+	mi := &file_transaction_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1118,7 +1118,7 @@ func (x *Transaction_Rollback_Res) String() string {
 func (*Transaction_Rollback_Res) ProtoMessage() {}
 
 func (x *Transaction_Rollback_Res) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[19]
+	mi := &file_transaction_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1131,7 +1131,7 @@ func (x *Transaction_Rollback_Res) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_Rollback_Res.ProtoReflect.Descriptor instead.
 func (*Transaction_Rollback_Res) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 7, 1}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 7, 1}
 }
 
 type Transaction_Close_Req struct {
@@ -1142,7 +1142,7 @@ type Transaction_Close_Req struct {
 
 func (x *Transaction_Close_Req) Reset() {
 	*x = Transaction_Close_Req{}
-	mi := &file_proto_transaction_proto_msgTypes[20]
+	mi := &file_transaction_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1154,7 +1154,7 @@ func (x *Transaction_Close_Req) String() string {
 func (*Transaction_Close_Req) ProtoMessage() {}
 
 func (x *Transaction_Close_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[20]
+	mi := &file_transaction_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1167,7 +1167,7 @@ func (x *Transaction_Close_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_Close_Req.ProtoReflect.Descriptor instead.
 func (*Transaction_Close_Req) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 8, 0}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 8, 0}
 }
 
 type Transaction_Close_Res struct {
@@ -1178,7 +1178,7 @@ type Transaction_Close_Res struct {
 
 func (x *Transaction_Close_Res) Reset() {
 	*x = Transaction_Close_Res{}
-	mi := &file_proto_transaction_proto_msgTypes[21]
+	mi := &file_transaction_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1190,7 +1190,7 @@ func (x *Transaction_Close_Res) String() string {
 func (*Transaction_Close_Res) ProtoMessage() {}
 
 func (x *Transaction_Close_Res) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[21]
+	mi := &file_transaction_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1203,7 +1203,7 @@ func (x *Transaction_Close_Res) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_Close_Res.ProtoReflect.Descriptor instead.
 func (*Transaction_Close_Res) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 8, 1}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 8, 1}
 }
 
 type Transaction_GetSchemaExceptions_Req struct {
@@ -1214,7 +1214,7 @@ type Transaction_GetSchemaExceptions_Req struct {
 
 func (x *Transaction_GetSchemaExceptions_Req) Reset() {
 	*x = Transaction_GetSchemaExceptions_Req{}
-	mi := &file_proto_transaction_proto_msgTypes[22]
+	mi := &file_transaction_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1226,7 +1226,7 @@ func (x *Transaction_GetSchemaExceptions_Req) String() string {
 func (*Transaction_GetSchemaExceptions_Req) ProtoMessage() {}
 
 func (x *Transaction_GetSchemaExceptions_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[22]
+	mi := &file_transaction_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1239,7 +1239,7 @@ func (x *Transaction_GetSchemaExceptions_Req) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use Transaction_GetSchemaExceptions_Req.ProtoReflect.Descriptor instead.
 func (*Transaction_GetSchemaExceptions_Req) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 9, 0}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 9, 0}
 }
 
 type Transaction_GetSchemaExceptions_Res struct {
@@ -1251,7 +1251,7 @@ type Transaction_GetSchemaExceptions_Res struct {
 
 func (x *Transaction_GetSchemaExceptions_Res) Reset() {
 	*x = Transaction_GetSchemaExceptions_Res{}
-	mi := &file_proto_transaction_proto_msgTypes[23]
+	mi := &file_transaction_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1263,7 +1263,7 @@ func (x *Transaction_GetSchemaExceptions_Res) String() string {
 func (*Transaction_GetSchemaExceptions_Res) ProtoMessage() {}
 
 func (x *Transaction_GetSchemaExceptions_Res) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[23]
+	mi := &file_transaction_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1276,7 +1276,7 @@ func (x *Transaction_GetSchemaExceptions_Res) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use Transaction_GetSchemaExceptions_Res.ProtoReflect.Descriptor instead.
 func (*Transaction_GetSchemaExceptions_Res) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 9, 1}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 9, 1}
 }
 
 func (x *Transaction_GetSchemaExceptions_Res) GetExceptions() []*Transaction_SchemaException {
@@ -1294,7 +1294,7 @@ type Transaction_StreamSignal_Req struct {
 
 func (x *Transaction_StreamSignal_Req) Reset() {
 	*x = Transaction_StreamSignal_Req{}
-	mi := &file_proto_transaction_proto_msgTypes[24]
+	mi := &file_transaction_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1306,7 +1306,7 @@ func (x *Transaction_StreamSignal_Req) String() string {
 func (*Transaction_StreamSignal_Req) ProtoMessage() {}
 
 func (x *Transaction_StreamSignal_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[24]
+	mi := &file_transaction_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1319,7 +1319,7 @@ func (x *Transaction_StreamSignal_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_StreamSignal_Req.ProtoReflect.Descriptor instead.
 func (*Transaction_StreamSignal_Req) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 11, 0}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 11, 0}
 }
 
 type Transaction_StreamSignal_ResPart struct {
@@ -1336,7 +1336,7 @@ type Transaction_StreamSignal_ResPart struct {
 
 func (x *Transaction_StreamSignal_ResPart) Reset() {
 	*x = Transaction_StreamSignal_ResPart{}
-	mi := &file_proto_transaction_proto_msgTypes[25]
+	mi := &file_transaction_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1348,7 +1348,7 @@ func (x *Transaction_StreamSignal_ResPart) String() string {
 func (*Transaction_StreamSignal_ResPart) ProtoMessage() {}
 
 func (x *Transaction_StreamSignal_ResPart) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[25]
+	mi := &file_transaction_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1361,7 +1361,7 @@ func (x *Transaction_StreamSignal_ResPart) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Transaction_StreamSignal_ResPart.ProtoReflect.Descriptor instead.
 func (*Transaction_StreamSignal_ResPart) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 11, 1}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 11, 1}
 }
 
 func (x *Transaction_StreamSignal_ResPart) GetState() isTransaction_StreamSignal_ResPart_State {
@@ -1428,7 +1428,7 @@ type Transaction_StreamSignal_ResPart_Continue struct {
 
 func (x *Transaction_StreamSignal_ResPart_Continue) Reset() {
 	*x = Transaction_StreamSignal_ResPart_Continue{}
-	mi := &file_proto_transaction_proto_msgTypes[26]
+	mi := &file_transaction_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1440,7 +1440,7 @@ func (x *Transaction_StreamSignal_ResPart_Continue) String() string {
 func (*Transaction_StreamSignal_ResPart_Continue) ProtoMessage() {}
 
 func (x *Transaction_StreamSignal_ResPart_Continue) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[26]
+	mi := &file_transaction_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1453,7 +1453,7 @@ func (x *Transaction_StreamSignal_ResPart_Continue) ProtoReflect() protoreflect.
 
 // Deprecated: Use Transaction_StreamSignal_ResPart_Continue.ProtoReflect.Descriptor instead.
 func (*Transaction_StreamSignal_ResPart_Continue) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 11, 1, 0}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 11, 1, 0}
 }
 
 type Transaction_StreamSignal_ResPart_Done struct {
@@ -1464,7 +1464,7 @@ type Transaction_StreamSignal_ResPart_Done struct {
 
 func (x *Transaction_StreamSignal_ResPart_Done) Reset() {
 	*x = Transaction_StreamSignal_ResPart_Done{}
-	mi := &file_proto_transaction_proto_msgTypes[27]
+	mi := &file_transaction_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1476,7 +1476,7 @@ func (x *Transaction_StreamSignal_ResPart_Done) String() string {
 func (*Transaction_StreamSignal_ResPart_Done) ProtoMessage() {}
 
 func (x *Transaction_StreamSignal_ResPart_Done) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_transaction_proto_msgTypes[27]
+	mi := &file_transaction_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1489,14 +1489,14 @@ func (x *Transaction_StreamSignal_ResPart_Done) ProtoReflect() protoreflect.Mess
 
 // Deprecated: Use Transaction_StreamSignal_ResPart_Done.ProtoReflect.Descriptor instead.
 func (*Transaction_StreamSignal_ResPart_Done) Descriptor() ([]byte, []int) {
-	return file_proto_transaction_proto_rawDescGZIP(), []int{0, 11, 1, 1}
+	return file_transaction_proto_rawDescGZIP(), []int{0, 11, 1, 1}
 }
 
-var File_proto_transaction_proto protoreflect.FileDescriptor
+var File_transaction_proto protoreflect.FileDescriptor
 
-const file_proto_transaction_proto_rawDesc = "" +
+const file_transaction_proto_rawDesc = "" +
 	"\n" +
-	"\x17proto/transaction.proto\x12\x0ftypedb.protocol\x1a\x11proto/error.proto\x1a\x13proto/options.proto\x1a\x11proto/query.proto\"\xa7\x11\n" +
+	"\x11transaction.proto\x12\x0ftypedb.protocol\x1a\verror.proto\x1a\roptions.proto\x1a\vquery.proto\"\xa7\x11\n" +
 	"\vTransaction\x1a>\n" +
 	"\x06Client\x124\n" +
 	"\x04reqs\x18\x01 \x03(\v2 .typedb.protocol.Transaction.ReqR\x04reqs\x1a\x8b\x01\n" +
@@ -1574,23 +1574,23 @@ const file_proto_transaction_proto_rawDesc = "" +
 	"\x04READ\x10\x00\x12\t\n" +
 	"\x05WRITE\x10\x01\x12\n" +
 	"\n" +
-	"\x06SCHEMA\x10\x02BCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
+	"\x06SCHEMA\x10\x02B1Z/github.com/joycheney/go-typedb-v3-grpc/pb/protob\x06proto3"
 
 var (
-	file_proto_transaction_proto_rawDescOnce sync.Once
-	file_proto_transaction_proto_rawDescData []byte
+	file_transaction_proto_rawDescOnce sync.Once
+	file_transaction_proto_rawDescData []byte
 )
 
-func file_proto_transaction_proto_rawDescGZIP() []byte {
-	file_proto_transaction_proto_rawDescOnce.Do(func() {
-		file_proto_transaction_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_transaction_proto_rawDesc), len(file_proto_transaction_proto_rawDesc)))
+func file_transaction_proto_rawDescGZIP() []byte {
+	file_transaction_proto_rawDescOnce.Do(func() {
+		file_transaction_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_transaction_proto_rawDesc), len(file_transaction_proto_rawDesc)))
 	})
-	return file_proto_transaction_proto_rawDescData
+	return file_transaction_proto_rawDescData
 }
 
-var file_proto_transaction_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_proto_transaction_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
-var file_proto_transaction_proto_goTypes = []any{
+var file_transaction_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_transaction_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
+var file_transaction_proto_goTypes = []any{
 	(Transaction_Type)(0),                             // 0: typedb.protocol.Transaction.Type
 	(*Transaction)(nil),                               // 1: typedb.protocol.Transaction
 	(*Transaction_Client)(nil),                        // 2: typedb.protocol.Transaction.Client
@@ -1626,7 +1626,7 @@ var file_proto_transaction_proto_goTypes = []any{
 	(*Options_Transaction)(nil),                       // 32: typedb.protocol.Options.Transaction
 	(*Error)(nil),                                     // 33: typedb.protocol.Error
 }
-var file_proto_transaction_proto_depIdxs = []int32{
+var file_transaction_proto_depIdxs = []int32{
 	4,  // 0: typedb.protocol.Transaction.Client.reqs:type_name -> typedb.protocol.Transaction.Req
 	5,  // 1: typedb.protocol.Transaction.Server.res:type_name -> typedb.protocol.Transaction.Res
 	6,  // 2: typedb.protocol.Transaction.Server.res_part:type_name -> typedb.protocol.Transaction.ResPart
@@ -1656,19 +1656,19 @@ var file_proto_transaction_proto_depIdxs = []int32{
 	0,  // [0:22] is the sub-list for field type_name
 }
 
-func init() { file_proto_transaction_proto_init() }
-func file_proto_transaction_proto_init() {
-	if File_proto_transaction_proto != nil {
+func init() { file_transaction_proto_init() }
+func file_transaction_proto_init() {
+	if File_transaction_proto != nil {
 		return
 	}
-	file_proto_error_proto_init()
-	file_proto_options_proto_init()
-	file_proto_query_proto_init()
-	file_proto_transaction_proto_msgTypes[2].OneofWrappers = []any{
+	file_error_proto_init()
+	file_options_proto_init()
+	file_query_proto_init()
+	file_transaction_proto_msgTypes[2].OneofWrappers = []any{
 		(*Transaction_Server_Res)(nil),
 		(*Transaction_Server_ResPart)(nil),
 	}
-	file_proto_transaction_proto_msgTypes[3].OneofWrappers = []any{
+	file_transaction_proto_msgTypes[3].OneofWrappers = []any{
 		(*Transaction_Req_OpenReq)(nil),
 		(*Transaction_Req_QueryReq)(nil),
 		(*Transaction_Req_StreamReq)(nil),
@@ -1676,17 +1676,17 @@ func file_proto_transaction_proto_init() {
 		(*Transaction_Req_RollbackReq)(nil),
 		(*Transaction_Req_CloseReq)(nil),
 	}
-	file_proto_transaction_proto_msgTypes[4].OneofWrappers = []any{
+	file_transaction_proto_msgTypes[4].OneofWrappers = []any{
 		(*Transaction_Res_OpenRes)(nil),
 		(*Transaction_Res_QueryInitialRes)(nil),
 		(*Transaction_Res_CommitRes)(nil),
 		(*Transaction_Res_RollbackRes)(nil),
 	}
-	file_proto_transaction_proto_msgTypes[5].OneofWrappers = []any{
+	file_transaction_proto_msgTypes[5].OneofWrappers = []any{
 		(*Transaction_ResPart_QueryRes)(nil),
 		(*Transaction_ResPart_StreamRes)(nil),
 	}
-	file_proto_transaction_proto_msgTypes[25].OneofWrappers = []any{
+	file_transaction_proto_msgTypes[25].OneofWrappers = []any{
 		(*Transaction_StreamSignal_ResPart_Continue_)(nil),
 		(*Transaction_StreamSignal_ResPart_Done_)(nil),
 		(*Transaction_StreamSignal_ResPart_Error)(nil),
@@ -1695,18 +1695,18 @@ func file_proto_transaction_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_transaction_proto_rawDesc), len(file_proto_transaction_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_transaction_proto_rawDesc), len(file_transaction_proto_rawDesc)),
 			NumEnums:      1,
 			NumMessages:   28,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_proto_transaction_proto_goTypes,
-		DependencyIndexes: file_proto_transaction_proto_depIdxs,
-		EnumInfos:         file_proto_transaction_proto_enumTypes,
-		MessageInfos:      file_proto_transaction_proto_msgTypes,
+		GoTypes:           file_transaction_proto_goTypes,
+		DependencyIndexes: file_transaction_proto_depIdxs,
+		EnumInfos:         file_transaction_proto_enumTypes,
+		MessageInfos:      file_transaction_proto_msgTypes,
 	}.Build()
-	File_proto_transaction_proto = out.File
-	file_proto_transaction_proto_goTypes = nil
-	file_proto_transaction_proto_depIdxs = nil
+	File_transaction_proto = out.File
+	file_transaction_proto_goTypes = nil
+	file_transaction_proto_depIdxs = nil
 }

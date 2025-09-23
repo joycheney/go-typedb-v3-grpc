@@ -6,9 +6,9 @@
 // versions:
 // 	protoc-gen-go v1.36.9
 // 	protoc        v3.21.12
-// source: proto/answer.proto
+// source: answer.proto
 
-package pb
+package proto
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -61,11 +61,11 @@ func (x ConceptDocument_Node_Leaf_Kind) String() string {
 }
 
 func (ConceptDocument_Node_Leaf_Kind) Descriptor() protoreflect.EnumDescriptor {
-	return file_proto_answer_proto_enumTypes[0].Descriptor()
+	return file_answer_proto_enumTypes[0].Descriptor()
 }
 
 func (ConceptDocument_Node_Leaf_Kind) Type() protoreflect.EnumType {
-	return &file_proto_answer_proto_enumTypes[0]
+	return &file_answer_proto_enumTypes[0]
 }
 
 func (x ConceptDocument_Node_Leaf_Kind) Number() protoreflect.EnumNumber {
@@ -74,7 +74,7 @@ func (x ConceptDocument_Node_Leaf_Kind) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ConceptDocument_Node_Leaf_Kind.Descriptor instead.
 func (ConceptDocument_Node_Leaf_Kind) EnumDescriptor() ([]byte, []int) {
-	return file_proto_answer_proto_rawDescGZIP(), []int{2, 0, 2, 0}
+	return file_answer_proto_rawDescGZIP(), []int{2, 0, 2, 0}
 }
 
 type ConceptRow struct {
@@ -86,7 +86,7 @@ type ConceptRow struct {
 
 func (x *ConceptRow) Reset() {
 	*x = ConceptRow{}
-	mi := &file_proto_answer_proto_msgTypes[0]
+	mi := &file_answer_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -98,7 +98,7 @@ func (x *ConceptRow) String() string {
 func (*ConceptRow) ProtoMessage() {}
 
 func (x *ConceptRow) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_answer_proto_msgTypes[0]
+	mi := &file_answer_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -111,7 +111,7 @@ func (x *ConceptRow) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConceptRow.ProtoReflect.Descriptor instead.
 func (*ConceptRow) Descriptor() ([]byte, []int) {
-	return file_proto_answer_proto_rawDescGZIP(), []int{0}
+	return file_answer_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *ConceptRow) GetRow() []*RowEntry {
@@ -137,7 +137,7 @@ type RowEntry struct {
 
 func (x *RowEntry) Reset() {
 	*x = RowEntry{}
-	mi := &file_proto_answer_proto_msgTypes[1]
+	mi := &file_answer_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -149,7 +149,7 @@ func (x *RowEntry) String() string {
 func (*RowEntry) ProtoMessage() {}
 
 func (x *RowEntry) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_answer_proto_msgTypes[1]
+	mi := &file_answer_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -162,7 +162,7 @@ func (x *RowEntry) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RowEntry.ProtoReflect.Descriptor instead.
 func (*RowEntry) Descriptor() ([]byte, []int) {
-	return file_proto_answer_proto_rawDescGZIP(), []int{1}
+	return file_answer_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *RowEntry) GetEntry() isRowEntry_Entry {
@@ -260,7 +260,7 @@ type ConceptDocument struct {
 
 func (x *ConceptDocument) Reset() {
 	*x = ConceptDocument{}
-	mi := &file_proto_answer_proto_msgTypes[2]
+	mi := &file_answer_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -272,7 +272,7 @@ func (x *ConceptDocument) String() string {
 func (*ConceptDocument) ProtoMessage() {}
 
 func (x *ConceptDocument) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_answer_proto_msgTypes[2]
+	mi := &file_answer_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -285,7 +285,7 @@ func (x *ConceptDocument) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConceptDocument.ProtoReflect.Descriptor instead.
 func (*ConceptDocument) Descriptor() ([]byte, []int) {
-	return file_proto_answer_proto_rawDescGZIP(), []int{2}
+	return file_answer_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ConceptDocument) GetRoot() *ConceptDocument_Node {
@@ -303,7 +303,7 @@ type RowEntry_Empty struct {
 
 func (x *RowEntry_Empty) Reset() {
 	*x = RowEntry_Empty{}
-	mi := &file_proto_answer_proto_msgTypes[3]
+	mi := &file_answer_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -315,7 +315,7 @@ func (x *RowEntry_Empty) String() string {
 func (*RowEntry_Empty) ProtoMessage() {}
 
 func (x *RowEntry_Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_answer_proto_msgTypes[3]
+	mi := &file_answer_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -328,7 +328,7 @@ func (x *RowEntry_Empty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RowEntry_Empty.ProtoReflect.Descriptor instead.
 func (*RowEntry_Empty) Descriptor() ([]byte, []int) {
-	return file_proto_answer_proto_rawDescGZIP(), []int{1, 0}
+	return file_answer_proto_rawDescGZIP(), []int{1, 0}
 }
 
 type RowEntry_ConceptList struct {
@@ -340,7 +340,7 @@ type RowEntry_ConceptList struct {
 
 func (x *RowEntry_ConceptList) Reset() {
 	*x = RowEntry_ConceptList{}
-	mi := &file_proto_answer_proto_msgTypes[4]
+	mi := &file_answer_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -352,7 +352,7 @@ func (x *RowEntry_ConceptList) String() string {
 func (*RowEntry_ConceptList) ProtoMessage() {}
 
 func (x *RowEntry_ConceptList) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_answer_proto_msgTypes[4]
+	mi := &file_answer_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -365,7 +365,7 @@ func (x *RowEntry_ConceptList) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RowEntry_ConceptList.ProtoReflect.Descriptor instead.
 func (*RowEntry_ConceptList) Descriptor() ([]byte, []int) {
-	return file_proto_answer_proto_rawDescGZIP(), []int{1, 1}
+	return file_answer_proto_rawDescGZIP(), []int{1, 1}
 }
 
 func (x *RowEntry_ConceptList) GetConcepts() []*Concept {
@@ -384,7 +384,7 @@ type RowEntry_ValueList struct {
 
 func (x *RowEntry_ValueList) Reset() {
 	*x = RowEntry_ValueList{}
-	mi := &file_proto_answer_proto_msgTypes[5]
+	mi := &file_answer_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -396,7 +396,7 @@ func (x *RowEntry_ValueList) String() string {
 func (*RowEntry_ValueList) ProtoMessage() {}
 
 func (x *RowEntry_ValueList) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_answer_proto_msgTypes[5]
+	mi := &file_answer_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -409,7 +409,7 @@ func (x *RowEntry_ValueList) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RowEntry_ValueList.ProtoReflect.Descriptor instead.
 func (*RowEntry_ValueList) Descriptor() ([]byte, []int) {
-	return file_proto_answer_proto_rawDescGZIP(), []int{1, 2}
+	return file_answer_proto_rawDescGZIP(), []int{1, 2}
 }
 
 func (x *RowEntry_ValueList) GetValues() []*Value {
@@ -433,7 +433,7 @@ type ConceptDocument_Node struct {
 
 func (x *ConceptDocument_Node) Reset() {
 	*x = ConceptDocument_Node{}
-	mi := &file_proto_answer_proto_msgTypes[6]
+	mi := &file_answer_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -445,7 +445,7 @@ func (x *ConceptDocument_Node) String() string {
 func (*ConceptDocument_Node) ProtoMessage() {}
 
 func (x *ConceptDocument_Node) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_answer_proto_msgTypes[6]
+	mi := &file_answer_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -458,7 +458,7 @@ func (x *ConceptDocument_Node) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConceptDocument_Node.ProtoReflect.Descriptor instead.
 func (*ConceptDocument_Node) Descriptor() ([]byte, []int) {
-	return file_proto_answer_proto_rawDescGZIP(), []int{2, 0}
+	return file_answer_proto_rawDescGZIP(), []int{2, 0}
 }
 
 func (x *ConceptDocument_Node) GetNode() isConceptDocument_Node_Node {
@@ -526,7 +526,7 @@ type ConceptDocument_Node_Map struct {
 
 func (x *ConceptDocument_Node_Map) Reset() {
 	*x = ConceptDocument_Node_Map{}
-	mi := &file_proto_answer_proto_msgTypes[7]
+	mi := &file_answer_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -538,7 +538,7 @@ func (x *ConceptDocument_Node_Map) String() string {
 func (*ConceptDocument_Node_Map) ProtoMessage() {}
 
 func (x *ConceptDocument_Node_Map) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_answer_proto_msgTypes[7]
+	mi := &file_answer_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -551,7 +551,7 @@ func (x *ConceptDocument_Node_Map) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConceptDocument_Node_Map.ProtoReflect.Descriptor instead.
 func (*ConceptDocument_Node_Map) Descriptor() ([]byte, []int) {
-	return file_proto_answer_proto_rawDescGZIP(), []int{2, 0, 0}
+	return file_answer_proto_rawDescGZIP(), []int{2, 0, 0}
 }
 
 func (x *ConceptDocument_Node_Map) GetMap() map[string]*ConceptDocument_Node {
@@ -570,7 +570,7 @@ type ConceptDocument_Node_List struct {
 
 func (x *ConceptDocument_Node_List) Reset() {
 	*x = ConceptDocument_Node_List{}
-	mi := &file_proto_answer_proto_msgTypes[8]
+	mi := &file_answer_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -582,7 +582,7 @@ func (x *ConceptDocument_Node_List) String() string {
 func (*ConceptDocument_Node_List) ProtoMessage() {}
 
 func (x *ConceptDocument_Node_List) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_answer_proto_msgTypes[8]
+	mi := &file_answer_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -595,7 +595,7 @@ func (x *ConceptDocument_Node_List) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConceptDocument_Node_List.ProtoReflect.Descriptor instead.
 func (*ConceptDocument_Node_List) Descriptor() ([]byte, []int) {
-	return file_proto_answer_proto_rawDescGZIP(), []int{2, 0, 1}
+	return file_answer_proto_rawDescGZIP(), []int{2, 0, 1}
 }
 
 func (x *ConceptDocument_Node_List) GetList() []*ConceptDocument_Node {
@@ -625,7 +625,7 @@ type ConceptDocument_Node_Leaf struct {
 
 func (x *ConceptDocument_Node_Leaf) Reset() {
 	*x = ConceptDocument_Node_Leaf{}
-	mi := &file_proto_answer_proto_msgTypes[9]
+	mi := &file_answer_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -637,7 +637,7 @@ func (x *ConceptDocument_Node_Leaf) String() string {
 func (*ConceptDocument_Node_Leaf) ProtoMessage() {}
 
 func (x *ConceptDocument_Node_Leaf) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_answer_proto_msgTypes[9]
+	mi := &file_answer_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -650,7 +650,7 @@ func (x *ConceptDocument_Node_Leaf) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConceptDocument_Node_Leaf.ProtoReflect.Descriptor instead.
 func (*ConceptDocument_Node_Leaf) Descriptor() ([]byte, []int) {
-	return file_proto_answer_proto_rawDescGZIP(), []int{2, 0, 2}
+	return file_answer_proto_rawDescGZIP(), []int{2, 0, 2}
 }
 
 func (x *ConceptDocument_Node_Leaf) GetLeaf() isConceptDocument_Node_Leaf_Leaf {
@@ -807,7 +807,7 @@ type ConceptDocument_Node_Leaf_Empty struct {
 
 func (x *ConceptDocument_Node_Leaf_Empty) Reset() {
 	*x = ConceptDocument_Node_Leaf_Empty{}
-	mi := &file_proto_answer_proto_msgTypes[11]
+	mi := &file_answer_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -819,7 +819,7 @@ func (x *ConceptDocument_Node_Leaf_Empty) String() string {
 func (*ConceptDocument_Node_Leaf_Empty) ProtoMessage() {}
 
 func (x *ConceptDocument_Node_Leaf_Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_answer_proto_msgTypes[11]
+	mi := &file_answer_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -832,14 +832,14 @@ func (x *ConceptDocument_Node_Leaf_Empty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConceptDocument_Node_Leaf_Empty.ProtoReflect.Descriptor instead.
 func (*ConceptDocument_Node_Leaf_Empty) Descriptor() ([]byte, []int) {
-	return file_proto_answer_proto_rawDescGZIP(), []int{2, 0, 2, 0}
+	return file_answer_proto_rawDescGZIP(), []int{2, 0, 2, 0}
 }
 
-var File_proto_answer_proto protoreflect.FileDescriptor
+var File_answer_proto protoreflect.FileDescriptor
 
-const file_proto_answer_proto_rawDesc = "" +
+const file_answer_proto_rawDesc = "" +
 	"\n" +
-	"\x12proto/answer.proto\x12\x0ftypedb.protocol\x1a\x13proto/concept.proto\"9\n" +
+	"\fanswer.proto\x12\x0ftypedb.protocol\x1a\rconcept.proto\"9\n" +
 	"\n" +
 	"ConceptRow\x12+\n" +
 	"\x03row\x18\x01 \x03(\v2\x19.typedb.protocol.RowEntryR\x03row\"\xcf\x03\n" +
@@ -890,23 +890,23 @@ const file_proto_answer_proto_rawDesc = "" +
 	"\rAttributeKind\x10\x03\x12\b\n" +
 	"\x04Role\x10\x04B\x06\n" +
 	"\x04leafB\x06\n" +
-	"\x04nodeBCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
+	"\x04nodeB1Z/github.com/joycheney/go-typedb-v3-grpc/pb/protob\x06proto3"
 
 var (
-	file_proto_answer_proto_rawDescOnce sync.Once
-	file_proto_answer_proto_rawDescData []byte
+	file_answer_proto_rawDescOnce sync.Once
+	file_answer_proto_rawDescData []byte
 )
 
-func file_proto_answer_proto_rawDescGZIP() []byte {
-	file_proto_answer_proto_rawDescOnce.Do(func() {
-		file_proto_answer_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_answer_proto_rawDesc), len(file_proto_answer_proto_rawDesc)))
+func file_answer_proto_rawDescGZIP() []byte {
+	file_answer_proto_rawDescOnce.Do(func() {
+		file_answer_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_answer_proto_rawDesc), len(file_answer_proto_rawDesc)))
 	})
-	return file_proto_answer_proto_rawDescData
+	return file_answer_proto_rawDescData
 }
 
-var file_proto_answer_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_proto_answer_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
-var file_proto_answer_proto_goTypes = []any{
+var file_answer_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_answer_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_answer_proto_goTypes = []any{
 	(ConceptDocument_Node_Leaf_Kind)(0),     // 0: typedb.protocol.ConceptDocument.Node.Leaf.Kind
 	(*ConceptRow)(nil),                      // 1: typedb.protocol.ConceptRow
 	(*RowEntry)(nil),                        // 2: typedb.protocol.RowEntry
@@ -929,7 +929,7 @@ var file_proto_answer_proto_goTypes = []any{
 	(*ValueType)(nil),                       // 19: typedb.protocol.ValueType
 	(*Attribute)(nil),                       // 20: typedb.protocol.Attribute
 }
-var file_proto_answer_proto_depIdxs = []int32{
+var file_answer_proto_depIdxs = []int32{
 	2,  // 0: typedb.protocol.ConceptRow.row:type_name -> typedb.protocol.RowEntry
 	4,  // 1: typedb.protocol.RowEntry.empty:type_name -> typedb.protocol.RowEntry.Empty
 	13, // 2: typedb.protocol.RowEntry.concept:type_name -> typedb.protocol.Concept
@@ -961,25 +961,25 @@ var file_proto_answer_proto_depIdxs = []int32{
 	0,  // [0:24] is the sub-list for field type_name
 }
 
-func init() { file_proto_answer_proto_init() }
-func file_proto_answer_proto_init() {
-	if File_proto_answer_proto != nil {
+func init() { file_answer_proto_init() }
+func file_answer_proto_init() {
+	if File_answer_proto != nil {
 		return
 	}
-	file_proto_concept_proto_init()
-	file_proto_answer_proto_msgTypes[1].OneofWrappers = []any{
+	file_concept_proto_init()
+	file_answer_proto_msgTypes[1].OneofWrappers = []any{
 		(*RowEntry_Empty_)(nil),
 		(*RowEntry_Concept)(nil),
 		(*RowEntry_Value)(nil),
 		(*RowEntry_ConceptList_)(nil),
 		(*RowEntry_ValueList_)(nil),
 	}
-	file_proto_answer_proto_msgTypes[6].OneofWrappers = []any{
+	file_answer_proto_msgTypes[6].OneofWrappers = []any{
 		(*ConceptDocument_Node_Map_)(nil),
 		(*ConceptDocument_Node_List_)(nil),
 		(*ConceptDocument_Node_Leaf_)(nil),
 	}
-	file_proto_answer_proto_msgTypes[9].OneofWrappers = []any{
+	file_answer_proto_msgTypes[9].OneofWrappers = []any{
 		(*ConceptDocument_Node_Leaf_Empty_)(nil),
 		(*ConceptDocument_Node_Leaf_EntityType)(nil),
 		(*ConceptDocument_Node_Leaf_RelationType)(nil),
@@ -994,18 +994,18 @@ func file_proto_answer_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_answer_proto_rawDesc), len(file_proto_answer_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_answer_proto_rawDesc), len(file_answer_proto_rawDesc)),
 			NumEnums:      1,
 			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_proto_answer_proto_goTypes,
-		DependencyIndexes: file_proto_answer_proto_depIdxs,
-		EnumInfos:         file_proto_answer_proto_enumTypes,
-		MessageInfos:      file_proto_answer_proto_msgTypes,
+		GoTypes:           file_answer_proto_goTypes,
+		DependencyIndexes: file_answer_proto_depIdxs,
+		EnumInfos:         file_answer_proto_enumTypes,
+		MessageInfos:      file_answer_proto_msgTypes,
 	}.Build()
-	File_proto_answer_proto = out.File
-	file_proto_answer_proto_goTypes = nil
-	file_proto_answer_proto_depIdxs = nil
+	File_answer_proto = out.File
+	file_answer_proto_goTypes = nil
+	file_answer_proto_depIdxs = nil
 }

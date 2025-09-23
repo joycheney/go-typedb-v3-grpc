@@ -6,9 +6,9 @@
 // versions:
 // 	protoc-gen-go v1.36.9
 // 	protoc        v3.21.12
-// source: proto/server.proto
+// source: server.proto
 
-package pb
+package proto
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -33,7 +33,7 @@ type ServerManager struct {
 
 func (x *ServerManager) Reset() {
 	*x = ServerManager{}
-	mi := &file_proto_server_proto_msgTypes[0]
+	mi := &file_server_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -45,7 +45,7 @@ func (x *ServerManager) String() string {
 func (*ServerManager) ProtoMessage() {}
 
 func (x *ServerManager) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_server_proto_msgTypes[0]
+	mi := &file_server_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -58,7 +58,7 @@ func (x *ServerManager) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServerManager.ProtoReflect.Descriptor instead.
 func (*ServerManager) Descriptor() ([]byte, []int) {
-	return file_proto_server_proto_rawDescGZIP(), []int{0}
+	return file_server_proto_rawDescGZIP(), []int{0}
 }
 
 type Server struct {
@@ -70,7 +70,7 @@ type Server struct {
 
 func (x *Server) Reset() {
 	*x = Server{}
-	mi := &file_proto_server_proto_msgTypes[1]
+	mi := &file_server_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -82,7 +82,7 @@ func (x *Server) String() string {
 func (*Server) ProtoMessage() {}
 
 func (x *Server) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_server_proto_msgTypes[1]
+	mi := &file_server_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -95,7 +95,7 @@ func (x *Server) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Server.ProtoReflect.Descriptor instead.
 func (*Server) Descriptor() ([]byte, []int) {
-	return file_proto_server_proto_rawDescGZIP(), []int{1}
+	return file_server_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Server) GetAddress() string {
@@ -113,7 +113,7 @@ type ServerManager_All struct {
 
 func (x *ServerManager_All) Reset() {
 	*x = ServerManager_All{}
-	mi := &file_proto_server_proto_msgTypes[2]
+	mi := &file_server_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -125,7 +125,7 @@ func (x *ServerManager_All) String() string {
 func (*ServerManager_All) ProtoMessage() {}
 
 func (x *ServerManager_All) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_server_proto_msgTypes[2]
+	mi := &file_server_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -138,7 +138,7 @@ func (x *ServerManager_All) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServerManager_All.ProtoReflect.Descriptor instead.
 func (*ServerManager_All) Descriptor() ([]byte, []int) {
-	return file_proto_server_proto_rawDescGZIP(), []int{0, 0}
+	return file_server_proto_rawDescGZIP(), []int{0, 0}
 }
 
 type ServerManager_All_Req struct {
@@ -149,7 +149,7 @@ type ServerManager_All_Req struct {
 
 func (x *ServerManager_All_Req) Reset() {
 	*x = ServerManager_All_Req{}
-	mi := &file_proto_server_proto_msgTypes[3]
+	mi := &file_server_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -161,7 +161,7 @@ func (x *ServerManager_All_Req) String() string {
 func (*ServerManager_All_Req) ProtoMessage() {}
 
 func (x *ServerManager_All_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_server_proto_msgTypes[3]
+	mi := &file_server_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -174,7 +174,7 @@ func (x *ServerManager_All_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServerManager_All_Req.ProtoReflect.Descriptor instead.
 func (*ServerManager_All_Req) Descriptor() ([]byte, []int) {
-	return file_proto_server_proto_rawDescGZIP(), []int{0, 0, 0}
+	return file_server_proto_rawDescGZIP(), []int{0, 0, 0}
 }
 
 type ServerManager_All_Res struct {
@@ -186,7 +186,7 @@ type ServerManager_All_Res struct {
 
 func (x *ServerManager_All_Res) Reset() {
 	*x = ServerManager_All_Res{}
-	mi := &file_proto_server_proto_msgTypes[4]
+	mi := &file_server_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -198,7 +198,7 @@ func (x *ServerManager_All_Res) String() string {
 func (*ServerManager_All_Res) ProtoMessage() {}
 
 func (x *ServerManager_All_Res) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_server_proto_msgTypes[4]
+	mi := &file_server_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -211,7 +211,7 @@ func (x *ServerManager_All_Res) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServerManager_All_Res.ProtoReflect.Descriptor instead.
 func (*ServerManager_All_Res) Descriptor() ([]byte, []int) {
-	return file_proto_server_proto_rawDescGZIP(), []int{0, 0, 1}
+	return file_server_proto_rawDescGZIP(), []int{0, 0, 1}
 }
 
 func (x *ServerManager_All_Res) GetServers() []*Server {
@@ -221,40 +221,40 @@ func (x *ServerManager_All_Res) GetServers() []*Server {
 	return nil
 }
 
-var File_proto_server_proto protoreflect.FileDescriptor
+var File_server_proto protoreflect.FileDescriptor
 
-const file_proto_server_proto_rawDesc = "" +
+const file_server_proto_rawDesc = "" +
 	"\n" +
-	"\x12proto/server.proto\x12\x0ftypedb.protocol\"W\n" +
+	"\fserver.proto\x12\x0ftypedb.protocol\"W\n" +
 	"\rServerManager\x1aF\n" +
 	"\x03All\x1a\x05\n" +
 	"\x03Req\x1a8\n" +
 	"\x03Res\x121\n" +
 	"\aservers\x18\x01 \x03(\v2\x17.typedb.protocol.ServerR\aservers\"\"\n" +
 	"\x06Server\x12\x18\n" +
-	"\aaddress\x18\x01 \x01(\tR\aaddressBCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
+	"\aaddress\x18\x01 \x01(\tR\aaddressB1Z/github.com/joycheney/go-typedb-v3-grpc/pb/protob\x06proto3"
 
 var (
-	file_proto_server_proto_rawDescOnce sync.Once
-	file_proto_server_proto_rawDescData []byte
+	file_server_proto_rawDescOnce sync.Once
+	file_server_proto_rawDescData []byte
 )
 
-func file_proto_server_proto_rawDescGZIP() []byte {
-	file_proto_server_proto_rawDescOnce.Do(func() {
-		file_proto_server_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_server_proto_rawDesc), len(file_proto_server_proto_rawDesc)))
+func file_server_proto_rawDescGZIP() []byte {
+	file_server_proto_rawDescOnce.Do(func() {
+		file_server_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_server_proto_rawDesc), len(file_server_proto_rawDesc)))
 	})
-	return file_proto_server_proto_rawDescData
+	return file_server_proto_rawDescData
 }
 
-var file_proto_server_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
-var file_proto_server_proto_goTypes = []any{
+var file_server_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_server_proto_goTypes = []any{
 	(*ServerManager)(nil),         // 0: typedb.protocol.ServerManager
 	(*Server)(nil),                // 1: typedb.protocol.Server
 	(*ServerManager_All)(nil),     // 2: typedb.protocol.ServerManager.All
 	(*ServerManager_All_Req)(nil), // 3: typedb.protocol.ServerManager.All.Req
 	(*ServerManager_All_Res)(nil), // 4: typedb.protocol.ServerManager.All.Res
 }
-var file_proto_server_proto_depIdxs = []int32{
+var file_server_proto_depIdxs = []int32{
 	1, // 0: typedb.protocol.ServerManager.All.Res.servers:type_name -> typedb.protocol.Server
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
@@ -263,26 +263,26 @@ var file_proto_server_proto_depIdxs = []int32{
 	0, // [0:1] is the sub-list for field type_name
 }
 
-func init() { file_proto_server_proto_init() }
-func file_proto_server_proto_init() {
-	if File_proto_server_proto != nil {
+func init() { file_server_proto_init() }
+func file_server_proto_init() {
+	if File_server_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_server_proto_rawDesc), len(file_proto_server_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_server_proto_rawDesc), len(file_server_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_proto_server_proto_goTypes,
-		DependencyIndexes: file_proto_server_proto_depIdxs,
-		MessageInfos:      file_proto_server_proto_msgTypes,
+		GoTypes:           file_server_proto_goTypes,
+		DependencyIndexes: file_server_proto_depIdxs,
+		MessageInfos:      file_server_proto_msgTypes,
 	}.Build()
-	File_proto_server_proto = out.File
-	file_proto_server_proto_goTypes = nil
-	file_proto_server_proto_depIdxs = nil
+	File_server_proto = out.File
+	file_server_proto_goTypes = nil
+	file_server_proto_depIdxs = nil
 }

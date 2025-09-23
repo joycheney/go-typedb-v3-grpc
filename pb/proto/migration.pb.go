@@ -6,9 +6,9 @@
 // versions:
 // 	protoc-gen-go v1.36.9
 // 	protoc        v3.21.12
-// source: proto/migration.proto
+// source: migration.proto
 
-package pb
+package proto
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -33,7 +33,7 @@ type Migration struct {
 
 func (x *Migration) Reset() {
 	*x = Migration{}
-	mi := &file_proto_migration_proto_msgTypes[0]
+	mi := &file_migration_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -45,7 +45,7 @@ func (x *Migration) String() string {
 func (*Migration) ProtoMessage() {}
 
 func (x *Migration) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[0]
+	mi := &file_migration_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -58,7 +58,7 @@ func (x *Migration) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration.ProtoReflect.Descriptor instead.
 func (*Migration) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0}
+	return file_migration_proto_rawDescGZIP(), []int{0}
 }
 
 type Migration_Export struct {
@@ -69,7 +69,7 @@ type Migration_Export struct {
 
 func (x *Migration_Export) Reset() {
 	*x = Migration_Export{}
-	mi := &file_proto_migration_proto_msgTypes[1]
+	mi := &file_migration_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -81,7 +81,7 @@ func (x *Migration_Export) String() string {
 func (*Migration_Export) ProtoMessage() {}
 
 func (x *Migration_Export) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[1]
+	mi := &file_migration_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -94,7 +94,7 @@ func (x *Migration_Export) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Export.ProtoReflect.Descriptor instead.
 func (*Migration_Export) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 0}
+	return file_migration_proto_rawDescGZIP(), []int{0, 0}
 }
 
 type Migration_Import struct {
@@ -105,7 +105,7 @@ type Migration_Import struct {
 
 func (x *Migration_Import) Reset() {
 	*x = Migration_Import{}
-	mi := &file_proto_migration_proto_msgTypes[2]
+	mi := &file_migration_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -117,7 +117,7 @@ func (x *Migration_Import) String() string {
 func (*Migration_Import) ProtoMessage() {}
 
 func (x *Migration_Import) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[2]
+	mi := &file_migration_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -130,7 +130,7 @@ func (x *Migration_Import) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Import.ProtoReflect.Descriptor instead.
 func (*Migration_Import) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 1}
+	return file_migration_proto_rawDescGZIP(), []int{0, 1}
 }
 
 type Migration_Item struct {
@@ -149,7 +149,7 @@ type Migration_Item struct {
 
 func (x *Migration_Item) Reset() {
 	*x = Migration_Item{}
-	mi := &file_proto_migration_proto_msgTypes[3]
+	mi := &file_migration_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -161,7 +161,7 @@ func (x *Migration_Item) String() string {
 func (*Migration_Item) ProtoMessage() {}
 
 func (x *Migration_Item) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[3]
+	mi := &file_migration_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -174,7 +174,7 @@ func (x *Migration_Item) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Item.ProtoReflect.Descriptor instead.
 func (*Migration_Item) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 2}
+	return file_migration_proto_rawDescGZIP(), []int{0, 2}
 }
 
 func (x *Migration_Item) GetItem() isMigration_Item_Item {
@@ -285,7 +285,7 @@ type Migration_MigrationValue struct {
 
 func (x *Migration_MigrationValue) Reset() {
 	*x = Migration_MigrationValue{}
-	mi := &file_proto_migration_proto_msgTypes[4]
+	mi := &file_migration_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -297,7 +297,7 @@ func (x *Migration_MigrationValue) String() string {
 func (*Migration_MigrationValue) ProtoMessage() {}
 
 func (x *Migration_MigrationValue) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[4]
+	mi := &file_migration_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -310,7 +310,7 @@ func (x *Migration_MigrationValue) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_MigrationValue.ProtoReflect.Descriptor instead.
 func (*Migration_MigrationValue) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 3}
+	return file_migration_proto_rawDescGZIP(), []int{0, 3}
 }
 
 func (x *Migration_MigrationValue) GetValue() isMigration_MigrationValue_Value {
@@ -498,7 +498,7 @@ type Migration_Export_Req struct {
 
 func (x *Migration_Export_Req) Reset() {
 	*x = Migration_Export_Req{}
-	mi := &file_proto_migration_proto_msgTypes[5]
+	mi := &file_migration_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -510,7 +510,7 @@ func (x *Migration_Export_Req) String() string {
 func (*Migration_Export_Req) ProtoMessage() {}
 
 func (x *Migration_Export_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[5]
+	mi := &file_migration_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -523,7 +523,7 @@ func (x *Migration_Export_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Export_Req.ProtoReflect.Descriptor instead.
 func (*Migration_Export_Req) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 0, 0}
+	return file_migration_proto_rawDescGZIP(), []int{0, 0, 0}
 }
 
 func (x *Migration_Export_Req) GetName() string {
@@ -547,7 +547,7 @@ type Migration_Export_Server struct {
 
 func (x *Migration_Export_Server) Reset() {
 	*x = Migration_Export_Server{}
-	mi := &file_proto_migration_proto_msgTypes[6]
+	mi := &file_migration_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -559,7 +559,7 @@ func (x *Migration_Export_Server) String() string {
 func (*Migration_Export_Server) ProtoMessage() {}
 
 func (x *Migration_Export_Server) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[6]
+	mi := &file_migration_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -572,7 +572,7 @@ func (x *Migration_Export_Server) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Export_Server.ProtoReflect.Descriptor instead.
 func (*Migration_Export_Server) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 0, 1}
+	return file_migration_proto_rawDescGZIP(), []int{0, 0, 1}
 }
 
 func (x *Migration_Export_Server) GetServer() isMigration_Export_Server_Server {
@@ -640,7 +640,7 @@ type Migration_Export_InitialRes struct {
 
 func (x *Migration_Export_InitialRes) Reset() {
 	*x = Migration_Export_InitialRes{}
-	mi := &file_proto_migration_proto_msgTypes[7]
+	mi := &file_migration_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -652,7 +652,7 @@ func (x *Migration_Export_InitialRes) String() string {
 func (*Migration_Export_InitialRes) ProtoMessage() {}
 
 func (x *Migration_Export_InitialRes) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[7]
+	mi := &file_migration_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -665,7 +665,7 @@ func (x *Migration_Export_InitialRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Export_InitialRes.ProtoReflect.Descriptor instead.
 func (*Migration_Export_InitialRes) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 0, 2}
+	return file_migration_proto_rawDescGZIP(), []int{0, 0, 2}
 }
 
 func (x *Migration_Export_InitialRes) GetSchema() string {
@@ -684,7 +684,7 @@ type Migration_Export_ResPart struct {
 
 func (x *Migration_Export_ResPart) Reset() {
 	*x = Migration_Export_ResPart{}
-	mi := &file_proto_migration_proto_msgTypes[8]
+	mi := &file_migration_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -696,7 +696,7 @@ func (x *Migration_Export_ResPart) String() string {
 func (*Migration_Export_ResPart) ProtoMessage() {}
 
 func (x *Migration_Export_ResPart) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[8]
+	mi := &file_migration_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -709,7 +709,7 @@ func (x *Migration_Export_ResPart) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Export_ResPart.ProtoReflect.Descriptor instead.
 func (*Migration_Export_ResPart) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 0, 3}
+	return file_migration_proto_rawDescGZIP(), []int{0, 0, 3}
 }
 
 func (x *Migration_Export_ResPart) GetItems() []*Migration_Item {
@@ -727,7 +727,7 @@ type Migration_Export_Done struct {
 
 func (x *Migration_Export_Done) Reset() {
 	*x = Migration_Export_Done{}
-	mi := &file_proto_migration_proto_msgTypes[9]
+	mi := &file_migration_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -739,7 +739,7 @@ func (x *Migration_Export_Done) String() string {
 func (*Migration_Export_Done) ProtoMessage() {}
 
 func (x *Migration_Export_Done) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[9]
+	mi := &file_migration_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -752,7 +752,7 @@ func (x *Migration_Export_Done) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Export_Done.ProtoReflect.Descriptor instead.
 func (*Migration_Export_Done) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 0, 4}
+	return file_migration_proto_rawDescGZIP(), []int{0, 0, 4}
 }
 
 type Migration_Import_Client struct {
@@ -769,7 +769,7 @@ type Migration_Import_Client struct {
 
 func (x *Migration_Import_Client) Reset() {
 	*x = Migration_Import_Client{}
-	mi := &file_proto_migration_proto_msgTypes[10]
+	mi := &file_migration_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -781,7 +781,7 @@ func (x *Migration_Import_Client) String() string {
 func (*Migration_Import_Client) ProtoMessage() {}
 
 func (x *Migration_Import_Client) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[10]
+	mi := &file_migration_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -794,7 +794,7 @@ func (x *Migration_Import_Client) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Import_Client.ProtoReflect.Descriptor instead.
 func (*Migration_Import_Client) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 1, 0}
+	return file_migration_proto_rawDescGZIP(), []int{0, 1, 0}
 }
 
 func (x *Migration_Import_Client) GetClient() isMigration_Import_Client_Client {
@@ -862,7 +862,7 @@ type Migration_Import_Server struct {
 
 func (x *Migration_Import_Server) Reset() {
 	*x = Migration_Import_Server{}
-	mi := &file_proto_migration_proto_msgTypes[11]
+	mi := &file_migration_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -874,7 +874,7 @@ func (x *Migration_Import_Server) String() string {
 func (*Migration_Import_Server) ProtoMessage() {}
 
 func (x *Migration_Import_Server) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[11]
+	mi := &file_migration_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -887,7 +887,7 @@ func (x *Migration_Import_Server) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Import_Server.ProtoReflect.Descriptor instead.
 func (*Migration_Import_Server) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 1, 1}
+	return file_migration_proto_rawDescGZIP(), []int{0, 1, 1}
 }
 
 func (x *Migration_Import_Server) GetDone() *Migration_Import_Server_Done {
@@ -907,7 +907,7 @@ type Migration_Import_Client_InitialReq struct {
 
 func (x *Migration_Import_Client_InitialReq) Reset() {
 	*x = Migration_Import_Client_InitialReq{}
-	mi := &file_proto_migration_proto_msgTypes[12]
+	mi := &file_migration_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -919,7 +919,7 @@ func (x *Migration_Import_Client_InitialReq) String() string {
 func (*Migration_Import_Client_InitialReq) ProtoMessage() {}
 
 func (x *Migration_Import_Client_InitialReq) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[12]
+	mi := &file_migration_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -932,7 +932,7 @@ func (x *Migration_Import_Client_InitialReq) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use Migration_Import_Client_InitialReq.ProtoReflect.Descriptor instead.
 func (*Migration_Import_Client_InitialReq) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 1, 0, 0}
+	return file_migration_proto_rawDescGZIP(), []int{0, 1, 0, 0}
 }
 
 func (x *Migration_Import_Client_InitialReq) GetName() string {
@@ -958,7 +958,7 @@ type Migration_Import_Client_ReqPart struct {
 
 func (x *Migration_Import_Client_ReqPart) Reset() {
 	*x = Migration_Import_Client_ReqPart{}
-	mi := &file_proto_migration_proto_msgTypes[13]
+	mi := &file_migration_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -970,7 +970,7 @@ func (x *Migration_Import_Client_ReqPart) String() string {
 func (*Migration_Import_Client_ReqPart) ProtoMessage() {}
 
 func (x *Migration_Import_Client_ReqPart) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[13]
+	mi := &file_migration_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -983,7 +983,7 @@ func (x *Migration_Import_Client_ReqPart) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Import_Client_ReqPart.ProtoReflect.Descriptor instead.
 func (*Migration_Import_Client_ReqPart) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 1, 0, 1}
+	return file_migration_proto_rawDescGZIP(), []int{0, 1, 0, 1}
 }
 
 func (x *Migration_Import_Client_ReqPart) GetItems() []*Migration_Item {
@@ -1001,7 +1001,7 @@ type Migration_Import_Client_Done struct {
 
 func (x *Migration_Import_Client_Done) Reset() {
 	*x = Migration_Import_Client_Done{}
-	mi := &file_proto_migration_proto_msgTypes[14]
+	mi := &file_migration_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1013,7 +1013,7 @@ func (x *Migration_Import_Client_Done) String() string {
 func (*Migration_Import_Client_Done) ProtoMessage() {}
 
 func (x *Migration_Import_Client_Done) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[14]
+	mi := &file_migration_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1026,7 +1026,7 @@ func (x *Migration_Import_Client_Done) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Import_Client_Done.ProtoReflect.Descriptor instead.
 func (*Migration_Import_Client_Done) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 1, 0, 2}
+	return file_migration_proto_rawDescGZIP(), []int{0, 1, 0, 2}
 }
 
 type Migration_Import_Server_Done struct {
@@ -1037,7 +1037,7 @@ type Migration_Import_Server_Done struct {
 
 func (x *Migration_Import_Server_Done) Reset() {
 	*x = Migration_Import_Server_Done{}
-	mi := &file_proto_migration_proto_msgTypes[15]
+	mi := &file_migration_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1049,7 +1049,7 @@ func (x *Migration_Import_Server_Done) String() string {
 func (*Migration_Import_Server_Done) ProtoMessage() {}
 
 func (x *Migration_Import_Server_Done) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[15]
+	mi := &file_migration_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1062,7 +1062,7 @@ func (x *Migration_Import_Server_Done) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Import_Server_Done.ProtoReflect.Descriptor instead.
 func (*Migration_Import_Server_Done) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 1, 1, 0}
+	return file_migration_proto_rawDescGZIP(), []int{0, 1, 1, 0}
 }
 
 type Migration_Item_Entity struct {
@@ -1076,7 +1076,7 @@ type Migration_Item_Entity struct {
 
 func (x *Migration_Item_Entity) Reset() {
 	*x = Migration_Item_Entity{}
-	mi := &file_proto_migration_proto_msgTypes[16]
+	mi := &file_migration_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1088,7 +1088,7 @@ func (x *Migration_Item_Entity) String() string {
 func (*Migration_Item_Entity) ProtoMessage() {}
 
 func (x *Migration_Item_Entity) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[16]
+	mi := &file_migration_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1101,7 +1101,7 @@ func (x *Migration_Item_Entity) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Item_Entity.ProtoReflect.Descriptor instead.
 func (*Migration_Item_Entity) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 2, 0}
+	return file_migration_proto_rawDescGZIP(), []int{0, 2, 0}
 }
 
 func (x *Migration_Item_Entity) GetId() string {
@@ -1137,7 +1137,7 @@ type Migration_Item_Attribute struct {
 
 func (x *Migration_Item_Attribute) Reset() {
 	*x = Migration_Item_Attribute{}
-	mi := &file_proto_migration_proto_msgTypes[17]
+	mi := &file_migration_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1149,7 +1149,7 @@ func (x *Migration_Item_Attribute) String() string {
 func (*Migration_Item_Attribute) ProtoMessage() {}
 
 func (x *Migration_Item_Attribute) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[17]
+	mi := &file_migration_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1162,7 +1162,7 @@ func (x *Migration_Item_Attribute) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Item_Attribute.ProtoReflect.Descriptor instead.
 func (*Migration_Item_Attribute) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 2, 1}
+	return file_migration_proto_rawDescGZIP(), []int{0, 2, 1}
 }
 
 func (x *Migration_Item_Attribute) GetId() string {
@@ -1205,7 +1205,7 @@ type Migration_Item_Relation struct {
 
 func (x *Migration_Item_Relation) Reset() {
 	*x = Migration_Item_Relation{}
-	mi := &file_proto_migration_proto_msgTypes[18]
+	mi := &file_migration_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1217,7 +1217,7 @@ func (x *Migration_Item_Relation) String() string {
 func (*Migration_Item_Relation) ProtoMessage() {}
 
 func (x *Migration_Item_Relation) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[18]
+	mi := &file_migration_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1230,7 +1230,7 @@ func (x *Migration_Item_Relation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Item_Relation.ProtoReflect.Descriptor instead.
 func (*Migration_Item_Relation) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 2, 2}
+	return file_migration_proto_rawDescGZIP(), []int{0, 2, 2}
 }
 
 func (x *Migration_Item_Relation) GetId() string {
@@ -1270,7 +1270,7 @@ type Migration_Item_OwnedAttribute struct {
 
 func (x *Migration_Item_OwnedAttribute) Reset() {
 	*x = Migration_Item_OwnedAttribute{}
-	mi := &file_proto_migration_proto_msgTypes[19]
+	mi := &file_migration_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1282,7 +1282,7 @@ func (x *Migration_Item_OwnedAttribute) String() string {
 func (*Migration_Item_OwnedAttribute) ProtoMessage() {}
 
 func (x *Migration_Item_OwnedAttribute) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[19]
+	mi := &file_migration_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1295,7 +1295,7 @@ func (x *Migration_Item_OwnedAttribute) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Item_OwnedAttribute.ProtoReflect.Descriptor instead.
 func (*Migration_Item_OwnedAttribute) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 2, 3}
+	return file_migration_proto_rawDescGZIP(), []int{0, 2, 3}
 }
 
 func (x *Migration_Item_OwnedAttribute) GetId() string {
@@ -1315,7 +1315,7 @@ type Migration_Item_Header struct {
 
 func (x *Migration_Item_Header) Reset() {
 	*x = Migration_Item_Header{}
-	mi := &file_proto_migration_proto_msgTypes[20]
+	mi := &file_migration_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1327,7 +1327,7 @@ func (x *Migration_Item_Header) String() string {
 func (*Migration_Item_Header) ProtoMessage() {}
 
 func (x *Migration_Item_Header) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[20]
+	mi := &file_migration_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1340,7 +1340,7 @@ func (x *Migration_Item_Header) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Item_Header.ProtoReflect.Descriptor instead.
 func (*Migration_Item_Header) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 2, 4}
+	return file_migration_proto_rawDescGZIP(), []int{0, 2, 4}
 }
 
 func (x *Migration_Item_Header) GetTypedbVersion() string {
@@ -1370,7 +1370,7 @@ type Migration_Item_Checksums struct {
 
 func (x *Migration_Item_Checksums) Reset() {
 	*x = Migration_Item_Checksums{}
-	mi := &file_proto_migration_proto_msgTypes[21]
+	mi := &file_migration_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1382,7 +1382,7 @@ func (x *Migration_Item_Checksums) String() string {
 func (*Migration_Item_Checksums) ProtoMessage() {}
 
 func (x *Migration_Item_Checksums) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[21]
+	mi := &file_migration_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1395,7 +1395,7 @@ func (x *Migration_Item_Checksums) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Item_Checksums.ProtoReflect.Descriptor instead.
 func (*Migration_Item_Checksums) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 2, 5}
+	return file_migration_proto_rawDescGZIP(), []int{0, 2, 5}
 }
 
 func (x *Migration_Item_Checksums) GetEntityCount() int64 {
@@ -1443,7 +1443,7 @@ type Migration_Item_Relation_Role struct {
 
 func (x *Migration_Item_Relation_Role) Reset() {
 	*x = Migration_Item_Relation_Role{}
-	mi := &file_proto_migration_proto_msgTypes[22]
+	mi := &file_migration_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1455,7 +1455,7 @@ func (x *Migration_Item_Relation_Role) String() string {
 func (*Migration_Item_Relation_Role) ProtoMessage() {}
 
 func (x *Migration_Item_Relation_Role) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[22]
+	mi := &file_migration_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1468,7 +1468,7 @@ func (x *Migration_Item_Relation_Role) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Migration_Item_Relation_Role.ProtoReflect.Descriptor instead.
 func (*Migration_Item_Relation_Role) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 2, 2, 0}
+	return file_migration_proto_rawDescGZIP(), []int{0, 2, 2, 0}
 }
 
 func (x *Migration_Item_Relation_Role) GetLabel() string {
@@ -1494,7 +1494,7 @@ type Migration_Item_Relation_Role_Player struct {
 
 func (x *Migration_Item_Relation_Role_Player) Reset() {
 	*x = Migration_Item_Relation_Role_Player{}
-	mi := &file_proto_migration_proto_msgTypes[23]
+	mi := &file_migration_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1506,7 +1506,7 @@ func (x *Migration_Item_Relation_Role_Player) String() string {
 func (*Migration_Item_Relation_Role_Player) ProtoMessage() {}
 
 func (x *Migration_Item_Relation_Role_Player) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_migration_proto_msgTypes[23]
+	mi := &file_migration_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1519,7 +1519,7 @@ func (x *Migration_Item_Relation_Role_Player) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use Migration_Item_Relation_Role_Player.ProtoReflect.Descriptor instead.
 func (*Migration_Item_Relation_Role_Player) Descriptor() ([]byte, []int) {
-	return file_proto_migration_proto_rawDescGZIP(), []int{0, 2, 2, 0, 0}
+	return file_migration_proto_rawDescGZIP(), []int{0, 2, 2, 0, 0}
 }
 
 func (x *Migration_Item_Relation_Role_Player) GetId() string {
@@ -1529,11 +1529,11 @@ func (x *Migration_Item_Relation_Role_Player) GetId() string {
 	return ""
 }
 
-var File_proto_migration_proto protoreflect.FileDescriptor
+var File_migration_proto protoreflect.FileDescriptor
 
-const file_proto_migration_proto_rawDesc = "" +
+const file_migration_proto_rawDesc = "" +
 	"\n" +
-	"\x15proto/migration.proto\x12\x0ftypedb.protocol\x1a\x13proto/concept.proto\"\xea\x15\n" +
+	"\x0fmigration.proto\x12\x0ftypedb.protocol\x1a\rconcept.proto\"\xea\x15\n" +
 	"\tMigration\x1a\xff\x02\n" +
 	"\x06Export\x1a\x19\n" +
 	"\x03Req\x12\x12\n" +
@@ -1626,22 +1626,22 @@ const file_proto_migration_proto_rawDesc = "" +
 	"datetimeTz\x12=\n" +
 	"\bduration\x18\v \x01(\v2\x1f.typedb.protocol.Value.DurationH\x00R\bduration\x127\n" +
 	"\x06struct\x18\f \x01(\v2\x1d.typedb.protocol.Value.StructH\x00R\x06structB\a\n" +
-	"\x05valueBCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
+	"\x05valueB1Z/github.com/joycheney/go-typedb-v3-grpc/pb/protob\x06proto3"
 
 var (
-	file_proto_migration_proto_rawDescOnce sync.Once
-	file_proto_migration_proto_rawDescData []byte
+	file_migration_proto_rawDescOnce sync.Once
+	file_migration_proto_rawDescData []byte
 )
 
-func file_proto_migration_proto_rawDescGZIP() []byte {
-	file_proto_migration_proto_rawDescOnce.Do(func() {
-		file_proto_migration_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_migration_proto_rawDesc), len(file_proto_migration_proto_rawDesc)))
+func file_migration_proto_rawDescGZIP() []byte {
+	file_migration_proto_rawDescOnce.Do(func() {
+		file_migration_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_migration_proto_rawDesc), len(file_migration_proto_rawDesc)))
 	})
-	return file_proto_migration_proto_rawDescData
+	return file_migration_proto_rawDescData
 }
 
-var file_proto_migration_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
-var file_proto_migration_proto_goTypes = []any{
+var file_migration_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
+var file_migration_proto_goTypes = []any{
 	(*Migration)(nil),                           // 0: typedb.protocol.Migration
 	(*Migration_Export)(nil),                    // 1: typedb.protocol.Migration.Export
 	(*Migration_Import)(nil),                    // 2: typedb.protocol.Migration.Import
@@ -1673,7 +1673,7 @@ var file_proto_migration_proto_goTypes = []any{
 	(*Value_Duration)(nil),                      // 28: typedb.protocol.Value.Duration
 	(*Value_Struct)(nil),                        // 29: typedb.protocol.Value.Struct
 }
-var file_proto_migration_proto_depIdxs = []int32{
+var file_migration_proto_depIdxs = []int32{
 	17, // 0: typedb.protocol.Migration.Item.attribute:type_name -> typedb.protocol.Migration.Item.Attribute
 	16, // 1: typedb.protocol.Migration.Item.entity:type_name -> typedb.protocol.Migration.Item.Entity
 	18, // 2: typedb.protocol.Migration.Item.relation:type_name -> typedb.protocol.Migration.Item.Relation
@@ -1707,20 +1707,20 @@ var file_proto_migration_proto_depIdxs = []int32{
 	0,  // [0:26] is the sub-list for field type_name
 }
 
-func init() { file_proto_migration_proto_init() }
-func file_proto_migration_proto_init() {
-	if File_proto_migration_proto != nil {
+func init() { file_migration_proto_init() }
+func file_migration_proto_init() {
+	if File_migration_proto != nil {
 		return
 	}
-	file_proto_concept_proto_init()
-	file_proto_migration_proto_msgTypes[3].OneofWrappers = []any{
+	file_concept_proto_init()
+	file_migration_proto_msgTypes[3].OneofWrappers = []any{
 		(*Migration_Item_Attribute_)(nil),
 		(*Migration_Item_Entity_)(nil),
 		(*Migration_Item_Relation_)(nil),
 		(*Migration_Item_Header_)(nil),
 		(*Migration_Item_Checksums_)(nil),
 	}
-	file_proto_migration_proto_msgTypes[4].OneofWrappers = []any{
+	file_migration_proto_msgTypes[4].OneofWrappers = []any{
 		(*Migration_MigrationValue_String_)(nil),
 		(*Migration_MigrationValue_Boolean)(nil),
 		(*Migration_MigrationValue_Integer)(nil),
@@ -1733,12 +1733,12 @@ func file_proto_migration_proto_init() {
 		(*Migration_MigrationValue_Duration)(nil),
 		(*Migration_MigrationValue_Struct)(nil),
 	}
-	file_proto_migration_proto_msgTypes[6].OneofWrappers = []any{
+	file_migration_proto_msgTypes[6].OneofWrappers = []any{
 		(*Migration_Export_Server_InitialRes)(nil),
 		(*Migration_Export_Server_ResPart)(nil),
 		(*Migration_Export_Server_Done)(nil),
 	}
-	file_proto_migration_proto_msgTypes[10].OneofWrappers = []any{
+	file_migration_proto_msgTypes[10].OneofWrappers = []any{
 		(*Migration_Import_Client_InitialReq_)(nil),
 		(*Migration_Import_Client_ReqPart_)(nil),
 		(*Migration_Import_Client_Done_)(nil),
@@ -1747,17 +1747,17 @@ func file_proto_migration_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_migration_proto_rawDesc), len(file_proto_migration_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_migration_proto_rawDesc), len(file_migration_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   24,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_proto_migration_proto_goTypes,
-		DependencyIndexes: file_proto_migration_proto_depIdxs,
-		MessageInfos:      file_proto_migration_proto_msgTypes,
+		GoTypes:           file_migration_proto_goTypes,
+		DependencyIndexes: file_migration_proto_depIdxs,
+		MessageInfos:      file_migration_proto_msgTypes,
 	}.Build()
-	File_proto_migration_proto = out.File
-	file_proto_migration_proto_goTypes = nil
-	file_proto_migration_proto_depIdxs = nil
+	File_migration_proto = out.File
+	file_migration_proto_goTypes = nil
+	file_migration_proto_depIdxs = nil
 }

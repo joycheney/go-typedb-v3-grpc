@@ -4,13 +4,13 @@
 
 syntax = "proto3";
 
-import "proto/answer.proto";
-import "proto/options.proto";
-import "proto/error.proto";
+import "answer.proto";
+import "options.proto";
+import "error.proto";
 
 package typedb.protocol;
 
-option go_package = "github.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pb";
+option go_package = "github.com/joycheney/go-typedb-v3-grpc/pb/proto";
 
 message Query {
 

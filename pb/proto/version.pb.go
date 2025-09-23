@@ -6,9 +6,9 @@
 // versions:
 // 	protoc-gen-go v1.36.9
 // 	protoc        v3.21.12
-// source: proto/version.proto
+// source: version.proto
 
-package pb
+package proto
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -55,11 +55,11 @@ func (x Version) String() string {
 }
 
 func (Version) Descriptor() protoreflect.EnumDescriptor {
-	return file_proto_version_proto_enumTypes[0].Descriptor()
+	return file_version_proto_enumTypes[0].Descriptor()
 }
 
 func (Version) Type() protoreflect.EnumType {
-	return &file_proto_version_proto_enumTypes[0]
+	return &file_version_proto_enumTypes[0]
 }
 
 func (x Version) Number() protoreflect.EnumNumber {
@@ -68,35 +68,35 @@ func (x Version) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Version.Descriptor instead.
 func (Version) EnumDescriptor() ([]byte, []int) {
-	return file_proto_version_proto_rawDescGZIP(), []int{0}
+	return file_version_proto_rawDescGZIP(), []int{0}
 }
 
-var File_proto_version_proto protoreflect.FileDescriptor
+var File_version_proto protoreflect.FileDescriptor
 
-const file_proto_version_proto_rawDesc = "" +
+const file_version_proto_rawDesc = "" +
 	"\n" +
-	"\x13proto/version.proto\x12\x0ftypedb.protocol*K\n" +
+	"\rversion.proto\x12\x0ftypedb.protocol*K\n" +
 	"\aVersion\x12\x0f\n" +
 	"\vUNSPECIFIED\x10\x00\x12\v\n" +
-	"\aVERSION\x10\a\"\x04\b\x01\x10\x01\"\x04\b\x02\x10\x02\"\x04\b\x03\x10\x03\"\x04\b\x04\x10\x04\"\x04\b\x05\x10\x05\"\x04\b\x06\x10\x06BCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
+	"\aVERSION\x10\a\"\x04\b\x01\x10\x01\"\x04\b\x02\x10\x02\"\x04\b\x03\x10\x03\"\x04\b\x04\x10\x04\"\x04\b\x05\x10\x05\"\x04\b\x06\x10\x06B1Z/github.com/joycheney/go-typedb-v3-grpc/pb/protob\x06proto3"
 
 var (
-	file_proto_version_proto_rawDescOnce sync.Once
-	file_proto_version_proto_rawDescData []byte
+	file_version_proto_rawDescOnce sync.Once
+	file_version_proto_rawDescData []byte
 )
 
-func file_proto_version_proto_rawDescGZIP() []byte {
-	file_proto_version_proto_rawDescOnce.Do(func() {
-		file_proto_version_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_version_proto_rawDesc), len(file_proto_version_proto_rawDesc)))
+func file_version_proto_rawDescGZIP() []byte {
+	file_version_proto_rawDescOnce.Do(func() {
+		file_version_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_version_proto_rawDesc), len(file_version_proto_rawDesc)))
 	})
-	return file_proto_version_proto_rawDescData
+	return file_version_proto_rawDescData
 }
 
-var file_proto_version_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_proto_version_proto_goTypes = []any{
+var file_version_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_version_proto_goTypes = []any{
 	(Version)(0), // 0: typedb.protocol.Version
 }
-var file_proto_version_proto_depIdxs = []int32{
+var file_version_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
 	0, // [0:0] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -104,26 +104,26 @@ var file_proto_version_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_proto_version_proto_init() }
-func file_proto_version_proto_init() {
-	if File_proto_version_proto != nil {
+func init() { file_version_proto_init() }
+func file_version_proto_init() {
+	if File_version_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_version_proto_rawDesc), len(file_proto_version_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_version_proto_rawDesc), len(file_version_proto_rawDesc)),
 			NumEnums:      1,
 			NumMessages:   0,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_proto_version_proto_goTypes,
-		DependencyIndexes: file_proto_version_proto_depIdxs,
-		EnumInfos:         file_proto_version_proto_enumTypes,
+		GoTypes:           file_version_proto_goTypes,
+		DependencyIndexes: file_version_proto_depIdxs,
+		EnumInfos:         file_version_proto_enumTypes,
 	}.Build()
-	File_proto_version_proto = out.File
-	file_proto_version_proto_goTypes = nil
-	file_proto_version_proto_depIdxs = nil
+	File_version_proto = out.File
+	file_version_proto_goTypes = nil
+	file_version_proto_depIdxs = nil
 }

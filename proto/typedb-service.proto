@@ -4,17 +4,17 @@
 
 syntax = "proto3";
 
-import "proto/authentication.proto";
-import "proto/connection.proto";
-import "proto/database.proto";
-import "proto/server.proto";
-import "proto/user.proto";
-import "proto/transaction.proto";
-import "proto/migration.proto";
+import "authentication.proto";
+import "connection.proto";
+import "database.proto";
+import "server.proto";
+import "user.proto";
+import "transaction.proto";
+import "migration.proto";
 
 package typedb.protocol;
 
-option go_package = "github.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pb";
+option go_package = "github.com/joycheney/go-typedb-v3-grpc/pb/proto";
 
 service TypeDB {
 

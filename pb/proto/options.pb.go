@@ -6,9 +6,9 @@
 // versions:
 // 	protoc-gen-go v1.36.9
 // 	protoc        v3.21.12
-// source: proto/options.proto
+// source: options.proto
 
-package pb
+package proto
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -33,7 +33,7 @@ type Options struct {
 
 func (x *Options) Reset() {
 	*x = Options{}
-	mi := &file_proto_options_proto_msgTypes[0]
+	mi := &file_options_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -45,7 +45,7 @@ func (x *Options) String() string {
 func (*Options) ProtoMessage() {}
 
 func (x *Options) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_options_proto_msgTypes[0]
+	mi := &file_options_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -58,7 +58,7 @@ func (x *Options) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Options.ProtoReflect.Descriptor instead.
 func (*Options) Descriptor() ([]byte, []int) {
-	return file_proto_options_proto_rawDescGZIP(), []int{0}
+	return file_options_proto_rawDescGZIP(), []int{0}
 }
 
 type Options_Transaction struct {
@@ -72,7 +72,7 @@ type Options_Transaction struct {
 
 func (x *Options_Transaction) Reset() {
 	*x = Options_Transaction{}
-	mi := &file_proto_options_proto_msgTypes[1]
+	mi := &file_options_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -84,7 +84,7 @@ func (x *Options_Transaction) String() string {
 func (*Options_Transaction) ProtoMessage() {}
 
 func (x *Options_Transaction) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_options_proto_msgTypes[1]
+	mi := &file_options_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -97,7 +97,7 @@ func (x *Options_Transaction) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Options_Transaction.ProtoReflect.Descriptor instead.
 func (*Options_Transaction) Descriptor() ([]byte, []int) {
-	return file_proto_options_proto_rawDescGZIP(), []int{0, 0}
+	return file_options_proto_rawDescGZIP(), []int{0, 0}
 }
 
 func (x *Options_Transaction) GetParallel() bool {
@@ -131,7 +131,7 @@ type Options_Query struct {
 
 func (x *Options_Query) Reset() {
 	*x = Options_Query{}
-	mi := &file_proto_options_proto_msgTypes[2]
+	mi := &file_options_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -143,7 +143,7 @@ func (x *Options_Query) String() string {
 func (*Options_Query) ProtoMessage() {}
 
 func (x *Options_Query) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_options_proto_msgTypes[2]
+	mi := &file_options_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -156,7 +156,7 @@ func (x *Options_Query) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Options_Query.ProtoReflect.Descriptor instead.
 func (*Options_Query) Descriptor() ([]byte, []int) {
-	return file_proto_options_proto_rawDescGZIP(), []int{0, 1}
+	return file_options_proto_rawDescGZIP(), []int{0, 1}
 }
 
 func (x *Options_Query) GetIncludeInstanceTypes() bool {
@@ -173,11 +173,11 @@ func (x *Options_Query) GetPrefetchSize() uint64 {
 	return 0
 }
 
-var File_proto_options_proto protoreflect.FileDescriptor
+var File_options_proto protoreflect.FileDescriptor
 
-const file_proto_options_proto_rawDesc = "" +
+const file_options_proto_rawDesc = "" +
 	"\n" +
-	"\x13proto/options.proto\x12\x0ftypedb.protocol\"\xbd\x03\n" +
+	"\roptions.proto\x12\x0ftypedb.protocol\"\xbd\x03\n" +
 	"\aOptions\x1a\x95\x02\n" +
 	"\vTransaction\x12\x1f\n" +
 	"\bparallel\x18\x01 \x01(\bH\x00R\bparallel\x88\x01\x01\x12A\n" +
@@ -190,27 +190,27 @@ const file_proto_options_proto_rawDesc = "" +
 	"\x16include_instance_types\x18\x01 \x01(\bH\x00R\x14includeInstanceTypes\x88\x01\x01\x12(\n" +
 	"\rprefetch_size\x18\x02 \x01(\x04H\x01R\fprefetchSize\x88\x01\x01B\x19\n" +
 	"\x17_include_instance_typesB\x10\n" +
-	"\x0e_prefetch_sizeBCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
+	"\x0e_prefetch_sizeB1Z/github.com/joycheney/go-typedb-v3-grpc/pb/protob\x06proto3"
 
 var (
-	file_proto_options_proto_rawDescOnce sync.Once
-	file_proto_options_proto_rawDescData []byte
+	file_options_proto_rawDescOnce sync.Once
+	file_options_proto_rawDescData []byte
 )
 
-func file_proto_options_proto_rawDescGZIP() []byte {
-	file_proto_options_proto_rawDescOnce.Do(func() {
-		file_proto_options_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_options_proto_rawDesc), len(file_proto_options_proto_rawDesc)))
+func file_options_proto_rawDescGZIP() []byte {
+	file_options_proto_rawDescOnce.Do(func() {
+		file_options_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_options_proto_rawDesc), len(file_options_proto_rawDesc)))
 	})
-	return file_proto_options_proto_rawDescData
+	return file_options_proto_rawDescData
 }
 
-var file_proto_options_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
-var file_proto_options_proto_goTypes = []any{
+var file_options_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_options_proto_goTypes = []any{
 	(*Options)(nil),             // 0: typedb.protocol.Options
 	(*Options_Transaction)(nil), // 1: typedb.protocol.Options.Transaction
 	(*Options_Query)(nil),       // 2: typedb.protocol.Options.Query
 }
-var file_proto_options_proto_depIdxs = []int32{
+var file_options_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
 	0, // [0:0] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -218,28 +218,28 @@ var file_proto_options_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_proto_options_proto_init() }
-func file_proto_options_proto_init() {
-	if File_proto_options_proto != nil {
+func init() { file_options_proto_init() }
+func file_options_proto_init() {
+	if File_options_proto != nil {
 		return
 	}
-	file_proto_options_proto_msgTypes[1].OneofWrappers = []any{}
-	file_proto_options_proto_msgTypes[2].OneofWrappers = []any{}
+	file_options_proto_msgTypes[1].OneofWrappers = []any{}
+	file_options_proto_msgTypes[2].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_options_proto_rawDesc), len(file_proto_options_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_options_proto_rawDesc), len(file_options_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_proto_options_proto_goTypes,
-		DependencyIndexes: file_proto_options_proto_depIdxs,
-		MessageInfos:      file_proto_options_proto_msgTypes,
+		GoTypes:           file_options_proto_goTypes,
+		DependencyIndexes: file_options_proto_depIdxs,
+		MessageInfos:      file_options_proto_msgTypes,
 	}.Build()
-	File_proto_options_proto = out.File
-	file_proto_options_proto_goTypes = nil
-	file_proto_options_proto_depIdxs = nil
+	File_options_proto = out.File
+	file_options_proto_goTypes = nil
+	file_options_proto_depIdxs = nil
 }
