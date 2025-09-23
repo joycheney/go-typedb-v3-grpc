@@ -1996,7 +1996,7 @@ const file_proto_concept_proto_rawDesc = "" +
 	"\x06Struct\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04nameB\f\n" +
 	"\n" +
-	"value_typeBCZAgithub.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pbb\x06proto3"
+	"value_typeBCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
 
 var (
 	file_proto_concept_proto_rawDescOnce sync.Once

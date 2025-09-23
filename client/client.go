@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	pb "github.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pb/proto"
+	pb "github.com/joycheney/go-typedb-v3-grpc/pb/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"

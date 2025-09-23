@@ -890,7 +890,7 @@ const file_proto_answer_proto_rawDesc = "" +
 	"\rAttributeKind\x10\x03\x12\b\n" +
 	"\x04Role\x10\x04B\x06\n" +
 	"\x04leafB\x06\n" +
-	"\x04nodeBCZAgithub.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pbb\x06proto3"
+	"\x04nodeBCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
 
 var (
 	file_proto_answer_proto_rawDescOnce sync.Once

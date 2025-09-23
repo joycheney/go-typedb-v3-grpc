@@ -78,7 +78,7 @@ const file_proto_version_proto_rawDesc = "" +
 	"\x13proto/version.proto\x12\x0ftypedb.protocol*K\n" +
 	"\aVersion\x12\x0f\n" +
 	"\vUNSPECIFIED\x10\x00\x12\v\n" +
-	"\aVERSION\x10\a\"\x04\b\x01\x10\x01\"\x04\b\x02\x10\x02\"\x04\b\x03\x10\x03\"\x04\b\x04\x10\x04\"\x04\b\x05\x10\x05\"\x04\b\x06\x10\x06BCZAgithub.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pbb\x06proto3"
+	"\aVERSION\x10\a\"\x04\b\x01\x10\x01\"\x04\b\x02\x10\x02\"\x04\b\x03\x10\x03\"\x04\b\x04\x10\x04\"\x04\b\x05\x10\x05\"\x04\b\x06\x10\x06BCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
 
 var (
 	file_proto_version_proto_rawDescOnce sync.Once

@@ -1626,7 +1626,7 @@ const file_proto_migration_proto_rawDesc = "" +
 	"datetimeTz\x12=\n" +
 	"\bduration\x18\v \x01(\v2\x1f.typedb.protocol.Value.DurationH\x00R\bduration\x127\n" +
 	"\x06struct\x18\f \x01(\v2\x1d.typedb.protocol.Value.StructH\x00R\x06structB\a\n" +
-	"\x05valueBCZAgithub.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pbb\x06proto3"
+	"\x05valueBCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
 
 var (
 	file_proto_migration_proto_rawDescOnce sync.Once

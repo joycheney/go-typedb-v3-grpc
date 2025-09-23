@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mcp-software-think-execute-server/go-typedb-v3-grpc/typedbclient"
+	"github.com/joycheney/go-typedb-v3-grpc/typedbclient"
 )
 
 // Example 7: Comprehensive End-to-End Demonstration

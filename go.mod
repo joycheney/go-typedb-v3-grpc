@@ -1,4 +1,4 @@
-module github.com/mcp-software-think-execute-server/go-typedb-v3-grpc
+module github.com/joycheney/go-typedb-v3-grpc
 
 go 1.23.0
 

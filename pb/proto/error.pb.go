@@ -97,7 +97,7 @@ const file_proto_error_proto_rawDesc = "" +
 	"error_code\x18\x01 \x01(\tR\terrorCode\x12\x16\n" +
 	"\x06domain\x18\x02 \x01(\tR\x06domain\x12\x1f\n" +
 	"\vstack_trace\x18\x03 \x03(\tR\n" +
-	"stackTraceBCZAgithub.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pbb\x06proto3"
+	"stackTraceBCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
 
 var (
 	file_proto_error_proto_rawDescOnce sync.Once

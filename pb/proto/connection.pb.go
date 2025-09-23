@@ -299,7 +299,7 @@ const file_proto_connection_proto_rawDesc = "" +
 	"\rdatabases_all\x18\x03 \x01(\v2(.typedb.protocol.DatabaseManager.All.ResR\fdatabasesAll\x12X\n" +
 	"\x0eauthentication\x18\x04 \x01(\v20.typedb.protocol.Authentication.Token.Create.ResR\x0eauthentication\"\x1e\n" +
 	"\fConnectionID\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\fR\x02idBCZAgithub.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pbb\x06proto3"
+	"\x02id\x18\x01 \x01(\fR\x02idBCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
 
 var (
 	file_proto_connection_proto_rawDescOnce sync.Once

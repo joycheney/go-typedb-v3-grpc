@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	pb "github.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pb/proto"
+	pb "github.com/joycheney/go-typedb-v3-grpc/pb/proto"
 )
 
 // Database database operations interface

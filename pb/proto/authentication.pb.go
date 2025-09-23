@@ -310,7 +310,7 @@ const file_proto_authentication_proto_rawDesc = "" +
 	"\bpassword\x18\x02 \x01(\tR\bpasswordB\r\n" +
 	"\vcredentials\x1a\x1b\n" +
 	"\x03Res\x12\x14\n" +
-	"\x05token\x18\x01 \x01(\tR\x05tokenBCZAgithub.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pbb\x06proto3"
+	"\x05token\x18\x01 \x01(\tR\x05tokenBCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
 
 var (
 	file_proto_authentication_proto_rawDescOnce sync.Once

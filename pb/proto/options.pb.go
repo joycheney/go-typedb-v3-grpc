@@ -190,7 +190,7 @@ const file_proto_options_proto_rawDesc = "" +
 	"\x16include_instance_types\x18\x01 \x01(\bH\x00R\x14includeInstanceTypes\x88\x01\x01\x12(\n" +
 	"\rprefetch_size\x18\x02 \x01(\x04H\x01R\fprefetchSize\x88\x01\x01B\x19\n" +
 	"\x17_include_instance_typesB\x10\n" +
-	"\x0e_prefetch_sizeBCZAgithub.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pbb\x06proto3"
+	"\x0e_prefetch_sizeBCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
 
 var (
 	file_proto_options_proto_rawDescOnce sync.Once

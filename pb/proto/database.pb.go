@@ -1375,7 +1375,7 @@ const file_proto_database_proto_rawDesc = "" +
 	"\x06Delete\x1a\x19\n" +
 	"\x03Req\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x1a\x05\n" +
-	"\x03ResBCZAgithub.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pbb\x06proto3"
+	"\x03ResBCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
 
 var (
 	file_proto_database_proto_rawDescOnce sync.Once

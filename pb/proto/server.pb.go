@@ -232,7 +232,7 @@ const file_proto_server_proto_rawDesc = "" +
 	"\x03Res\x121\n" +
 	"\aservers\x18\x01 \x03(\v2\x17.typedb.protocol.ServerR\aservers\"\"\n" +
 	"\x06Server\x12\x18\n" +
-	"\aaddress\x18\x01 \x01(\tR\aaddressBCZAgithub.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pbb\x06proto3"
+	"\aaddress\x18\x01 \x01(\tR\aaddressBCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
 
 var (
 	file_proto_server_proto_rawDescOnce sync.Once

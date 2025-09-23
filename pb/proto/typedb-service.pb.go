@@ -48,7 +48,7 @@ const file_proto_typedb_service_proto_rawDesc = "" +
 	"\x14database_type_schema\x12(.typedb.protocol.Database.TypeSchema.Req\x1a(.typedb.protocol.Database.TypeSchema.Res\x12]\n" +
 	"\x0fdatabase_delete\x12$.typedb.protocol.Database.Delete.Req\x1a$.typedb.protocol.Database.Delete.Res\x12b\n" +
 	"\x0fdatabase_export\x12$.typedb.protocol.Database.Export.Req\x1a'.typedb.protocol.Database.Export.Server0\x01\x12[\n" +
-	"\vtransaction\x12#.typedb.protocol.Transaction.Client\x1a#.typedb.protocol.Transaction.Server(\x010\x01BCZAgithub.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pbb\x06proto3"
+	"\vtransaction\x12#.typedb.protocol.Transaction.Client\x1a#.typedb.protocol.Transaction.Server(\x010\x01BCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
 
 var file_proto_typedb_service_proto_goTypes = []any{
 	(*Connection_Open_Req)(nil),             // 0: typedb.protocol.Connection.Open.Req

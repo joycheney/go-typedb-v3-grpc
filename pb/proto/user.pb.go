@@ -869,7 +869,7 @@ const file_proto_user_proto_rawDesc = "" +
 	"\x03Req\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x1a\x05\n" +
 	"\x03ResB\v\n" +
-	"\t_passwordBCZAgithub.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pbb\x06proto3"
+	"\t_passwordBCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
 
 var (
 	file_proto_user_proto_rawDescOnce sync.Once

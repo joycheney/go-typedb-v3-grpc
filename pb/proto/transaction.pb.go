@@ -1574,7 +1574,7 @@ const file_proto_transaction_proto_rawDesc = "" +
 	"\x04READ\x10\x00\x12\t\n" +
 	"\x05WRITE\x10\x01\x12\n" +
 	"\n" +
-	"\x06SCHEMA\x10\x02BCZAgithub.com/mcp-software-think-execute-server/go-typedb-v3-grpc/pbb\x06proto3"
+	"\x06SCHEMA\x10\x02BCZAgithub.com/joycheney/go-typedb-v3-grpc/pbb\x06proto3"
 
 var (
 	file_proto_transaction_proto_rawDescOnce sync.Once
