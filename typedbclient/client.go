@@ -98,7 +98,7 @@ func (c *Client) connect(opts *Options) error {
 	return nil
 }
 
-// authenticate performs authentication (lock-free design)
+// authenticate performs initial authentication (used for first connection)
 func (c *Client) authenticate() error {
 	// Use CAS operation to prevent concurrent authentication
 	if !c.authInProgress.CompareAndSwap(false, true) {
@@ -144,7 +144,7 @@ func (c *Client) authenticate() error {
 		return fmt.Errorf("gRPC client not initialized")
 	}
 
-	// Call ConnectionOpen instead of AuthenticationTokenCreate
+	// Call ConnectionOpen for initial connection
 	resp, err := client.ConnectionOpen(ctx, req)
 	if err != nil {
 		return fmt.Errorf("connection open failed: %w", err)
@@ -156,6 +156,62 @@ func (c *Client) authenticate() error {
 
 	// Store token (lock-free)
 	c.tokenValue.Store(resp.Authentication.Token)
+
+	return nil
+}
+
+// refreshToken refreshes authentication token (used for token expiration)
+func (c *Client) refreshToken() error {
+	// Use CAS operation to prevent concurrent refresh
+	if !c.authInProgress.CompareAndSwap(false, true) {
+		// Another goroutine is refreshing, wait for completion
+		for i := 0; i < 50; i++ {
+			time.Sleep(100 * time.Millisecond)
+			if !c.authInProgress.Load() {
+				// Check if refresh was successful
+				if token := c.getToken(); token != "" {
+					return nil
+				}
+				break
+			}
+		}
+		return fmt.Errorf("token refresh timeout")
+	}
+	defer c.authInProgress.Store(false)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	c.connMu.RLock()
+	client := c.grpcClient
+	c.connMu.RUnlock()
+
+	if client == nil {
+		return fmt.Errorf("gRPC client not initialized")
+	}
+
+	// Use AuthenticationTokenCreate for token refresh (not ConnectionOpen)
+	req := &pb.Authentication_Token_Create_Req{
+		Credentials: &pb.Authentication_Token_Create_Req_Password_{
+			Password: &pb.Authentication_Token_Create_Req_Password{
+				Username: c.username,
+				Password: c.password,
+			},
+		},
+	}
+
+	resp, err := client.AuthenticationTokenCreate(ctx, req)
+	if err != nil {
+		// If token refresh fails, might need full reconnection
+		return fmt.Errorf("token refresh failed: %w", err)
+	}
+
+	if resp.Token == "" {
+		return fmt.Errorf("received empty refresh token")
+	}
+
+	// Store new token (lock-free)
+	c.tokenValue.Store(resp.Token)
 
 	return nil
 }
@@ -257,9 +313,12 @@ func (c *Client) executeWithRetry(ctx context.Context, operation func(context.Co
 
 		// Check if reauthentication is needed
 		if isAuthError(err) {
-			// Try to reauthenticate
-			if authErr := c.authenticate(); authErr != nil {
-				return fmt.Errorf("reauthentication failed: %w", authErr)
+			// Try to refresh token first (for existing connections)
+			if refreshErr := c.refreshToken(); refreshErr != nil {
+				// If token refresh fails, try full reconnection
+				if reconnErr := c.tryReconnect(); reconnErr != nil {
+					return fmt.Errorf("both token refresh and reconnection failed: refresh=%w, reconnect=%w", refreshErr, reconnErr)
+				}
 			}
 			continue
 		}
