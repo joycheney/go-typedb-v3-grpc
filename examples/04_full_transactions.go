@@ -9,15 +9,13 @@ import (
 	"github.com/joycheney/go-typedb-v3-grpc/typedbclient"
 )
 
-// Example 4: Full Transaction API
-// This example demonstrates the full transaction management API of TypeDB v3 gRPC client, including:
+// Example 4: Full Transaction API with Bundles
+// This example demonstrates the full transaction management API using atomic bundles:
 // - BeginTransaction: Start different types of transactions (Read/Write/Schema)
-// - Transaction.Execute: Execute queries within transactions
-// - Transaction.Commit: Commit transactions
-// - Transaction.Rollback: Rollback transactions
-// - Transaction.Close: Close transactions
-// - Multi-query transaction management and batch operations
-// - Transaction error handling and resource management
+// - Transaction.ExecuteBundle: Execute atomic bundles of operations
+// - Bundle operations: OpExecute, OpCommit, OpRollback, OpClose
+// - Multi-query transaction management with atomic bundles
+// - Bundle-based error handling and resource management
 
 func main() {
 	fmt.Println("=== TypeDB v3 gRPC Full Transaction API Example ===")
@@ -74,28 +72,29 @@ func demonstrateReadTransaction(ctx context.Context, database *typedbclient.Data
 		fmt.Printf("Failed to begin read transaction: %v\n", err)
 		return
 	}
-	defer tx.Close(readCtx) // Ensure transaction is closed
-
 	fmt.Println("✓ Read transaction started")
 
-	// TypeDB 3.x compatible queries - removed get clauses and use business data queries
-	queries := []string{
-		"match $p isa person; limit 3;",
-		"match $c isa company; limit 3;",
+	// Create a bundle with multiple read queries
+	bundle := []typedbclient.BundleOperation{
+		{Type: typedbclient.OpExecute, Query: "match $p isa person; limit 3;"},
+		{Type: typedbclient.OpExecute, Query: "match $c isa company; limit 3;"},
+		{Type: typedbclient.OpClose}, // Read transactions just need close
 	}
 
-	for i, query := range queries {
-		fmt.Printf("\nExecuting query %d: %s\n", i+1, query)
+	fmt.Println("\nExecuting bundle with 2 queries...")
+	results, err := tx.ExecuteBundle(readCtx, bundle)
+	if err != nil {
+		fmt.Printf("  Bundle execution failed: %v\n", err)
+		return
+	}
 
-		result, err := tx.Execute(readCtx, query)
-		if err != nil {
-			fmt.Printf("  Query failed: %v\n", err)
-			continue
-		}
-
-		fmt.Printf("  ✓ Query successful, result type: %s\n", getResultTypeDescription(result))
-		if result.IsRowStream && len(result.Rows) > 0 {
-			fmt.Printf("  Found %d row results\n", len(result.Rows))
+	fmt.Printf("  ✓ Bundle successful, executed %d operations\n", len(results))
+	for i, result := range results {
+		if result != nil {
+			fmt.Printf("  Query %d result type: %s\n", i+1, getResultTypeDescription(result))
+			if result.IsRowStream && len(result.Rows) > 0 {
+				fmt.Printf("    Found %d row results\n", len(result.Rows))
+			}
 		}
 	}
 
@@ -124,34 +123,29 @@ func demonstrateSchemaTransaction(ctx context.Context, database *typedbclient.Da
 	fmt.Println("✓ Schema transaction started")
 
 	// Define complete schema
-	// TypeDB 3.x schema definitions - using simplified syntax that works
-	schemaQueries := []string{
-		`define
+	schemaQuery := `define
 		entity person, owns name;
 		entity company, owns companyname;
 		attribute name, value string;
-		attribute companyname, value string;`,
+		attribute companyname, value string;`
+
+	// Create bundle with schema definition and commit
+	bundle := []typedbclient.BundleOperation{
+		{Type: typedbclient.OpExecute, Query: schemaQuery},
+		{Type: typedbclient.OpCommit}, // Schema transactions need commit
+		{Type: typedbclient.OpClose},
 	}
 
-	// Execute all schema definitions in transaction
-	for i, query := range schemaQueries {
-		fmt.Printf("\nExecuting schema definition %d...\n", i+1)
-
-		result, err := tx.Execute(schemaCtx, query)
-		if err != nil {
-			fmt.Printf("  Schema definition failed: %v\n", err)
-			fmt.Println("  Rolling back...")
-			tx.Rollback(schemaCtx)
-			return
-		}
-
-		fmt.Printf("  ✓ Schema definition successful, query type: %s\n", getQueryTypeDescription(result.QueryType))
-	}
-
-	// Commit schema changes
-	if err := tx.Commit(schemaCtx); err != nil {
-		fmt.Printf("Failed to commit schema transaction: %v\n", err)
+	fmt.Println("\nExecuting schema bundle...")
+	results, err := tx.ExecuteBundle(schemaCtx, bundle)
+	if err != nil {
+		fmt.Printf("  Schema bundle failed: %v\n", err)
+		// Bundle automatically handles rollback on error
 		return
+	}
+
+	if len(results) > 0 && results[0] != nil {
+		fmt.Printf("  ✓ Schema definition successful, query type: %s\n", getQueryTypeDescription(results[0].QueryType))
 	}
 
 	fmt.Println("\n✓ Schema transaction successfully committed")
@@ -179,51 +173,45 @@ func demonstrateWriteTransaction(ctx context.Context, database *typedbclient.Dat
 
 	fmt.Println("✓ Write transaction started")
 
-	// Insert data
-	insertQueries := []string{
-		`insert
+	// Create bundle with insert and verification operations
+	bundle := []typedbclient.BundleOperation{
+		// Insert operations
+		{Type: typedbclient.OpExecute, Query: `insert
 		$p1 isa person, has name "Alice";
 		$p2 isa person, has name "Bob";
-		$c1 isa company, has companyname "TechCorp";`,
+		$c1 isa company, has companyname "TechCorp";`},
+		// Verification query before commit
+		{Type: typedbclient.OpExecute, Query: "match $p isa person; reduce $count = count($p);"},
+		// Commit the transaction
+		{Type: typedbclient.OpCommit},
+		// Close the transaction
+		{Type: typedbclient.OpClose},
 	}
 
-	// Execute all insert operations in transaction
-	for i, query := range insertQueries {
-		fmt.Printf("\nExecuting insert operation %d...\n", i+1)
-
-		result, err := tx.Execute(writeCtx, query)
-		if err != nil {
-			fmt.Printf("  Insert operation failed: %v\n", err)
-			fmt.Println("  Rolling back...")
-			tx.Rollback(writeCtx)
-			return
-		}
-
-		fmt.Printf("  ✓ Insert operation successful, query type: %s\n", getQueryTypeDescription(result.QueryType))
-	}
-
-	// Perform verification query before committing
-	fmt.Printf("\nVerifying data before commit...\n")
-	verifyQuery := "match $p isa person; count;"
-	result, err := tx.Execute(writeCtx, verifyQuery)
+	fmt.Println("\nExecuting write bundle with insert and verification...")
+	results, err := tx.ExecuteBundle(writeCtx, bundle)
 	if err != nil {
-		fmt.Printf("  Verification query failed: %v\n", err)
-	} else {
-		fmt.Printf("  ✓ Verification query successful, result type: %s\n", getResultTypeDescription(result))
+		fmt.Printf("  Write bundle failed: %v\n", err)
+		// Bundle automatically handles rollback on error
+		return
 	}
 
-	// Commit write transaction
-	if err := tx.Commit(writeCtx); err != nil {
-		fmt.Printf("Failed to commit write transaction: %v\n", err)
-		return
+	fmt.Printf("  ✓ Write bundle successful, executed %d operations\n", len(results))
+
+	// Display results for each operation
+	if len(results) > 0 && results[0] != nil {
+		fmt.Printf("  Insert operation result: %s\n", getQueryTypeDescription(results[0].QueryType))
+	}
+	if len(results) > 1 && results[1] != nil {
+		fmt.Printf("  Verification query result: %s\n", getResultTypeDescription(results[1]))
 	}
 
 	fmt.Println("\n✓ Write transaction successfully committed")
 	fmt.Println("Write transaction features:")
 	fmt.Printf("  - Used for inserting, updating, or deleting data\n")
-	fmt.Printf("  - Must call Commit() to persist changes\n")
-	fmt.Printf("  - Can perform verification queries before commit\n")
-	fmt.Printf("  - Supports complex batch data operations\n")
+	fmt.Printf("  - Bundle includes commit operation for persistence\n")
+	fmt.Printf("  - Can include verification queries in same bundle\n")
+	fmt.Printf("  - Atomic execution ensures all-or-nothing semantics\n")
 }
 
 // demonstrateTransactionRollback demonstrates transaction rollback
@@ -243,54 +231,58 @@ func demonstrateTransactionRollback(ctx context.Context, database *typedbclient.
 
 	fmt.Println("✓ Write transaction started (for rollback demonstration)")
 
-	// Execute an insert operation
-	insertQuery := `insert $p isa person, has name "TestPerson";`
+	// Create bundle with insert followed by rollback (no commit)
+	bundle := []typedbclient.BundleOperation{
+		{Type: typedbclient.OpExecute, Query: `insert $p isa person, has name "TestPerson";`},
+		// Simulate business logic failure - rollback instead of commit
+		{Type: typedbclient.OpRollback},
+		{Type: typedbclient.OpClose},
+	}
 
-	result, err := tx.Execute(writeCtx, insertQuery)
+	fmt.Println("\nExecuting bundle with insert followed by rollback...")
+	fmt.Println("Simulating business logic check failure...")
+
+	results, err := tx.ExecuteBundle(writeCtx, bundle)
 	if err != nil {
-		fmt.Printf("Insert operation failed: %v\n", err)
-		tx.Close(writeCtx)
+		fmt.Printf("  Bundle execution failed: %v\n", err)
 		return
 	}
 
-	fmt.Printf("✓ Insert operation successful, query type: %s\n", getQueryTypeDescription(result.QueryType))
-
-	// Simulate business logic decision to rollback
-	fmt.Println("\nSimulating business logic check...")
-	fmt.Println("Assuming business logic check failed, need to rollback transaction")
-
-	// Execute rollback
-	if err := tx.Rollback(writeCtx); err != nil {
-		fmt.Printf("Failed to rollback transaction: %v\n", err)
-		return
+	if len(results) > 0 && results[0] != nil {
+		fmt.Printf("✓ Insert operation executed, query type: %s\n", getQueryTypeDescription(results[0].QueryType))
 	}
-
 	fmt.Println("✓ Transaction successfully rolled back")
 
 	// Verify that data was not persisted
 	fmt.Println("\nVerifying rollback effect:")
+	verifyBundle := []typedbclient.BundleOperation{
+		{Type: typedbclient.OpExecute, Query: `match $p isa person, has name "TestPerson";`},
+		{Type: typedbclient.OpClose},
+	}
+
 	readTx, err := database.BeginTransaction(writeCtx, typedbclient.Read)
 	if err != nil {
 		fmt.Printf("Failed to begin verification transaction: %v\n", err)
 		return
 	}
-	defer readTx.Close(writeCtx)
 
-	verifyQuery := `match $p isa person, has name "TestPerson";`
-	result, err = readTx.Execute(writeCtx, verifyQuery)
+	verifyResults, err := readTx.ExecuteBundle(writeCtx, verifyBundle)
 	if err != nil {
-		fmt.Printf("Verification query failed: %v\n", err)
-	} else if result.IsRowStream && len(result.Rows) == 0 {
-		fmt.Println("✓ Verification successful: data was not persisted after rollback")
-	} else {
-		fmt.Printf("✗ Verification failed: found %d rows of data\n", len(result.Rows))
+		fmt.Printf("Verification bundle failed: %v\n", err)
+	} else if len(verifyResults) > 0 && verifyResults[0] != nil {
+		result := verifyResults[0]
+		if result.IsRowStream && len(result.Rows) == 0 {
+			fmt.Println("✓ Verification successful: data was not persisted after rollback")
+		} else {
+			fmt.Printf("✗ Verification failed: found %d rows of data\n", len(result.Rows))
+		}
 	}
 
 	fmt.Println("\nTransaction rollback features:")
-	fmt.Printf("  - Rollback() undoes all changes in the transaction\n")
+	fmt.Printf("  - OpRollback in bundle undoes all changes in the transaction\n")
 	fmt.Printf("  - Database state is restored to before transaction began\n")
 	fmt.Printf("  - Suitable for error handling and business logic validation\n")
-	fmt.Printf("  - Close() on Write/Schema transactions automatically rolls back\n")
+	fmt.Printf("  - Bundle ensures atomic rollback operation\n")
 }
 
 // demonstrateBatchTransaction demonstrates batch operation transaction
@@ -320,57 +312,56 @@ func demonstrateBatchTransaction(ctx context.Context, database *typedbclient.Dat
 		$p4 isa person, has name "Sarah";
 	`
 
-	result, err := tx.Execute(batchCtx, batchInsert)
-	if err != nil {
-		fmt.Printf("Batch insert failed: %v\n", err)
-		tx.Rollback(batchCtx)
-		return
-	}
-	fmt.Printf("✓ Batch insert successful, query type: %s\n", getQueryTypeDescription(result.QueryType))
-
-	// Batch insert company data
-	fmt.Printf("\nExecuting batch company insert...\n")
-	companyInsert := `
+	// Create bundle with multiple batch operations
+	bundle := []typedbclient.BundleOperation{
+		// Batch insert multiple persons
+		{Type: typedbclient.OpExecute, Query: batchInsert},
+		// Batch insert company data
+		{Type: typedbclient.OpExecute, Query: `
 		insert
 		$c1 isa company, has companyname "InnovateTech";
 		$c2 isa company, has companyname "DataCorp";
-	`
-	result2, err := tx.Execute(batchCtx, companyInsert)
+		`},
+
+		// Perform data statistics before commit
+		{Type: typedbclient.OpExecute, Query: "match $p isa person; reduce $count = count($p);"},
+		{Type: typedbclient.OpExecute, Query: "match $c isa company; reduce $count = count($c);"},
+		// Commit all batch operations
+		{Type: typedbclient.OpCommit},
+		{Type: typedbclient.OpClose},
+	}
+
+	fmt.Println("\nExecuting batch bundle with multiple operations...")
+	results, err := tx.ExecuteBundle(batchCtx, bundle)
 	if err != nil {
-		fmt.Printf("Company insert failed: %v\n", err)
-		tx.Rollback(batchCtx)
+		fmt.Printf("  Batch bundle failed: %v\n", err)
+		// Bundle automatically handles rollback on error
 		return
 	}
-	fmt.Printf("✓ Company insert successful, query type: %s\n", getQueryTypeDescription(result2.QueryType))
 
-	// Perform data statistics before batch operations
-	fmt.Printf("\nStatistics before commit...\n")
-	countQueries := map[string]string{
-		"Total persons": "match $p isa person; count;",
-		"Total companies": "match $c isa company; count;"
+	fmt.Printf("  ✓ Batch bundle successful, executed %d operations\n", len(results))
+
+	// Display results for each operation
+	if len(results) > 0 && results[0] != nil {
+		fmt.Printf("  Batch person insert: %s\n", getQueryTypeDescription(results[0].QueryType))
+	}
+	if len(results) > 1 && results[1] != nil {
+		fmt.Printf("  Batch company insert: %s\n", getQueryTypeDescription(results[1].QueryType))
+	}
+	if len(results) > 2 && results[2] != nil {
+		fmt.Printf("  Person count statistics: %s\n", getResultTypeDescription(results[2]))
+	}
+	if len(results) > 3 && results[3] != nil {
+		fmt.Printf("  Company count statistics: %s\n", getResultTypeDescription(results[3]))
 	}
 
-	for desc, query := range countQueries {
-		result, err := tx.Execute(batchCtx, query)
-		if err != nil {
-			fmt.Printf("Statistics %s failed: %v\n", desc, err)
-		} else {
-			fmt.Printf("✓ %s statistics successful, result type: %s\n", desc, getResultTypeDescription(result))
-		}
-	}
-
-	// Commit batch operations
-	if err := tx.Commit(batchCtx); err != nil {
-		fmt.Printf("Failed to commit batch operations: %v\n", err)
-		return
-	}
 
 	fmt.Println("\n✓ Batch operation transaction successfully committed")
 	fmt.Println("Batch operation features:")
-	fmt.Printf("  - Execute multiple related operations in a single transaction\n")
+	fmt.Printf("  - Execute multiple related operations in a single atomic bundle\n")
 	fmt.Printf("  - Guarantee atomicity of all operations (all succeed or all fail)\n")
 	fmt.Printf("  - Suitable for complex data import and update scenarios\n")
-	fmt.Printf("  - Can perform validation and statistics before commit\n")
+	fmt.Printf("  - Can include validation and statistics in same bundle\n")
 }
 
 // Helper functions

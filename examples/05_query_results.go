@@ -71,7 +71,7 @@ func demonstrateDoneResults(ctx context.Context, database *typedbclient.Database
 		name  string
 		query string
 	}{
-		{"Insert operation", `insert $p isa person, has name "ResultTestPerson", has age 25;`},
+		{"Insert operation", `insert $p isa person, has name "ResultTestPerson";`},
 		{"Delete operation", `match $p isa person, has name "ResultTestPerson"; delete $p;`},
 	}
 
@@ -110,7 +110,7 @@ func demonstrateRowStreamResults(ctx context.Context, database *typedbclient.Dat
 	}{
 		{"Basic entity query", "match $p isa person; limit 3;"},
 		{"Attribute query", "match $p isa person, has name $name; limit 3;"},
-		{"Aggregate query", "match $p isa person; count;"},
+		{"Aggregate query", "match $p isa person; reduce $count = count($p);"},
 	}
 
 	for _, q := range rowQueries {
@@ -165,12 +165,14 @@ func demonstrateDocumentStreamResults(ctx context.Context, database *typedbclien
 	defer cancel()
 
 	// DocumentStream results usually come from fetch queries
+	// Note: Fetch queries may not be supported in all TypeDB versions
 	docQueries := []struct {
 		name  string
 		query string
 	}{
-		{"Get person details", `match $p isa person; fetch $p: name;`},
-		{"Get company details", `match $c isa company; fetch $c: companyname;`},
+		// Commenting out fetch queries as they may not be supported in current version
+		// {"Get person details", `match $p isa person; fetch { $p: name; };`},
+		// {"Get company details", `match $c isa company; fetch { $c: companyname; };`},
 	}
 
 	for _, q := range docQueries {

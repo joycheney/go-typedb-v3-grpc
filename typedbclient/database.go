@@ -62,13 +62,14 @@ func (c *Client) DatabaseExists(ctx context.Context, name string) (bool, error) 
 	// Use executeWithRetry to execute operation
 	var exists bool
 	err := c.executeWithRetry(ctx, func(ctx context.Context) error {
-		c.connMu.RLock()
-		client := c.grpcClient
-		c.connMu.RUnlock()
-
-		if client == nil {
+		// Get current connection atomically
+		connRef := c.connRef.Load()
+		if connRef == nil {
 			return fmt.Errorf("gRPC client not initialized")
 		}
+
+		wrapper := connRef.(*connWrapper)
+		client := wrapper.grpcClient
 
 		req := &pb.DatabaseManager_Contains_Req{
 			Name: name,
@@ -91,13 +92,14 @@ func (c *Client) CreateDatabase(ctx context.Context, name string) error {
 	name = ensureValidDatabaseName(name)
 
 	return c.executeWithRetry(ctx, func(ctx context.Context) error {
-		c.connMu.RLock()
-		client := c.grpcClient
-		c.connMu.RUnlock()
-
-		if client == nil {
+		// Get current connection atomically
+		connRef := c.connRef.Load()
+		if connRef == nil {
 			return fmt.Errorf("gRPC client not initialized")
 		}
+
+		wrapper := connRef.(*connWrapper)
+		client := wrapper.grpcClient
 
 		req := &pb.DatabaseManager_Create_Req{
 			Name: name,
@@ -113,13 +115,14 @@ func (c *Client) DeleteDatabase(ctx context.Context, name string) error {
 	name = ensureValidDatabaseName(name)
 
 	return c.executeWithRetry(ctx, func(ctx context.Context) error {
-		c.connMu.RLock()
-		client := c.grpcClient
-		c.connMu.RUnlock()
-
-		if client == nil {
+		// Get current connection atomically
+		connRef := c.connRef.Load()
+		if connRef == nil {
 			return fmt.Errorf("gRPC client not initialized")
 		}
+
+		wrapper := connRef.(*connWrapper)
+		client := wrapper.grpcClient
 
 		req := &pb.Database_Delete_Req{
 			Name: name,
@@ -135,13 +138,14 @@ func (c *Client) ListDatabases(ctx context.Context) ([]string, error) {
 	var databases []string
 
 	err := c.executeWithRetry(ctx, func(ctx context.Context) error {
-		c.connMu.RLock()
-		client := c.grpcClient
-		c.connMu.RUnlock()
-
-		if client == nil {
+		// Get current connection atomically
+		connRef := c.connRef.Load()
+		if connRef == nil {
 			return fmt.Errorf("gRPC client not initialized")
 		}
+
+		wrapper := connRef.(*connWrapper)
+		client := wrapper.grpcClient
 
 		req := &pb.DatabaseManager_All_Req{}
 
@@ -166,9 +170,14 @@ func (db *Database) GetSchema(ctx context.Context) (string, error) {
 	var schema string
 
 	err := db.client.executeWithRetry(ctx, func(ctx context.Context) error {
-		db.client.connMu.RLock()
-		client := db.client.grpcClient
-		db.client.connMu.RUnlock()
+		// Get current connection atomically
+		connRef := db.client.connRef.Load()
+		if connRef == nil {
+			return fmt.Errorf("gRPC client not initialized")
+		}
+
+		wrapper := connRef.(*connWrapper)
+		client := wrapper.grpcClient
 
 		if client == nil {
 			return fmt.Errorf("gRPC client not initialized")
@@ -195,9 +204,14 @@ func (db *Database) GetTypeSchema(ctx context.Context) (string, error) {
 	var schema string
 
 	err := db.client.executeWithRetry(ctx, func(ctx context.Context) error {
-		db.client.connMu.RLock()
-		client := db.client.grpcClient
-		db.client.connMu.RUnlock()
+		// Get current connection atomically
+		connRef := db.client.connRef.Load()
+		if connRef == nil {
+			return fmt.Errorf("gRPC client not initialized")
+		}
+
+		wrapper := connRef.(*connWrapper)
+		client := wrapper.grpcClient
 
 		if client == nil {
 			return fmt.Errorf("gRPC client not initialized")
@@ -230,21 +244,23 @@ func (db *Database) ExecuteRead(ctx context.Context, query string) (*QueryResult
 			return fmt.Errorf("failed to begin read transaction: %w", err)
 		}
 
-		// Ensure transaction is closed (cleanup even if error occurs)
-		defer func() {
-			if closeErr := tx.Close(ctx); closeErr != nil {
-				// Log close error but don't affect main result
-				// Should use appropriate logging in production environment
-			}
-		}()
-
-		// Execute query
-		queryResult, err := tx.Execute(ctx, query)
-		if err != nil {
-			return fmt.Errorf("failed to execute query: %w", err)
+		// Create bundle with complete transaction lifecycle
+		// Read transactions don't need explicit commit
+		bundle := []BundleOperation{
+			{Type: OpExecute, Query: query},
+			{Type: OpClose},
 		}
 
-		result = queryResult
+		// Execute bundle atomically
+		results, err := tx.ExecuteBundle(ctx, bundle)
+		if err != nil {
+			return fmt.Errorf("failed to execute bundle: %w", err)
+		}
+
+		// Extract query result
+		if len(results) > 0 {
+			result = results[0]
+		}
 		return nil
 	})
 
@@ -262,25 +278,24 @@ func (db *Database) ExecuteWrite(ctx context.Context, query string) (*QueryResul
 			return fmt.Errorf("failed to begin write transaction: %w", err)
 		}
 
-		// Ensure transaction is cleaned up (commit or rollback)
-		defer func() {
-			if closeErr := tx.Close(ctx); closeErr != nil {
-				// Log close error but don't affect main result
-			}
-		}()
+		// Create bundle with complete transaction lifecycle
+		// Write transactions need explicit commit
+		bundle := []BundleOperation{
+			{Type: OpExecute, Query: query},
+			{Type: OpCommit},
+			{Type: OpClose},
+		}
 
-		// Execute query
-		queryResult, err := tx.Execute(ctx, query)
+		// Execute bundle atomically
+		results, err := tx.ExecuteBundle(ctx, bundle)
 		if err != nil {
-			return fmt.Errorf("failed to execute query: %w", err)
+			return fmt.Errorf("failed to execute bundle: %w", err)
 		}
 
-		// Commit transaction to persist changes
-		if err := tx.Commit(ctx); err != nil {
-			return fmt.Errorf("failed to commit transaction: %w", err)
+		// Extract query result
+		if len(results) > 0 {
+			result = results[0]
 		}
-
-		result = queryResult
 		return nil
 	})
 
@@ -298,25 +313,24 @@ func (db *Database) ExecuteSchema(ctx context.Context, query string) (*QueryResu
 			return fmt.Errorf("failed to begin schema transaction: %w", err)
 		}
 
-		// Ensure transaction is cleaned up (commit or rollback)
-		defer func() {
-			if closeErr := tx.Close(ctx); closeErr != nil {
-				// Log close error but don't affect main result
-			}
-		}()
+		// Create bundle with complete transaction lifecycle
+		// Schema transactions need explicit commit
+		bundle := []BundleOperation{
+			{Type: OpExecute, Query: query},
+			{Type: OpCommit},
+			{Type: OpClose},
+		}
 
-		// Execute query
-		queryResult, err := tx.Execute(ctx, query)
+		// Execute bundle atomically
+		results, err := tx.ExecuteBundle(ctx, bundle)
 		if err != nil {
-			return fmt.Errorf("failed to execute query: %w", err)
+			return fmt.Errorf("failed to execute bundle: %w", err)
 		}
 
-		// Commit transaction to persist schema changes
-		if err := tx.Commit(ctx); err != nil {
-			return fmt.Errorf("failed to commit transaction: %w", err)
+		// Extract query result
+		if len(results) > 0 {
+			result = results[0]
 		}
-
-		result = queryResult
 		return nil
 	})
 

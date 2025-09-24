@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -17,22 +16,28 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// Client TypeDB gRPC client (lock-free design, consistent with HTTP client architecture)
-type Client struct {
-	address    string
-	username   string
-	password   string
+// connWrapper wraps connection and gRPC client for atomic access
+type connWrapper struct {
 	conn       *grpc.ClientConn
-	grpcClient pb.TypeDBClient // Generated gRPC client
+	grpcClient pb.TypeDBClient
+}
+
+// Client TypeDB gRPC client (completely lock-free design, consistent with HTTP client architecture)
+type Client struct {
+	address  string
+	username string
+	password string
+
+	// Lock-free connection management using atomic pointer
+	connRef atomic.Value // stores *connWrapper
 
 	// Lock-free authentication state management
 	tokenValue     atomic.Value // Store JWT token (string)
 	authInProgress atomic.Bool  // Mark if authentication is in progress (lock-free CAS operation)
 
-	// Connection management
-	connMu         sync.RWMutex // Only for connection management, other operations are lock-free
-	reconnecting   atomic.Bool
-	lastConnTime   atomic.Value // time.Time
+	// Lock-free connection state
+	reconnecting atomic.Bool
+	lastConnTime atomic.Value // time.Time
 }
 
 
@@ -88,10 +93,12 @@ func (c *Client) connect(opts *Options) error {
 		return fmt.Errorf("failed to dial: %w", err)
 	}
 
-	c.connMu.Lock()
-	c.conn = conn
-	c.grpcClient = pb.NewTypeDBClient(conn) // Create gRPC client
-	c.connMu.Unlock()
+	// Create new connection wrapper and store atomically
+	wrapper := &connWrapper{
+		conn:       conn,
+		grpcClient: pb.NewTypeDBClient(conn),
+	}
+	c.connRef.Store(wrapper)
 
 	c.lastConnTime.Store(time.Now())
 
@@ -106,18 +113,18 @@ func (c *Client) authenticate() error {
 		for i := 0; i < 50; i++ {
 			time.Sleep(100 * time.Millisecond)
 
-			// 先检查是否还在认证中
+			// First check if still authenticating
 			if c.authInProgress.Load() {
 				continue
 			}
 
-			// 认证已结束，再次检查token（添加短暂延迟确保token已被设置）
+			// Authentication completed, recheck token (add brief delay to ensure token is set)
 			time.Sleep(10 * time.Millisecond)
 			if token := c.getToken(); token != "" {
 				return nil
 			}
 
-			// 如果没有token，说明其他goroutine的认证失败了
+			// If no token, authentication by other goroutine failed
 			return fmt.Errorf("authentication failed by other goroutine")
 		}
 		return fmt.Errorf("authentication timeout")
@@ -143,13 +150,14 @@ func (c *Client) authenticate() error {
 		},
 	}
 
-	c.connMu.RLock()
-	client := c.grpcClient
-	c.connMu.RUnlock()
-
-	if client == nil {
+	// Get current connection atomically
+	connRef := c.connRef.Load()
+	if connRef == nil {
 		return fmt.Errorf("gRPC client not initialized")
 	}
+
+	wrapper := connRef.(*connWrapper)
+	client := wrapper.grpcClient
 
 	// Call ConnectionOpen for initial connection
 	resp, err := client.ConnectionOpen(ctx, req)
@@ -205,33 +213,33 @@ func (c *Client) tryReconnect() error {
 		for i := 0; i < 30; i++ {
 			time.Sleep(100 * time.Millisecond)
 
-			// 检查是否还在重连中
+			// Check if still reconnecting
 			if c.reconnecting.Load() {
 				continue
 			}
 
-			// 重连已完成，检查是否成功（通过检查token）
+			// Reconnection completed, check if successful (by checking token)
 			time.Sleep(10 * time.Millisecond)
 			if token := c.getToken(); token != "" {
 				return nil
 			}
 
-			// 重连失败
+			// Reconnection failed
 			return fmt.Errorf("reconnection failed by other goroutine")
 		}
 		return fmt.Errorf("reconnection timeout")
 	}
 	defer c.reconnecting.Store(false)
 
-	// 清空旧token，确保重新认证
+	// Clear old token to ensure re-authentication
 	c.tokenValue.Store("")
 
-	// Close old connection
-	c.connMu.Lock()
-	if c.conn != nil {
-		c.conn.Close()
+	// Close old connection atomically
+	if oldConnRef := c.connRef.Load(); oldConnRef != nil {
+		if oldWrapper := oldConnRef.(*connWrapper); oldWrapper != nil && oldWrapper.conn != nil {
+			oldWrapper.conn.Close()
+		}
 	}
-	c.connMu.Unlock()
 
 	// Reconnect
 	opts := &Options{
@@ -245,26 +253,28 @@ func (c *Client) tryReconnect() error {
 		return err
 	}
 
-	// Reauthenticate（authenticate已有CAS保护，防止并发）
+	// Reauthenticate (authenticate already has CAS protection against concurrency)
 	return c.authenticate()
 }
 
 // Close closes client connection
 func (c *Client) Close() error {
-	c.connMu.Lock()
-	defer c.connMu.Unlock()
-
-	if c.conn != nil {
-		return c.conn.Close()
+	if connRef := c.connRef.Load(); connRef != nil {
+		if wrapper := connRef.(*connWrapper); wrapper != nil && wrapper.conn != nil {
+			return wrapper.conn.Close()
+		}
 	}
 	return nil
 }
 
 // GetConn gets gRPC connection (internal use)
 func (c *Client) GetConn() *grpc.ClientConn {
-	c.connMu.RLock()
-	defer c.connMu.RUnlock()
-	return c.conn
+	if connRef := c.connRef.Load(); connRef != nil {
+		if wrapper := connRef.(*connWrapper); wrapper != nil {
+			return wrapper.conn
+		}
+	}
+	return nil
 }
 
 // executeWithRetry executor with retry (unified request execution pattern, similar to HTTP client's executeRequest)
@@ -284,23 +294,23 @@ func (c *Client) executeWithRetry(ctx context.Context, operation func(context.Co
 
 		lastErr = err
 
-		// 检查协议错误（token过期时服务器返回HTTP而非gRPC）
-		// 协议错误通常表示token已完全失效，需要重新连接
+		// Check protocol error (server returns HTTP instead of gRPC when token expires)
+		// Protocol errors usually indicate token is completely invalid, need reconnection
 		if isProtocolError(err) {
-			// 直接重连并重新认证，避免token刷新悖论
-			// tryReconnect内部已有CAS保护，确保只有一个goroutine执行重连
+			// Directly reconnect and re-authenticate to avoid token refresh paradox
+			// tryReconnect has internal CAS protection ensuring only one goroutine reconnects
 			if reconnErr := c.tryReconnect(); reconnErr != nil {
 				return fmt.Errorf("reconnection after protocol error failed: %w", reconnErr)
 			}
 			continue
 		}
 
-		// 检查认证错误
+		// Check authentication error
 		if isAuthError(err) {
-			// 认证错误也需要重新连接获取新token
-			// refreshToken现在直接调用authenticate，有CAS保护
+			// Authentication errors also need reconnection to get new token
+			// refreshToken now directly calls authenticate, has CAS protection
 			if refreshErr := c.refreshToken(); refreshErr != nil {
-				// 如果刷新失败，尝试完全重连
+				// If refresh fails, try full reconnection
 				if reconnErr := c.tryReconnect(); reconnErr != nil {
 					return fmt.Errorf("reconnection after auth error failed: %w", reconnErr)
 				}
@@ -348,7 +358,7 @@ func isAuthError(err error) bool {
 }
 
 // isProtocolError checks if it's a protocol mismatch error (e.g., HTTP response to gRPC request)
-// 当token过期时，服务器可能返回HTTP响应而不是gRPC，导致协议不匹配错误
+// When token expires, server may return HTTP response instead of gRPC, causing protocol mismatch error
 func isProtocolError(err error) bool {
 	if err == nil {
 		return false
@@ -393,13 +403,14 @@ func (c *Client) CreateAuthToken(ctx context.Context, username, password string)
 	var token string
 
 	err := c.executeWithRetry(ctx, func(ctx context.Context) error {
-		c.connMu.RLock()
-		client := c.grpcClient
-		c.connMu.RUnlock()
-
-		if client == nil {
+		// Get current connection atomically
+		connRef := c.connRef.Load()
+		if connRef == nil {
 			return fmt.Errorf("gRPC client not initialized")
 		}
+
+		wrapper := connRef.(*connWrapper)
+		client := wrapper.grpcClient
 
 		req := &pb.Authentication_Token_Create_Req{
 			Credentials: &pb.Authentication_Token_Create_Req_Password_{
@@ -432,13 +443,14 @@ func (c *Client) ListServers(ctx context.Context) ([]*Server, error) {
 	var servers []*Server
 
 	err := c.executeWithRetry(ctx, func(ctx context.Context) error {
-		c.connMu.RLock()
-		client := c.grpcClient
-		c.connMu.RUnlock()
-
-		if client == nil {
+		// Get current connection atomically
+		connRef := c.connRef.Load()
+		if connRef == nil {
 			return fmt.Errorf("gRPC client not initialized")
 		}
+
+		wrapper := connRef.(*connWrapper)
+		client := wrapper.grpcClient
 
 		req := &pb.ServerManager_All_Req{}
 		resp, err := client.ServersAll(ctx, req)

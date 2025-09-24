@@ -216,7 +216,7 @@ func demonstrateNewAPIFeatures() {
 
 	// Demonstrate explicit pointer type
 	fmt.Println("\n4. Using explicit pointer type:")
-	var client4 *typedbclient.Client  // Explicitly specify pointer type
+	var client4 *typedbclient.Client // Explicitly specify pointer type
 	client4, err = typedbclient.ConnectLocal()
 	if err != nil {
 		fmt.Printf("   Explicit pointer type connection failed (Normal): %v\n", err)

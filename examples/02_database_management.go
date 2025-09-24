@@ -55,7 +55,7 @@ func main() {
 	// Demo 6: Cleanup - delete test database
 	demonstrateDeleteDatabase(ctx, client, testDbName)
 
-	fmt.Println("=== Database Management Example Completed ===)"
+	fmt.Println("=== Database Management Example Completed ===")
 }
 
 // demonstrateDatabaseExists demonstrates checking if database exists

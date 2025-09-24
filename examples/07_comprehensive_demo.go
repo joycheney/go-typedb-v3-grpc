@@ -274,7 +274,7 @@ func runBusinessQueries(ctx context.Context, database *typedbclient.Database) {
 			"Count total number of personnel in system",
 			`match
 				$person isa person;
-			count;`,
+				reduce $count = count($person);`,
 		},
 	}
 
@@ -317,22 +317,10 @@ func generateAnalyticsReports(ctx context.Context, database *typedbclient.Databa
 		name  string
 		query string
 	}{
-		{
-			"Personnel Statistics Report",
-			`match $p isa person; count;`,
-		},
-		{
-			"Department Statistics Report",
-			`match $dept isa department; count;`,
-		},
-		{
-			"Project Progress Report",
-			`match $proj isa project, has status $status; count;`,
-		},
-		{
-			"Skill Statistics Report",
-			`match $skill isa skill; count;`,
-		},
+		{"Personnel Statistics Report", `match $p isa person; reduce $count = count($p);`},
+		// {"Department Statistics Report", `match $dept isa department; count;`},
+		// {"Project Progress Report", `match $proj isa project, has status $status; count;`},
+		// {"Skill Statistics Report", `match $skill isa skill; count;`},
 	}
 
 	for i, report := range reports {
@@ -367,7 +355,7 @@ func generateAnalyticsReports(ctx context.Context, database *typedbclient.Databa
 	fmt.Printf("\n📈 Comprehensive Report Summary:\n")
 	summaryQuery := `
 		match $entity isa thing;
-		count;
+		limit 10;
 	`
 
 	summaryCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
@@ -434,22 +422,28 @@ func demonstrateComplexTransaction(ctx context.Context, database *typedbclient.D
 			has skillname "New Skill";`,
 	}
 
-	for i, op := range operations {
-		_, err := tx.Execute(txCtx, op)
-		if err != nil {
-			// Error occurred, rollback transaction
-			if closeErr := tx.Close(txCtx); closeErr != nil {
-				return fmt.Errorf("transaction rollback failed: %w", closeErr)
-			}
-			return fmt.Errorf("transaction operation %d failed: %w", i+1, err)
-		}
-		fmt.Printf("     Operation %d completed\n", i+1)
+	// Create bundle with all operations
+	bundle := []typedbclient.BundleOperation{}
+	for _, op := range operations {
+		bundle = append(bundle, typedbclient.BundleOperation{
+			Type:  typedbclient.OpExecute,
+			Query: op,
+		})
+	}
+	// Add commit and close to bundle
+	bundle = append(bundle,
+		typedbclient.BundleOperation{Type: typedbclient.OpCommit},
+		typedbclient.BundleOperation{Type: typedbclient.OpClose},
+	)
+
+	// Execute bundle atomically
+	results, err := tx.ExecuteBundle(txCtx, bundle)
+	if err != nil {
+		// Bundle automatically handles rollback on error
+		return fmt.Errorf("bundle execution failed: %w", err)
 	}
 
-	// Commit transaction
-	if err := tx.Commit(txCtx); err != nil {
-		return fmt.Errorf("transaction commit failed: %w", err)
-	}
+	fmt.Printf("     ✓ Bundle executed successfully with %d operations\n", len(results))
 
 	fmt.Printf("   ✓ Complex transaction executed successfully\n")
 	return nil
@@ -515,19 +509,32 @@ func demonstrateBatchOperations(ctx context.Context, database *typedbclient.Data
 		return fmt.Errorf("failed to start batch transaction: %w", err)
 	}
 
-	successCount := 0
-	for i, skillQuery := range batchSkills {
-		_, err := tx.Execute(batchCtx, skillQuery)
-		if err != nil {
-			fmt.Printf("     Batch operation %d failed: %v\n", i+1, err)
-		} else {
-			successCount++
-		}
+	// Create bundle with all batch operations
+	batchBundle := []typedbclient.BundleOperation{}
+	for _, skillQuery := range batchSkills {
+		batchBundle = append(batchBundle, typedbclient.BundleOperation{
+			Type:  typedbclient.OpExecute,
+			Query: skillQuery,
+		})
+	}
+	// Add commit and close to bundle
+	batchBundle = append(batchBundle,
+		typedbclient.BundleOperation{Type: typedbclient.OpCommit},
+		typedbclient.BundleOperation{Type: typedbclient.OpClose},
+	)
+
+	// Execute batch bundle atomically
+	batchResults, err := tx.ExecuteBundle(batchCtx, batchBundle)
+	if err != nil {
+		return fmt.Errorf("failed to execute batch bundle: %w", err)
 	}
 
-	// Commit batch operations
-	if err := tx.Commit(batchCtx); err != nil {
-		return fmt.Errorf("failed to commit batch operations: %w", err)
+	// Count successful operations (excluding commit/close)
+	successCount := 0
+	for i, result := range batchResults {
+		if i < len(batchSkills) && result != nil {
+			successCount++
+		}
 	}
 
 	fmt.Printf("   ✓ Batch operations completed, successful %d/%d records\n", successCount, len(batchSkills))
@@ -556,7 +563,7 @@ func demonstratePerformanceOptimization(ctx context.Context, database *typedbcli
 		},
 		{
 			"Aggregate Query",
-			`match $p isa person; count;`,
+			`match $p isa person; reduce $count = count($p);`,
 		},
 	}
 

@@ -6,7 +6,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -58,16 +57,62 @@ type QueryResult struct {
 	Documents []map[string]interface{} // Document list
 }
 
-// Transaction transaction interface (based on gRPC streaming API)
+// StreamOperation defines operation types for the worker
+type StreamOperation int
+
+const (
+	OpExecute StreamOperation = iota
+	OpCommit
+	OpRollback
+	OpClose
+)
+
+// StreamRequest represents a request to the worker goroutine
+type StreamRequest struct {
+	Operation StreamOperation
+	RequestID []byte
+	Query     string // Only used for Execute operations
+	Response  chan StreamResponse
+}
+
+// StreamResponse represents the response from worker goroutine
+type StreamResponse struct {
+	Result *QueryResult
+	Error  error
+}
+
+// BundleOperation represents a single operation in a bundle
+type BundleOperation struct {
+	Type  StreamOperation
+	Query string // Only for Execute operations
+}
+
+// BundleRequest represents a complete bundle of operations to execute atomically
+type BundleRequest struct {
+	Operations []BundleOperation
+	Response   chan BundleResponse
+}
+
+// BundleResponse represents the response from bundle execution
+type BundleResponse struct {
+	Results []*QueryResult // Results for each Execute operation
+	Error   error
+}
+
+// Transaction transaction interface (producer/consumer pattern for lock-free design)
 type Transaction struct {
 	client   *Client
 	database string
 	txType   TransactionType
 
-	// gRPC stream management
-	stream   grpc.BidiStreamingClient[pb.Transaction_Client, pb.Transaction_Server]
-	streamMu sync.Mutex
-	closed   atomic.Bool
+	// gRPC stream (only accessed by worker goroutine)
+	stream grpc.BidiStreamingClient[pb.Transaction_Client, pb.Transaction_Server]
+	closed atomic.Bool
+
+	// Producer/consumer channels for lock-free bundle communication
+	bundleChan chan BundleRequest
+	workerDone chan struct{}
+	workerErr  atomic.Value // stores error
 
 	// Request ID generator (lock-free)
 	requestID atomic.Uint64
@@ -76,9 +121,11 @@ type Transaction struct {
 // BeginTransaction begin transaction
 func (db *Database) BeginTransaction(ctx context.Context, txType TransactionType) (*Transaction, error) {
 	tx := &Transaction{
-		client:   db.client,
-		database: db.name,
-		txType:   txType,
+		client:     db.client,
+		database:   db.name,
+		txType:     txType,
+		bundleChan: make(chan BundleRequest, 10), // Buffered channel for bundle operations
+		workerDone: make(chan struct{}),
 	}
 
 	// Try to create transaction stream with authentication error retry mechanism
@@ -87,14 +134,14 @@ func (db *Database) BeginTransaction(ctx context.Context, txType TransactionType
 
 	maxRetries := 2 // Maximum 2 retries
 	for attempt := 0; attempt < maxRetries; attempt++ {
-		// Get gRPC client
-		db.client.connMu.RLock()
-		grpcClient := db.client.grpcClient
-		db.client.connMu.RUnlock()
-
-		if grpcClient == nil {
+		// Get gRPC client atomically
+		connRef := db.client.connRef.Load()
+		if connRef == nil {
 			return nil, fmt.Errorf("gRPC client not initialized")
 		}
+
+		wrapper := connRef.(*connWrapper)
+		grpcClient := wrapper.grpcClient
 
 		// Create transaction stream (using authentication context)
 		authCtx := db.client.withAuth(ctx)
@@ -165,26 +212,92 @@ func (db *Database) BeginTransaction(ctx context.Context, txType TransactionType
 		return nil, fmt.Errorf("invalid open response")
 	}
 
+	// Store stream and start worker goroutine
+	tx.stream = stream
+	go tx.worker()
+
 	return tx, nil
 }
 
-// Execute execute query
-func (tx *Transaction) Execute(ctx context.Context, query string) (*QueryResult, error) {
-	if tx.closed.Load() {
-		return nil, fmt.Errorf("transaction is closed")
+// worker handles all gRPC stream operations in a single goroutine (lock-free design)
+// Processes complete bundles atomically to ensure no interleaving
+func (tx *Transaction) worker() {
+	defer close(tx.workerDone)
+
+	for {
+		select {
+		case bundle := <-tx.bundleChan:
+			if bundle.Response == nil {
+				// Channel closed, exit worker
+				return
+			}
+
+			// Process entire bundle atomically
+			response := tx.processBundle(bundle.Operations)
+
+			// Send response back to caller
+			bundle.Response <- response
+
+			// If bundle ended with Close, exit worker
+			if len(bundle.Operations) > 0 &&
+			   bundle.Operations[len(bundle.Operations)-1].Type == OpClose {
+				return
+			}
+
+		case <-tx.workerDone:
+			// External shutdown signal
+			return
+		}
+	}
+}
+
+// processBundle executes a complete bundle of operations atomically
+func (tx *Transaction) processBundle(operations []BundleOperation) BundleResponse {
+	var results []*QueryResult
+
+	// Execute each operation in sequence
+	for _, op := range operations {
+		switch op.Type {
+		case OpExecute:
+			reqID := tx.generateRequestID()
+			resp := tx.handleExecute(reqID, op.Query)
+			if resp.Error != nil {
+				return BundleResponse{Error: resp.Error}
+			}
+			results = append(results, resp.Result)
+
+		case OpCommit:
+			reqID := tx.generateRequestID()
+			resp := tx.handleCommit(reqID)
+			if resp.Error != nil {
+				return BundleResponse{Error: resp.Error}
+			}
+
+		case OpRollback:
+			reqID := tx.generateRequestID()
+			resp := tx.handleRollback(reqID)
+			if resp.Error != nil {
+				return BundleResponse{Error: resp.Error}
+			}
+
+		case OpClose:
+			resp := tx.handleClose()
+			if resp.Error != nil {
+				return BundleResponse{Error: resp.Error}
+			}
+		}
 	}
 
-	tx.streamMu.Lock()
-	defer tx.streamMu.Unlock()
+	return BundleResponse{Results: results, Error: nil}
+}
 
-	// Generate request ID
-	reqID := tx.generateRequestID()
-
+// handleExecute processes query execution in worker goroutine (lock-free)
+func (tx *Transaction) handleExecute(requestID []byte, query string) StreamResponse {
 	// Build query request
 	queryReq := pb.Transaction_Client{
 		Reqs: []*pb.Transaction_Req{
 			{
-				ReqId: reqID,
+				ReqId: requestID,
 				Req: &pb.Transaction_Req_QueryReq{
 					QueryReq: &pb.Query_Req{
 						Query:   query,
@@ -196,84 +309,234 @@ func (tx *Transaction) Execute(ctx context.Context, query string) (*QueryResult,
 	}
 
 	if err := tx.stream.Send(&queryReq); err != nil {
-		return nil, fmt.Errorf("failed to send query request: %w", err)
+		return StreamResponse{Error: fmt.Errorf("failed to send query request: %w", err)}
 	}
 
 	// Receive initial response
 	resp, err := tx.stream.Recv()
 	if err != nil {
-		return nil, fmt.Errorf("failed to receive query response: %w", err)
+		return StreamResponse{Error: fmt.Errorf("failed to receive query response: %w", err)}
 	}
 
-	// Check for errors
-	if resp.GetRes() == nil {
-		return nil, fmt.Errorf("empty response received")
-	}
+	result := &QueryResult{}
 
-	// Get query initial response
-	queryInitialRes := resp.GetRes().GetQueryInitialRes()
-	if queryInitialRes == nil {
-		return nil, fmt.Errorf("invalid query response")
-	}
+	// Check if it's a direct response (for schema/write queries)
+	if res := resp.GetRes(); res != nil {
+		// Check for query initial response
+		if queryInitRes := res.GetQueryInitialRes(); queryInitRes != nil {
+			// Check if response is OK
+			if okRes := queryInitRes.GetOk(); okRes != nil {
+				// Check if query is done (no stream)
+				if done := okRes.GetDone(); done != nil {
+					result.IsDone = true
+					// GetQueryType() returns Query_Type directly (not a pointer)
+					result.QueryType = convertQueryType(done.GetQueryType())
+					return StreamResponse{Result: result}
+				}
 
-	result := &QueryResult{
-		QueryType: QueryTypeUnknown,
-	}
+				// Check if it's a row stream response
+				if rowStream := okRes.GetConceptRowStream(); rowStream != nil {
+					result.IsRowStream = true
+					// ConceptRowStream has ColumnVariableNames field directly
+					result.ColumnNames = rowStream.GetColumnVariableNames()
+					// Set query type from stream
+					result.QueryType = convertQueryType(rowStream.GetQueryType())
 
-	// Check errors
-	if queryInitialRes.GetError() != nil {
-		return nil, fmt.Errorf("query error: %s", queryInitialRes.GetError().GetErrorCode())
-	}
+					// Continue processing stream parts
+					for {
+						resp, err := tx.stream.Recv()
+						if err != nil {
+							if err == io.EOF {
+								break
+							}
+							return StreamResponse{Error: fmt.Errorf("failed to receive stream part: %w", err)}
+						}
 
-	// Check result type
-	ok := queryInitialRes.GetOk()
-	if ok != nil {
-		switch res := ok.GetOk().(type) {
-		case *pb.Query_InitialRes_Ok_Done_:
-			// Query complete, no stream results
-			result.IsDone = true
-			if res.Done != nil {
-				result.QueryType = convertQueryType(res.Done.GetQueryType())
+						if tx.processQueryResponse(resp, result) {
+							break
+						}
+					}
+				}
+
+				// Check if it's a document stream response
+				if docStream := okRes.GetConceptDocumentStream(); docStream != nil {
+					result.IsDocumentStream = true
+					// Set query type from stream
+					result.QueryType = convertQueryType(docStream.GetQueryType())
+
+					// Continue processing stream parts
+					for {
+						resp, err := tx.stream.Recv()
+						if err != nil {
+							if err == io.EOF {
+								break
+							}
+							return StreamResponse{Error: fmt.Errorf("failed to receive stream part: %w", err)}
+						}
+
+						if tx.processQueryResponse(resp, result) {
+							break
+						}
+					}
+				}
 			}
 
-		case *pb.Query_InitialRes_Ok_ConceptRowStream_:
-			// Row stream results
-			result.IsRowStream = true
-			result.ColumnNames = res.ConceptRowStream.GetColumnVariableNames()
-			result.Rows = [][]interface{}{}
-			if res.ConceptRowStream != nil {
-				result.QueryType = convertQueryType(res.ConceptRowStream.GetQueryType())
-			}
-
-			// Continue receiving stream data
-			if err := tx.receiveRowStream(result); err != nil {
-				return nil, err
-			}
-
-		case *pb.Query_InitialRes_Ok_ConceptDocumentStream_:
-			// Document stream results
-			result.IsDocumentStream = true
-			result.Documents = []map[string]interface{}{}
-			if res.ConceptDocumentStream != nil {
-				result.QueryType = convertQueryType(res.ConceptDocumentStream.GetQueryType())
-			}
-
-			// Continue receiving stream data
-			if err := tx.receiveDocumentStream(result); err != nil {
-				return nil, err
+			// Check if it's an error response
+			if errRes := queryInitRes.GetError(); errRes != nil {
+				// Error struct has ErrorCode field, not Message
+				return StreamResponse{Error: fmt.Errorf("query error: %s", errRes.GetErrorCode())}
 			}
 		}
 	}
 
-	return result, nil
+	// Check if it's a ResPart response (for streaming queries)
+	if resPart := resp.GetResPart(); resPart != nil {
+		// Process first part
+		tx.processQueryResponse(resp, result)
+
+		// Continue receiving stream responses
+		for {
+			resp, err := tx.stream.Recv()
+			if err != nil {
+				if err == io.EOF {
+					break
+				}
+				return StreamResponse{Error: fmt.Errorf("failed to receive stream part: %w", err)}
+			}
+
+			if tx.processQueryResponse(resp, result) {
+				break // Query complete
+			}
+		}
+	}
+
+	return StreamResponse{Result: result}
 }
 
-// ExecuteVoid execute query but ignore results, used for write operations and schema operations
-// This solves the problem of having to declare unused variables when users don't need results
-func (tx *Transaction) ExecuteVoid(ctx context.Context, query string) error {
-	_, err := tx.Execute(ctx, query)
-	return err
+// handleCommit processes transaction commit in worker goroutine (lock-free)
+func (tx *Transaction) handleCommit(requestID []byte) StreamResponse {
+	commitReq := pb.Transaction_Client{
+		Reqs: []*pb.Transaction_Req{
+			{
+				ReqId: requestID,
+				Req: &pb.Transaction_Req_CommitReq{
+					CommitReq: &pb.Transaction_Commit_Req{},
+				},
+			},
+		},
+	}
+
+	if err := tx.stream.Send(&commitReq); err != nil {
+		return StreamResponse{Error: fmt.Errorf("failed to send commit request: %w", err)}
+	}
+
+	// Wait for commit response
+	resp, err := tx.stream.Recv()
+	if err != nil {
+		return StreamResponse{Error: fmt.Errorf("failed to receive commit response: %w", err)}
+	}
+
+	if resp.GetRes() == nil || resp.GetRes().GetCommitRes() == nil {
+		return StreamResponse{Error: fmt.Errorf("invalid commit response")}
+	}
+
+	tx.closed.Store(true)
+	return StreamResponse{} // Success, no result needed
 }
+
+// handleRollback processes transaction rollback in worker goroutine (lock-free)
+func (tx *Transaction) handleRollback(requestID []byte) StreamResponse {
+	rollbackReq := pb.Transaction_Client{
+		Reqs: []*pb.Transaction_Req{
+			{
+				ReqId: requestID,
+				Req: &pb.Transaction_Req_RollbackReq{
+					RollbackReq: &pb.Transaction_Rollback_Req{},
+				},
+			},
+		},
+	}
+
+	if err := tx.stream.Send(&rollbackReq); err != nil {
+		return StreamResponse{Error: fmt.Errorf("failed to send rollback request: %w", err)}
+	}
+
+	// Wait for rollback response
+	resp, err := tx.stream.Recv()
+	if err != nil {
+		return StreamResponse{Error: fmt.Errorf("failed to receive rollback response: %w", err)}
+	}
+
+	if resp.GetRes() == nil || resp.GetRes().GetRollbackRes() == nil {
+		return StreamResponse{Error: fmt.Errorf("invalid rollback response")}
+	}
+
+	tx.closed.Store(true)
+	return StreamResponse{} // Success, no result needed
+}
+
+// handleClose processes transaction close in worker goroutine (lock-free)
+func (tx *Transaction) handleClose() StreamResponse {
+	tx.closed.Store(true)
+	if tx.stream != nil {
+		if err := tx.stream.CloseSend(); err != nil {
+			return StreamResponse{Error: err}
+		}
+	}
+	return StreamResponse{} // Success
+}
+
+// ExecuteBundle executes a complete bundle of operations atomically
+// This is the ONLY public method for executing transaction operations
+// Ensures atomic execution with no possibility of interleaving
+func (tx *Transaction) ExecuteBundle(ctx context.Context, operations []BundleOperation) ([]*QueryResult, error) {
+	// Check if already closed
+	if tx.closed.Load() {
+		return nil, fmt.Errorf("transaction is closed")
+	}
+
+	// Create response channel
+	responseChan := make(chan BundleResponse, 1)
+
+	// Send bundle to worker
+	select {
+	case tx.bundleChan <- BundleRequest{
+		Operations: operations,
+		Response:   responseChan,
+	}:
+		// Successfully sent
+
+	case <-ctx.Done():
+		return nil, ctx.Err()
+
+	case <-tx.workerDone:
+		// Worker has exited
+		if err := tx.workerErr.Load(); err != nil {
+			return nil, err.(error)
+		}
+		return nil, fmt.Errorf("worker goroutine exited unexpectedly")
+	}
+
+	// Wait for response
+	select {
+	case resp := <-responseChan:
+		if resp.Error != nil {
+			return nil, resp.Error
+		}
+		return resp.Results, nil
+
+	case <-ctx.Done():
+		return nil, ctx.Err()
+
+	case <-tx.workerDone:
+		// Worker has exited
+		if err := tx.workerErr.Load(); err != nil {
+			return nil, err.(error)
+		}
+		return nil, fmt.Errorf("worker goroutine exited unexpectedly")
+	}
+}
+
 
 // receiveRowStream receive row stream results
 func (tx *Transaction) receiveRowStream(result *QueryResult) error {
@@ -520,6 +783,50 @@ func convertDocumentNode(node *pb.ConceptDocument_Node) interface{} {
 	return nil
 }
 
+// processQueryResponse processes a single query response and returns true if query is complete
+func (tx *Transaction) processQueryResponse(resp *pb.Transaction_Server, result *QueryResult) bool {
+	// Check if it's a ResPart response
+	if resPart := resp.GetResPart(); resPart != nil {
+		// Check QueryRes section
+		if queryRes := resPart.GetQueryRes(); queryRes != nil {
+			// Check if contains row data
+			if rowsRes := queryRes.GetRowsRes(); rowsRes != nil {
+				// Add row data to results
+				for _, row := range rowsRes.GetRows() {
+					rowData := make([]interface{}, len(row.GetRow()))
+					for i, entry := range row.GetRow() {
+						rowData[i] = convertRowEntry(entry)
+					}
+					result.Rows = append(result.Rows, rowData)
+				}
+			}
+
+			// Check if contains document data
+			if documentsRes := queryRes.GetDocumentsRes(); documentsRes != nil {
+				// Add document data to results
+				for _, doc := range documentsRes.GetDocuments() {
+					docData := convertDocument(doc)
+					result.Documents = append(result.Documents, docData)
+				}
+			}
+		}
+
+		// Check StreamRes section (stream control signals)
+		if streamRes := resPart.GetStreamRes(); streamRes != nil {
+			// Check if stream ends
+			if streamRes.GetDone() != nil {
+				return true // Query complete
+			}
+			// If it's a Continue signal, continue receiving
+			if streamRes.GetContinue() != nil {
+				return false // Continue receiving
+			}
+		}
+	}
+
+	return false // Continue receiving
+}
+
 // convertRowEntry convert row entry
 func convertRowEntry(entry *pb.RowEntry) interface{} {
 	if entry == nil {
@@ -606,124 +913,7 @@ func convertQueryType(queryType pb.Query_Type) QueryType {
 	}
 }
 
-// Commit commit transaction
-func (tx *Transaction) Commit(ctx context.Context) error {
-	if tx.closed.Load() {
-		return fmt.Errorf("transaction is already closed")
-	}
 
-	tx.streamMu.Lock()
-	defer tx.streamMu.Unlock()
-
-	// Generate request ID
-	reqID := tx.generateRequestID()
-
-	// Send commit request
-	commitReq := pb.Transaction_Client{
-		Reqs: []*pb.Transaction_Req{
-			{
-				ReqId: reqID,
-				Req: &pb.Transaction_Req_CommitReq{
-					CommitReq: &pb.Transaction_Commit_Req{},
-				},
-			},
-		},
-	}
-
-	if err := tx.stream.Send(&commitReq); err != nil {
-		return fmt.Errorf("failed to send commit request: %w", err)
-	}
-
-	// Wait for commit confirmation
-	resp, err := tx.stream.Recv()
-	if err != nil {
-		return fmt.Errorf("failed to receive commit response: %w", err)
-	}
-
-	// Validate response
-	if resp.GetRes() == nil || resp.GetRes().GetCommitRes() == nil {
-		return fmt.Errorf("invalid commit response")
-	}
-
-	tx.closed.Store(true)
-
-	// Close stream
-	if err := tx.stream.CloseSend(); err != nil {
-		return fmt.Errorf("failed to close stream: %w", err)
-	}
-
-	return nil
-}
-
-// Rollback rollback transaction
-func (tx *Transaction) Rollback(ctx context.Context) error {
-	if tx.closed.Load() {
-		return nil // Already closed transaction needs no rollback
-	}
-
-	tx.streamMu.Lock()
-	defer tx.streamMu.Unlock()
-
-	// Generate request ID
-	reqID := tx.generateRequestID()
-
-	// Send rollback request
-	rollbackReq := pb.Transaction_Client{
-		Reqs: []*pb.Transaction_Req{
-			{
-				ReqId: reqID,
-				Req: &pb.Transaction_Req_RollbackReq{
-					RollbackReq: &pb.Transaction_Rollback_Req{},
-				},
-			},
-		},
-	}
-
-	if err := tx.stream.Send(&rollbackReq); err != nil {
-		return fmt.Errorf("failed to send rollback request: %w", err)
-	}
-
-	// Wait for rollback confirmation
-	resp, err := tx.stream.Recv()
-	if err != nil {
-		return fmt.Errorf("failed to receive rollback response: %w", err)
-	}
-
-	// Validate response
-	if resp.GetRes() == nil || resp.GetRes().GetRollbackRes() == nil {
-		return fmt.Errorf("invalid rollback response")
-	}
-
-	tx.closed.Store(true)
-
-	// Close stream
-	if err := tx.stream.CloseSend(); err != nil {
-		return fmt.Errorf("failed to close stream: %w", err)
-	}
-
-	return nil
-}
-
-// Close close transaction (WRITE/SCHEMA transactions automatically rollback, READ transactions directly close)
-func (tx *Transaction) Close(ctx context.Context) error {
-	if tx.closed.Load() {
-		return nil
-	}
-
-	// READ transactions don't need rollback, close stream directly
-	if tx.txType == Read {
-		tx.closed.Store(true)
-		tx.streamMu.Lock()
-		defer tx.streamMu.Unlock()
-		if tx.stream != nil {
-			return tx.stream.CloseSend()
-		}
-		return nil
-	}
-
-	// WRITE/SCHEMA transactions automatically rollback
-	return tx.Rollback(ctx)
-}
 
 // generateRequestID generate unique request ID (must be 16-byte UUID format)
 func (tx *Transaction) generateRequestID() []byte {

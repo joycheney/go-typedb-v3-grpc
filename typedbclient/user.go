@@ -18,13 +18,14 @@ func (c *Client) ListUsers(ctx context.Context) ([]*User, error) {
 	var users []*User
 
 	err := c.executeWithRetry(ctx, func(ctx context.Context) error {
-		c.connMu.RLock()
-		client := c.grpcClient
-		c.connMu.RUnlock()
-
-		if client == nil {
+		// Get current connection atomically
+		connRef := c.connRef.Load()
+		if connRef == nil {
 			return fmt.Errorf("gRPC client not initialized")
 		}
+
+		wrapper := connRef.(*connWrapper)
+		client := wrapper.grpcClient
 
 		req := &pb.UserManager_All_Req{}
 		resp, err := client.UsersAll(ctx, req)
@@ -53,13 +54,14 @@ func (c *Client) GetUser(ctx context.Context, name string) (*User, error) {
 	var user *User
 
 	err := c.executeWithRetry(ctx, func(ctx context.Context) error {
-		c.connMu.RLock()
-		client := c.grpcClient
-		c.connMu.RUnlock()
-
-		if client == nil {
+		// Get current connection atomically
+		connRef := c.connRef.Load()
+		if connRef == nil {
 			return fmt.Errorf("gRPC client not initialized")
 		}
+
+		wrapper := connRef.(*connWrapper)
+		client := wrapper.grpcClient
 
 		req := &pb.UserManager_Get_Req{
 			Name: name,
@@ -86,13 +88,14 @@ func (c *Client) UserExists(ctx context.Context, name string) (bool, error) {
 	var exists bool
 
 	err := c.executeWithRetry(ctx, func(ctx context.Context) error {
-		c.connMu.RLock()
-		client := c.grpcClient
-		c.connMu.RUnlock()
-
-		if client == nil {
+		// Get current connection atomically
+		connRef := c.connRef.Load()
+		if connRef == nil {
 			return fmt.Errorf("gRPC client not initialized")
 		}
+
+		wrapper := connRef.(*connWrapper)
+		client := wrapper.grpcClient
 
 		req := &pb.UserManager_Contains_Req{
 			Name: name,
@@ -112,13 +115,14 @@ func (c *Client) UserExists(ctx context.Context, name string) (bool, error) {
 // CreateUser create user
 func (c *Client) CreateUser(ctx context.Context, name, password string) error {
 	return c.executeWithRetry(ctx, func(ctx context.Context) error {
-		c.connMu.RLock()
-		client := c.grpcClient
-		c.connMu.RUnlock()
-
-		if client == nil {
+		// Get current connection atomically
+		connRef := c.connRef.Load()
+		if connRef == nil {
 			return fmt.Errorf("gRPC client not initialized")
 		}
+
+		wrapper := connRef.(*connWrapper)
+		client := wrapper.grpcClient
 
 		req := &pb.UserManager_Create_Req{
 			User: &pb.User{
@@ -134,13 +138,14 @@ func (c *Client) CreateUser(ctx context.Context, name, password string) error {
 // UpdateUser update user
 func (c *Client) UpdateUser(ctx context.Context, name string, newPassword string) error {
 	return c.executeWithRetry(ctx, func(ctx context.Context) error {
-		c.connMu.RLock()
-		client := c.grpcClient
-		c.connMu.RUnlock()
-
-		if client == nil {
+		// Get current connection atomically
+		connRef := c.connRef.Load()
+		if connRef == nil {
 			return fmt.Errorf("gRPC client not initialized")
 		}
+
+		wrapper := connRef.(*connWrapper)
+		client := wrapper.grpcClient
 
 		req := &pb.User_Update_Req{
 			Name: name,
@@ -157,13 +162,14 @@ func (c *Client) UpdateUser(ctx context.Context, name string, newPassword string
 // DeleteUser delete user
 func (c *Client) DeleteUser(ctx context.Context, name string) error {
 	return c.executeWithRetry(ctx, func(ctx context.Context) error {
-		c.connMu.RLock()
-		client := c.grpcClient
-		c.connMu.RUnlock()
-
-		if client == nil {
+		// Get current connection atomically
+		connRef := c.connRef.Load()
+		if connRef == nil {
 			return fmt.Errorf("gRPC client not initialized")
 		}
+
+		wrapper := connRef.(*connWrapper)
+		client := wrapper.grpcClient
 
 		req := &pb.User_Delete_Req{
 			Name: name,

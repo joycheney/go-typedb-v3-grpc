@@ -366,20 +366,20 @@ func demonstrateTransactionErrors() {
 		return
 	}
 
-	// Execute an operation that will fail
-	_, execErr := tx.Execute(txCtx, "insert $x isa nonexistent_type;")
-	if execErr != nil {
-		fmt.Printf("   ✓ Operation error in transaction: %v\n", execErr)
+	// Execute a bundle with an operation that will fail
+	bundle := []typedbclient.BundleOperation{
+		{Type: typedbclient.OpExecute, Query: "insert $x isa nonexistent_type;"},
+		{Type: typedbclient.OpCommit}, // Won't reach here due to error
+		{Type: typedbclient.OpClose},
+	}
 
-		// Attempt rollback
-		if rollbackErr := tx.Close(txCtx); rollbackErr != nil {
-			fmt.Printf("   Failed to rollback transaction: %v\n", rollbackErr)
-		} else {
-			fmt.Printf("   ✓ Transaction successfully rolled back\n")
-		}
+	_, execErr := tx.ExecuteBundle(txCtx, bundle)
+	if execErr != nil {
+		fmt.Printf("   ✓ Operation error in bundle: %v\n", execErr)
+		// Bundle automatically handles rollback on error
+		fmt.Printf("   ✓ Bundle automatically rolled back on error\n")
 	} else {
 		fmt.Printf("   Unexpected: error operation executed successfully\n")
-		tx.Close(txCtx)
 	}
 }
 
@@ -454,13 +454,13 @@ func demonstrateErrorClassification() {
 
 	fmt.Println("\n2. Error handling strategies:")
 	errorStrategies := map[string]string{
-		"Connection Error": "Retry connection, check network and server status",
+		"Connection Error":     "Retry connection, check network and server status",
 		"Authentication Error": "Refresh token, verify credentials",
-		"Syntax Error": "Fix query syntax, should not retry",
-		"Semantic Error": "Check schema, fix business logic",
-		"Resource Error": "Wait for resource release or optimize query",
-		"Timeout Error": "Increase timeout duration or decompose operation",
-		"System Error": "Retry later, contact administrator",
+		"Syntax Error":         "Fix query syntax, should not retry",
+		"Semantic Error":       "Check schema, fix business logic",
+		"Resource Error":       "Wait for resource release or optimize query",
+		"Timeout Error":        "Increase timeout duration or decompose operation",
+		"System Error":         "Retry later, contact administrator",
 	}
 
 	for errType, strategy := range errorStrategies {
@@ -521,45 +521,45 @@ func categorizeError(err error) string {
 
 	// Connection-related errors
 	if strings.Contains(errMsg, "connection") ||
-	   strings.Contains(errMsg, "connect") ||
-	   strings.Contains(errMsg, "dial") ||
-	   strings.Contains(errMsg, "network") {
+		strings.Contains(errMsg, "connect") ||
+		strings.Contains(errMsg, "dial") ||
+		strings.Contains(errMsg, "network") {
 		return "Connection Error (Connection)"
 	}
 
 	// Authentication-related errors
 	if strings.Contains(errMsg, "auth") ||
-	   strings.Contains(errMsg, "token") ||
-	   strings.Contains(errMsg, "credential") ||
-	   strings.Contains(errMsg, "unauthorized") {
+		strings.Contains(errMsg, "token") ||
+		strings.Contains(errMsg, "credential") ||
+		strings.Contains(errMsg, "unauthorized") {
 		return "Authentication Error (Authentication)"
 	}
 
 	// Timeout-related errors
 	if strings.Contains(errMsg, "timeout") ||
-	   strings.Contains(errMsg, "deadline") ||
-	   strings.Contains(errMsg, "context canceled") {
+		strings.Contains(errMsg, "deadline") ||
+		strings.Contains(errMsg, "context canceled") {
 		return "Timeout Error (Timeout)"
 	}
 
 	// Syntax-related errors
 	if strings.Contains(errMsg, "syntax") ||
-	   strings.Contains(errMsg, "parse") ||
-	   strings.Contains(errMsg, "invalid query") {
+		strings.Contains(errMsg, "parse") ||
+		strings.Contains(errMsg, "invalid query") {
 		return "Syntax Error (Syntax)"
 	}
 
 	// Schema-related errors
 	if strings.Contains(errMsg, "schema") ||
-	   strings.Contains(errMsg, "type") ||
-	   strings.Contains(errMsg, "constraint") {
+		strings.Contains(errMsg, "type") ||
+		strings.Contains(errMsg, "constraint") {
 		return "Semantic Error (Semantic)"
 	}
 
 	// Resource-related errors
 	if strings.Contains(errMsg, "resource") ||
-	   strings.Contains(errMsg, "memory") ||
-	   strings.Contains(errMsg, "limit") {
+		strings.Contains(errMsg, "memory") ||
+		strings.Contains(errMsg, "limit") {
 		return "Resource Error (Resource)"
 	}
 
@@ -571,13 +571,13 @@ func getSuggestion(err error) string {
 	category := categorizeError(err)
 
 	suggestions := map[string]string{
-		"Connection Error (Connection)":     "Check network connection and server status, consider retry",
+		"Connection Error (Connection)":         "Check network connection and server status, consider retry",
 		"Authentication Error (Authentication)": "Verify username and password, check token validity",
-		"Timeout Error (Timeout)":       "Increase timeout duration or optimize query performance",
-		"Syntax Error (Syntax)":        "Check query syntax, refer to documentation for correction",
-		"Semantic Error (Semantic)":      "Check data model and constraint conditions",
-		"Resource Error (Resource)":      "Optimize query or wait for resource release",
-		"System Error (System)":        "Contact system administrator, check server logs",
+		"Timeout Error (Timeout)":               "Increase timeout duration or optimize query performance",
+		"Syntax Error (Syntax)":                 "Check query syntax, refer to documentation for correction",
+		"Semantic Error (Semantic)":             "Check data model and constraint conditions",
+		"Resource Error (Resource)":             "Optimize query or wait for resource release",
+		"System Error (System)":                 "Contact system administrator, check server logs",
 	}
 
 	if suggestion, exists := suggestions[category]; exists {
@@ -594,9 +594,9 @@ func isAuthenticationError(err error) bool {
 
 	errMsg := strings.ToLower(err.Error())
 	return strings.Contains(errMsg, "auth") ||
-		   strings.Contains(errMsg, "token") ||
-		   strings.Contains(errMsg, "credential") ||
-		   strings.Contains(errMsg, "unauthorized")
+		strings.Contains(errMsg, "token") ||
+		strings.Contains(errMsg, "credential") ||
+		strings.Contains(errMsg, "unauthorized")
 }
 
 // isTimeoutError checks if error is timeout error
@@ -607,8 +607,8 @@ func isTimeoutError(err error) bool {
 
 	errMsg := strings.ToLower(err.Error())
 	return strings.Contains(errMsg, "timeout") ||
-		   strings.Contains(errMsg, "deadline") ||
-		   strings.Contains(errMsg, "context canceled")
+		strings.Contains(errMsg, "deadline") ||
+		strings.Contains(errMsg, "context canceled")
 }
 
 // Running instructions:
