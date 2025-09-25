@@ -103,14 +103,15 @@ func demonstrateRowStreamResults(ctx context.Context, database *typedbclient.Dat
 	queryCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	// RowStream results usually come from match queries
+	// RowStream results come from match, select, and reduce queries
 	rowQueries := []struct {
 		name  string
 		query string
 	}{
 		{"Basic entity query", "match $p isa person; limit 3;"},
+		{"SELECT specific variables", "match $p isa person, has name $name; select $p, $name; limit 3;"},
 		{"Attribute query", "match $p isa person, has name $name; limit 3;"},
-		{"Aggregate query", "match $p isa person; reduce $count = count($p);"},
+		{"REDUCE aggregation", "match $p isa person; reduce $count = count($p);"},
 	}
 
 	for _, q := range rowQueries {
@@ -164,15 +165,14 @@ func demonstrateDocumentStreamResults(ctx context.Context, database *typedbclien
 	queryCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	// DocumentStream results usually come from fetch queries
-	// Note: Fetch queries may not be supported in all TypeDB versions
+	// DocumentStream results come from fetch queries
 	docQueries := []struct {
 		name  string
 		query string
 	}{
-		// Commenting out fetch queries as they may not be supported in current version
-		// {"Get person details", `match $p isa person; fetch { $p: name; };`},
-		// {"Get company details", `match $c isa company; fetch { $c: companyname; };`},
+		{"FETCH person details", `match $p isa person, has name $n; fetch { "name": $n };`},
+		{"FETCH company details", `match $c isa company, has companyname $cn; fetch { "company": $cn };`},
+		{"FETCH structured data", `match $p isa person, has name $n; fetch { "person": { "name": $n } };`},
 	}
 
 	for _, q := range docQueries {

@@ -187,8 +187,8 @@ func demonstrateQuerySyntaxErrors() {
 		},
 		{
 			"Incorrect get syntax",
-			"match $x sub entity; get $y;",
-			"Referencing undefined variable in get",
+			"match $x sub entity; select $y;",
+			"Referencing undefined variable in select (GET is deprecated, use SELECT)",
 		},
 		{
 			"Mismatched brackets",
@@ -217,6 +217,27 @@ func demonstrateQuerySyntaxErrors() {
 			fmt.Printf("   Suggestion: %s\n", getSuggestion(err))
 		} else {
 			fmt.Printf("   Unexpected: syntax error was not captured\n")
+		}
+	}
+
+	// Demonstrate correct SELECT syntax as replacement for deprecated GET
+	fmt.Println("\nCorrect SELECT syntax verification:")
+	// First define a simple schema for testing
+	_, err = database.ExecuteSchema(context.Background(), "define entity test_entity, owns test_name; attribute test_name, value string;")
+	if err != nil {
+		fmt.Printf("   Schema setup failed: %v\n", err)
+	} else {
+		// Test correct SELECT syntax
+		correctQuery := "match $x isa test_entity; select $x; limit 1;"
+		queryCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		_, err = database.ExecuteRead(queryCtx, correctQuery)
+		cancel()
+
+		if err != nil {
+			fmt.Printf("   SELECT syntax test failed: %v\n", err)
+		} else {
+			fmt.Printf("   ✓ SELECT syntax verified: '%s' executed successfully\n", correctQuery)
+			fmt.Printf("   Note: SELECT replaces deprecated GET keyword in TypeDB v3\n")
 		}
 	}
 }

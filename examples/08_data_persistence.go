@@ -208,12 +208,18 @@ func main() {
 	fmt.Println("\n1. Query specific persons by name:")
 	personQueries := []string{"Alice Smith", "Bob Johnson", "Charlie Brown"}
 	for _, name := range personQueries {
-		query := fmt.Sprintf(`match $p isa person, has name "%s", has email $e; get $p, $e;`, name)
+		query := fmt.Sprintf(`match $p isa person, has name "%s", has email $e;`, name)
 		result, err := database2.ExecuteRead(ctx, query)
 		if err != nil {
 			fmt.Printf("  ❌ Failed to query %s: %v\n", name, err)
 		} else if result.IsRowStream && len(result.Rows) > 0 {
-			fmt.Printf("  ✓ Found %s with email\n", name)
+			// NEW: Use Get() method to access email by column name
+			email, err := result.Get("e")
+			if err != nil {
+				fmt.Printf("  ✓ Found %s (email access error: %v)\n", name, err)
+			} else {
+				fmt.Printf("  ✓ Found %s with email: %v\n", name, email)
+			}
 		} else {
 			fmt.Printf("  ❌ %s not found\n", name)
 		}
@@ -221,7 +227,7 @@ func main() {
 
 	// Query companies
 	fmt.Println("\n2. Query companies:")
-	companyQuery := `match $c isa company, has company_name $n, has industry $i; get $n, $i;`
+	companyQuery := `match $c isa company, has company_name $n, has industry $i;`
 	companyRes, err := database2.ExecuteRead(ctx, companyQuery)
 	if err != nil {
 		fmt.Printf("  ❌ Failed to query companies: %v\n", err)
@@ -229,7 +235,10 @@ func main() {
 		fmt.Printf("  ✓ Found %d companies\n", len(companyRes.Rows))
 		for i := range companyRes.Rows {
 			if i < 3 { // Show first 3
-				fmt.Printf("    • Company %d found\n", i+1)
+				// NEW: Use GetFromRow() to access specific row values by column name
+				companyName, _ := companyRes.GetFromRow(i, "n")
+				industry, _ := companyRes.GetFromRow(i, "i")
+				fmt.Printf("    • Company: %v, Industry: %v\n", companyName, industry)
 			}
 		}
 	}
@@ -239,8 +248,7 @@ func main() {
 	employmentQuery := `match
 		$emp isa employment, links (employee: $p, employer: $c);
 		$p has name $pname;
-		$c has company_name $cname;
-		get $pname, $cname;`
+		$c has company_name $cname;`
 	empRes, err := database2.ExecuteRead(ctx, employmentQuery)
 	if err != nil {
 		fmt.Printf("  ❌ Failed to query employment: %v\n", err)
@@ -277,7 +285,7 @@ func main() {
 		fmt.Printf("❌ Failed to begin verification transaction: %v\n", err)
 	} else {
 		verifyNewBundle := []typedbclient.BundleOperation{
-			{Type: typedbclient.OpExecute, Query: `match $p isa person, has name "Diana Prince"; get $p;`},
+			{Type: typedbclient.OpExecute, Query: `match $p isa person, has name "Diana Prince";`},
 			{Type: typedbclient.OpClose},
 		}
 

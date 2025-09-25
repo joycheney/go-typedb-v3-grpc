@@ -196,7 +196,7 @@ func demonstrateConvenienceSchema(ctx context.Context, database *typedbclient.Da
 		define
 		entity employee, owns emp_name, owns emp_age;
 		attribute emp_name, value string;
-		attribute emp_age, value long;
+		attribute emp_age, value integer;
 	`
 
 	result1, err := database.ExecuteSchema(schemaCtx, defineEntityQuery)
@@ -241,7 +241,7 @@ func demonstrateErrorHandling(database *typedbclient.Database) {
 	shortCtx, cancel := context.WithTimeout(context.Background(), 1*time.Millisecond)
 	defer cancel()
 
-	_, err := database.ExecuteRead(shortCtx, "match $x sub entity; get;")
+	_, err := database.ExecuteRead(shortCtx, "match $x sub entity;")
 	if err != nil {
 		fmt.Printf("   ✓ Timeout error correctly handled: %v\n", err)
 	}

@@ -57,6 +57,49 @@ type QueryResult struct {
 	Documents []map[string]interface{} // Document list
 }
 
+// GetColumnIndex returns the index of a column by name
+func (qr *QueryResult) GetColumnIndex(columnName string) (int, error) {
+	for i, name := range qr.ColumnNames {
+		if name == columnName {
+			return i, nil
+		}
+	}
+	return -1, fmt.Errorf("column '%s' not found in result columns: %v", columnName, qr.ColumnNames)
+}
+
+// Get returns value from the first row for a column (for convenience)
+func (qr *QueryResult) Get(columnName string) (interface{}, error) {
+	if !qr.IsRowStream {
+		return nil, fmt.Errorf("Get() can only be used with row stream results")
+	}
+	if len(qr.Rows) == 0 {
+		return nil, fmt.Errorf("no rows in result")
+	}
+	return qr.GetFromRow(0, columnName)
+}
+
+// GetFromRow returns value from a specific row for a column
+func (qr *QueryResult) GetFromRow(rowIndex int, columnName string) (interface{}, error) {
+	if !qr.IsRowStream {
+		return nil, fmt.Errorf("GetFromRow() can only be used with row stream results")
+	}
+	if rowIndex < 0 || rowIndex >= len(qr.Rows) {
+		return nil, fmt.Errorf("row index %d out of range (0-%d)", rowIndex, len(qr.Rows)-1)
+	}
+
+	columnIndex, err := qr.GetColumnIndex(columnName)
+	if err != nil {
+		return nil, err
+	}
+
+	row := qr.Rows[rowIndex]
+	if columnIndex >= len(row) {
+		return nil, fmt.Errorf("column index %d out of range for row with %d columns", columnIndex, len(row))
+	}
+
+	return row[columnIndex], nil
+}
+
 // StreamOperation defines operation types for the worker
 type StreamOperation int
 
