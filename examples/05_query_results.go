@@ -53,7 +53,10 @@ func main() {
 	// Demo 4: Complex data type processing
 	demonstrateComplexDataTypes(ctx, database)
 
-	// Demo 5: Result serialization and formatting
+	// Demo 5: Comprehensive Type-Safe Value Access
+	demonstrateComprehensiveValueAccess(ctx, database)
+
+	// Demo 6: Result serialization and formatting
 	demonstrateResultSerialization(ctx, database)
 
 	fmt.Println("=== Query Result Processing Example Completed ===")
@@ -128,27 +131,32 @@ func demonstrateRowStreamResults(ctx context.Context, database *typedbclient.Dat
 		if result.IsRowStream {
 			fmt.Printf("  ✓ Row stream result\n")
 			fmt.Printf("  Column count: %d\n", len(result.ColumnNames))
-			fmt.Printf("  Row count: %d\n", len(result.Rows))
+			fmt.Printf("  Row count: %d\n", len(result.TypedRows))
 
 			// Display column names
 			if len(result.ColumnNames) > 0 {
 				fmt.Printf("  Column names: %v\n", result.ColumnNames)
 			}
 
-			// Display first few rows of data
+			// Display first few rows using type-safe API
 			maxRows := 3
-			for i, row := range result.Rows {
+			for i, typedRow := range result.TypedRows {
 				if i >= maxRows {
-					fmt.Printf("    ... (%d more rows)\n", len(result.Rows)-maxRows)
+					fmt.Printf("    ... (%d more rows)\n", len(result.TypedRows)-maxRows)
 					break
 				}
 
 				fmt.Printf("  Row %d: ", i+1)
-				for j, cell := range row {
+				for j, colName := range result.ColumnNames {
 					if j > 0 {
 						fmt.Printf(", ")
 					}
-					fmt.Printf("%v", formatCellValue(cell))
+					// Use type-safe GetValue method
+					if val, err := typedRow.GetValue(colName); err == nil {
+						fmt.Printf("%v", val)
+					} else {
+						fmt.Printf("<error: %v>", err)
+					}
 				}
 				fmt.Println()
 			}
@@ -188,19 +196,7 @@ func demonstrateDocumentStreamResults(ctx context.Context, database *typedbclien
 		// Process DocumentStream type result
 		if result.IsDocumentStream {
 			fmt.Printf("  ✓ Document stream result\n")
-			fmt.Printf("  Document count: %d\n", len(result.Documents))
-
-			// Display first few documents
-			maxDocs := 3
-			for i, doc := range result.Documents {
-				if i >= maxDocs {
-					fmt.Printf("    ... (%d more documents)\n", len(result.Documents)-maxDocs)
-					break
-				}
-
-				fmt.Printf("  Document %d:\n", i+1)
-				displayDocument(doc, "    ")
-			}
+			fmt.Printf("  Document stream data is available (access through safe API methods)\n")
 		} else {
 			fmt.Printf("  Result type: %s\n", getResultTypeDescription(result))
 		}
@@ -228,26 +224,164 @@ func demonstrateComplexDataTypes(ctx context.Context, database *typedbclient.Dat
 		return
 	}
 
-	fmt.Printf("Complex data type analysis:\n")
+	fmt.Printf("Complex data type analysis (using type-safe API):\n")
 	fmt.Printf("Column names: %v\n", result.ColumnNames)
 
-	for i, row := range result.Rows {
+	for i, typedRow := range result.TypedRows {
 		fmt.Printf("\nRow %d data type analysis:\n", i+1)
 
-		for j, cell := range row {
-			colName := "unknown column"
-			if j < len(result.ColumnNames) {
-				colName = result.ColumnNames[j]
+		for _, colName := range result.ColumnNames {
+			// Use type-safe GetValue to get typed value
+			if val, err := typedRow.GetValue(colName); err == nil {
+				fmt.Printf("  Column '%s': Type=%s, Value=%v\n", colName, val.Type(), val)
+			} else {
+				fmt.Printf("  Column '%s': <error: %v>\n", colName, err)
 			}
-
-			fmt.Printf("  Column '%s': %s\n", colName, analyzeDataType(cell))
 		}
 	}
 }
 
+// demonstrateComprehensiveValueAccess demonstrates how to safely access all types of values
+func demonstrateComprehensiveValueAccess(ctx context.Context, database *typedbclient.Database) {
+	fmt.Printf("\n--- Demo 5: Comprehensive Type-Safe Value Access ---\n")
+	fmt.Printf("This demo shows how to use the type-safe API to access all TypeDB value types\n\n")
+
+	queryCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	// 1. Demonstrate getting string values
+	fmt.Println("1. Getting String Values (GetString):")
+	query1 := "match $p isa person, has name $n; limit 2;"
+	if result, err := database.ExecuteRead(queryCtx, query1); err == nil && result.IsRowStream {
+		fmt.Printf("   Query returned %d rows (using GetRowCount())\n", result.GetRowCount())
+		for i, row := range result.TypedRows {
+			// Safe string retrieval
+			if name, err := row.GetString("n"); err == nil {
+				fmt.Printf("   Row %d: name = \"%s\" (using GetString())\n", i+1, name)
+			} else {
+				fmt.Printf("   Row %d: Failed to get name: %v\n", i+1, err)
+			}
+		}
+	}
+
+	// 2. Demonstrate getting integer values
+	fmt.Println("\n2. Getting Integer Values (GetInt64):")
+	query2 := "match $p isa person, has age $a; limit 2;"
+	if result, err := database.ExecuteRead(queryCtx, query2); err == nil && result.IsRowStream {
+		for i, row := range result.TypedRows {
+			// Safe integer retrieval
+			if age, err := row.GetInt64("a"); err == nil {
+				fmt.Printf("   Row %d: age = %d (using GetInt64())\n", i+1, age)
+			} else {
+				// If age attribute doesn't exist
+				fmt.Printf("   Row %d: No age attribute or type mismatch\n", i+1)
+			}
+		}
+	}
+
+	// 3. Demonstrate getting Concept objects
+	fmt.Println("\n3. Getting Concept Objects (GetConcept):")
+	query3 := "match $p isa person, has name $n; $p has age $a; limit 2;"
+	if result, err := database.ExecuteRead(queryCtx, query3); err == nil && result.IsRowStream {
+		for i, row := range result.TypedRows {
+			// Safe concept retrieval
+			if person, err := row.GetConcept("p"); err == nil {
+				fmt.Printf("   Row %d: Person Concept\n", i+1)
+				fmt.Printf("     - Type: %s\n", person.Type)
+				fmt.Printf("     - IID: %s\n", person.IID)
+				fmt.Printf("     - Is Entity: %v\n", person.Type == "entity")
+			}
+		}
+	}
+
+	// 4. Demonstrate getting count values
+	fmt.Println("\n4. Getting Count Values (GetCount):")
+	query4 := "match $p isa person; reduce $count = count($p);"
+	if result, err := database.ExecuteRead(queryCtx, query4); err == nil && result.IsRowStream {
+		if len(result.TypedRows) > 0 {
+			// Safe count retrieval
+			if count, err := result.TypedRows[0].GetCount(); err == nil {
+				fmt.Printf("   Total persons: %d (using GetCount())\n", count)
+			}
+		}
+	}
+
+	// 5. Demonstrate generic value access
+	fmt.Println("\n5. Generic Value Access (GetValue) - Returns TypedValue:")
+	query5 := "match $p isa person, has name $n, has age $a; limit 1;"
+	if result, err := database.ExecuteRead(queryCtx, query5); err == nil && result.IsRowStream {
+		if len(result.TypedRows) > 0 {
+			row := result.TypedRows[0]
+			for _, colName := range result.ColumnNames {
+				if val, err := row.GetValue(colName); err == nil {
+					fmt.Printf("   Column '%s':\n", colName)
+					fmt.Printf("     - Type(): %v\n", val.Type())
+					fmt.Printf("     - IsNull(): %v\n", val.IsNull())
+					fmt.Printf("     - String(): %s\n", val.String())
+
+					// Demonstrate type checking and safe conversion
+					switch val.Type() {
+					case typedbclient.TypeString:
+						if s, err := val.AsString(); err == nil {
+							fmt.Printf("     - AsString(): \"%s\"\n", s)
+						}
+					case typedbclient.TypeInt64:
+						if i, err := val.AsInt64(); err == nil {
+							fmt.Printf("     - AsInt64(): %d\n", i)
+						}
+					case typedbclient.TypeConcept:
+						if c, err := val.AsConcept(); err == nil {
+							fmt.Printf("     - AsConcept(): IID=%s, Type=%s\n", c.IID, c.Type)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// 6. Demonstrate handling NULL values
+	fmt.Println("\n6. Handling NULL Values:")
+	// Some persons might not have an age attribute
+	query6 := "match $p isa person; limit 3;"
+	if result, err := database.ExecuteRead(queryCtx, query6); err == nil && result.IsRowStream {
+		for i, row := range result.TypedRows {
+			// Try to get a value that might not exist
+			val, err := row.GetValue("age")
+			if err != nil {
+				fmt.Printf("   Row %d: Column 'age' doesn't exist\n", i+1)
+			} else if val.IsNull() {
+				fmt.Printf("   Row %d: age is NULL\n", i+1)
+			} else {
+				fmt.Printf("   Row %d: age = %v\n", i+1, val)
+			}
+		}
+	}
+
+	// 7. Demonstrate document count (if DocumentStream)
+	fmt.Println("\n7. Getting Document Count (GetDocumentCount):")
+	fetchQuery := `match $p isa person, has name $n; fetch { "name": $n };`
+	if result, err := database.ExecuteRead(queryCtx, fetchQuery); err == nil && result.IsDocumentStream {
+		docCount := result.GetDocumentCount()
+		fmt.Printf("   Document stream contains %d documents (using GetDocumentCount())\n", docCount)
+
+		// Demonstrate getting a document
+		if docCount > 0 {
+			if doc, err := result.GetDocument(0); err == nil {
+				fmt.Printf("   First document: %v (using GetDocument(0))\n", doc)
+			}
+		}
+
+		// Get all documents
+		allDocs := result.GetAllDocuments()
+		fmt.Printf("   Got all documents: %d items (using GetAllDocuments())\n", len(allDocs))
+	}
+
+	fmt.Println("\n✅ Comprehensive demo completed - demonstrated all type-safe value access methods")
+}
+
 // demonstrateResultSerialization demonstrates result serialization and formatting
 func demonstrateResultSerialization(ctx context.Context, database *typedbclient.Database) {
-	fmt.Printf("\n--- Demo 5: Result Serialization and Formatting ---\n")
+	fmt.Printf("\n--- Demo 6: Result Serialization and Formatting ---\n")
 
 	queryCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
@@ -310,8 +444,8 @@ func setupTestDatabaseWithData(ctx context.Context, client *typedbclient.Client,
 		define
 		entity person, owns name;
 		entity company, owns companyname;
-		attribute name, value string;
-		attribute companyname, value string;
+		attribute name value string;
+		attribute companyname value string;
 	`
 
 	if _, err := database.ExecuteSchema(ctx, schemaQuery); err != nil {
@@ -343,6 +477,62 @@ func cleanupTestDatabase(ctx context.Context, client *typedbclient.Client, dbNam
 	} else {
 		fmt.Printf("✓ Cleaned up test database: %s\n", dbName)
 	}
+}
+
+// formatTypedValue formats a TypedValue for display
+func formatTypedValue(val *typedbclient.TypedValue) string {
+	if val.IsNull() {
+		return "null"
+	}
+
+	// Handle different value types
+	switch val.Type() {
+	case typedbclient.TypeString:
+		if s, err := val.AsString(); err == nil {
+			return fmt.Sprintf("\"%s\"", s)
+		}
+	case typedbclient.TypeBool:
+		if b, err := val.AsBool(); err == nil {
+			return fmt.Sprintf("%t", b)
+		}
+	case typedbclient.TypeInt64:
+		if i, err := val.AsInt64(); err == nil {
+			return fmt.Sprintf("%d", i)
+		}
+	case typedbclient.TypeFloat64:
+		if f, err := val.AsFloat64(); err == nil {
+			return fmt.Sprintf("%g", f)
+		}
+	case typedbclient.TypeDate:
+		if d, err := val.AsDate(); err == nil {
+			return fmt.Sprintf("Date(%d)", d.NumDaysSinceCE)
+		}
+	case typedbclient.TypeDateTime:
+		if dt, err := val.AsDateTime(); err == nil {
+			return dt.ToTime().Format(time.RFC3339)
+		}
+	case typedbclient.TypeDuration:
+		if d, err := val.AsDuration(); err == nil {
+			return fmt.Sprintf("%dM%dD%dns", d.Months, d.Days, d.Nanos)
+		}
+	case typedbclient.TypeDecimal:
+		if d, err := val.AsDecimal(); err == nil {
+			return fmt.Sprintf("%f", d.ToFloat64())
+		}
+	case typedbclient.TypeConcept:
+		if c, err := val.AsConcept(); err == nil {
+			if c.IID != "" {
+				return fmt.Sprintf("%s[%s]", c.Type, c.IID)
+			}
+			return fmt.Sprintf("%s:%s", c.Type, c.Label)
+		}
+	case typedbclient.TypeConceptList, typedbclient.TypeValueList:
+		if list, err := val.AsList(); err == nil {
+			return fmt.Sprintf("[%d items]", len(list))
+		}
+	}
+
+	return "<unknown>"
 }
 
 // formatCellValue formats cell value
@@ -437,10 +627,18 @@ func displayTable(result *typedbclient.QueryResult) {
 		colWidths[i] = len(colName)
 	}
 
-	for _, row := range result.Rows {
-		for i, cell := range row {
+	// Use type-safe TypedRows API
+	for _, typedRow := range result.TypedRows {
+		for i, colName := range result.ColumnNames {
 			if i < len(colWidths) {
-				cellStr := formatCellValue(cell)
+				// Get value safely
+				val, err := typedRow.GetValue(colName)
+				var cellStr string
+				if err != nil {
+					cellStr = "<error>"
+				} else {
+					cellStr = formatTypedValue(val)
+				}
 				if len(cellStr) > colWidths[i] {
 					colWidths[i] = len(cellStr)
 				}
@@ -466,18 +664,25 @@ func displayTable(result *typedbclient.QueryResult) {
 	}
 	fmt.Println()
 
-	// Print data rows
+	// Print data rows using type-safe API
 	maxRows := 5
-	for i, row := range result.Rows {
+	for i, typedRow := range result.TypedRows {
 		if i >= maxRows {
-			fmt.Printf("... (%d more rows)\n", len(result.Rows)-maxRows)
+			fmt.Printf("... (%d more rows)\n", len(result.TypedRows)-maxRows)
 			break
 		}
 
 		fmt.Print("|")
-		for j, cell := range row {
+		for j, colName := range result.ColumnNames {
 			if j < len(colWidths) {
-				cellStr := formatCellValue(cell)
+				// Get value safely
+				val, err := typedRow.GetValue(colName)
+				var cellStr string
+				if err != nil {
+					cellStr = "<error>"
+				} else {
+					cellStr = formatTypedValue(val)
+				}
 				fmt.Printf(" %-*s |", colWidths[j], cellStr)
 			}
 		}
@@ -492,14 +697,14 @@ func displayCustomFormat(result *typedbclient.QueryResult) {
 	fmt.Printf("  - Result type: %s\n", getResultTypeDescription(result))
 
 	if result.IsRowStream {
-		fmt.Printf("  - Row stream details: %d rows × %d columns\n", len(result.Rows), len(result.ColumnNames))
+		fmt.Printf("  - Row stream details: %d rows × %d columns\n", len(result.TypedRows), len(result.ColumnNames))
 		if len(result.ColumnNames) > 0 {
 			fmt.Printf("  - Column names: %v\n", result.ColumnNames)
 		}
 	}
 
 	if result.IsDocumentStream {
-		fmt.Printf("  - Document stream details: %d documents\n", len(result.Documents))
+		fmt.Printf("  - Document stream: results available\n")
 	}
 
 	if result.IsDone {
@@ -522,10 +727,10 @@ func getResultTypeDescription(result *typedbclient.QueryResult) string {
 		return "Done (operation completed)"
 	}
 	if result.IsRowStream {
-		return fmt.Sprintf("RowStream (row stream, %d rows)", len(result.Rows))
+		return fmt.Sprintf("RowStream (row stream, %d rows)", len(result.TypedRows))
 	}
 	if result.IsDocumentStream {
-		return fmt.Sprintf("DocumentStream (document stream, %d documents)", len(result.Documents))
+		return "DocumentStream (document stream results)"
 	}
 	return "Unknown (unknown type)"
 }

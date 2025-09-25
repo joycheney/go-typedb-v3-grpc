@@ -92,8 +92,8 @@ func demonstrateReadTransaction(ctx context.Context, database *typedbclient.Data
 	for i, result := range results {
 		if result != nil {
 			fmt.Printf("  Query %d result type: %s\n", i+1, getResultTypeDescription(result))
-			if result.IsRowStream && len(result.Rows) > 0 {
-				fmt.Printf("    Found %d row results\n", len(result.Rows))
+			if result.IsRowStream && len(result.TypedRows) > 0 {
+				fmt.Printf("    Found %d row results\n", len(result.TypedRows))
 			}
 		}
 	}
@@ -126,8 +126,8 @@ func demonstrateSchemaTransaction(ctx context.Context, database *typedbclient.Da
 	schemaQuery := `define
 		entity person, owns name;
 		entity company, owns companyname;
-		attribute name, value string;
-		attribute companyname, value string;`
+		attribute name value string;
+		attribute companyname value string;`
 
 	// Create bundle with schema definition and commit
 	bundle := []typedbclient.BundleOperation{
@@ -271,10 +271,10 @@ func demonstrateTransactionRollback(ctx context.Context, database *typedbclient.
 		fmt.Printf("Verification bundle failed: %v\n", err)
 	} else if len(verifyResults) > 0 && verifyResults[0] != nil {
 		result := verifyResults[0]
-		if result.IsRowStream && len(result.Rows) == 0 {
+		if result.IsRowStream && len(result.TypedRows) == 0 {
 			fmt.Println("✓ Verification successful: data was not persisted after rollback")
 		} else {
-			fmt.Printf("✗ Verification failed: found %d rows of data\n", len(result.Rows))
+			fmt.Printf("✗ Verification failed: found %d rows of data\n", len(result.TypedRows))
 		}
 	}
 
@@ -398,10 +398,10 @@ func getResultTypeDescription(result *typedbclient.QueryResult) string {
 		return "Done (operation completed)"
 	}
 	if result.IsRowStream {
-		return fmt.Sprintf("RowStream (%d rows, %d columns)", len(result.Rows), len(result.ColumnNames))
+		return fmt.Sprintf("RowStream (%d rows, %d columns)", len(result.TypedRows), len(result.ColumnNames))
 	}
 	if result.IsDocumentStream {
-		return fmt.Sprintf("DocumentStream (%d documents)", len(result.Documents))
+		return "DocumentStream (document stream results)"
 	}
 	return "Unknown (unknown type)"
 }

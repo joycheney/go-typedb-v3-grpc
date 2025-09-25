@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"log"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -185,15 +186,23 @@ func (tx *Transaction) Execute(ctx context.Context, query string) (*QueryResult,
 		Reqs: []*pb.Transaction_Req{
 			{
 				ReqId: reqID,
+				Metadata: make(map[string]string),
 				Req: &pb.Transaction_Req_QueryReq{
 					QueryReq: &pb.Query_Req{
-						Query:   query,
-						Options: &pb.Options_Query{}, // Use default options
+						Query: query,
+						Options: &pb.Options_Query{
+							IncludeInstanceTypes: nil,
+							PrefetchSize:        &[]uint64{32}[0], // TypeDB DEFAULT_PREFETCH_SIZE, must be >= 1
+						},
 					},
 				},
 			},
 		},
 	}
+
+	// Debug logging for protocol verification
+	log.Printf("[DEBUG] Sending query request: ReqId=%x, Query='%s'", reqID, query)
+	log.Printf("[DEBUG] QueryOptions: IncludeInstanceTypes=nil, PrefetchSize=32 (TypeDB server DEFAULT_PREFETCH_SIZE)")
 
 	if err := tx.stream.Send(&queryReq); err != nil {
 		return nil, fmt.Errorf("failed to send query request: %w", err)
@@ -202,8 +211,11 @@ func (tx *Transaction) Execute(ctx context.Context, query string) (*QueryResult,
 	// Receive initial response
 	resp, err := tx.stream.Recv()
 	if err != nil {
+		log.Printf("[DEBUG] Query response error: %v", err)
 		return nil, fmt.Errorf("failed to receive query response: %w", err)
 	}
+
+	log.Printf("[DEBUG] Received query response successfully, checking content...")
 
 	// Check for errors
 	if resp.GetRes() == nil {

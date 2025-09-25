@@ -125,12 +125,12 @@ func defineCompanySchema(ctx context.Context, database *typedbclient.Database) e
 				entity department, owns deptname;
 				entity project, owns projectname, owns status;
 				entity skill, owns skillname;
-				attribute name, value string;
-				attribute email, value string;
-				attribute deptname, value string;
-				attribute projectname, value string;
-				attribute status, value string;
-				attribute skillname, value string;
+				attribute name value string;
+				attribute email value string;
+				attribute deptname value string;
+				attribute projectname value string;
+				attribute status value string;
+				attribute skillname value string;
 			`,
 		},
 	}
@@ -291,17 +291,17 @@ func runBusinessQueries(ctx context.Context, database *typedbclient.Database) {
 			continue
 		}
 
-		if result.IsRowStream && len(result.Rows) > 0 {
-			fmt.Printf("   ✓ Query successful, found %d results\n", len(result.Rows))
+		if result.IsRowStream && len(result.TypedRows) > 0 {
+			fmt.Printf("   ✓ Query successful, found %d results\n", len(result.TypedRows))
 
 			// Show first 3 results as examples
 			maxShow := 3
-			for j := 0; j < len(result.Rows) && j < maxShow; j++ {
-				rowData := formatRowForDisplay(result.Rows[j], result.ColumnNames)
+			for j := 0; j < len(result.TypedRows) && j < maxShow; j++ {
+				rowData := formatTypedRowForDisplay(result.TypedRows[j], result.ColumnNames)
 				fmt.Printf("     Result %d: %s\n", j+1, rowData)
 			}
-			if len(result.Rows) > maxShow {
-				fmt.Printf("     ... (%d more results)\n", len(result.Rows)-maxShow)
+			if len(result.TypedRows) > maxShow {
+				fmt.Printf("     ... (%d more results)\n", len(result.TypedRows)-maxShow)
 			}
 		} else {
 			fmt.Printf("   ℹ️  Query successful, but no matching results found\n")
@@ -335,16 +335,17 @@ func generateAnalyticsReports(ctx context.Context, database *typedbclient.Databa
 			continue
 		}
 
-		if result.IsRowStream && len(result.Rows) > 0 {
-			// For count queries, display statistics results
-			if len(result.Rows) == 1 && len(result.ColumnNames) == 1 {
-				if count, ok := result.Rows[0][0].(map[string]interface{}); ok {
-					if countVal, exists := count["value"]; exists {
-						fmt.Printf("   📊 Statistics result: %v\n", countVal)
-					}
+		if result.IsRowStream && len(result.TypedRows) > 0 {
+			// For count queries, display statistics results using type-safe API
+			if len(result.TypedRows) == 1 && len(result.ColumnNames) == 1 {
+				// Use GetCount() for aggregation queries
+				if count, err := result.TypedRows[0].GetCount(); err == nil {
+					fmt.Printf("   📊 Statistics result: %d\n", count)
+				} else {
+					fmt.Printf("   📊 Data count: %d\n", len(result.TypedRows))
 				}
 			} else {
-				fmt.Printf("   📊 Data count: %d\n", len(result.Rows))
+				fmt.Printf("   📊 Data count: %d\n", len(result.TypedRows))
 			}
 		} else {
 			fmt.Printf("   ℹ️  No data available\n")
@@ -362,8 +363,8 @@ func generateAnalyticsReports(ctx context.Context, database *typedbclient.Databa
 	summaryResult, err := database.ExecuteRead(summaryCtx, summaryQuery)
 	cancel()
 
-	if err == nil && summaryResult.IsRowStream && len(summaryResult.Rows) > 0 {
-		fmt.Printf("   • Total entities in system: %d\n", len(summaryResult.Rows))
+	if err == nil && summaryResult.IsRowStream && len(summaryResult.TypedRows) > 0 {
+		fmt.Printf("   • Total entities in system: %d\n", len(summaryResult.TypedRows))
 	}
 
 	fmt.Printf("   • Data model integrity: ✓ All entities and relations normal\n")
@@ -457,7 +458,7 @@ func demonstrateSchemaEvolution(ctx context.Context, database *typedbclient.Data
 	evolutionQuery := `
 		define
 			entity manager, owns managername;
-			attribute managername, value string;
+			attribute managername value string;
 	`
 
 	schemaCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
@@ -587,7 +588,7 @@ func demonstratePerformanceOptimization(ctx context.Context, database *typedbcli
 
 		resultCount := 0
 		if result.IsRowStream {
-			resultCount = len(result.Rows)
+			resultCount = len(result.TypedRows)
 		}
 
 		fmt.Printf("   ⏱️  Execution time: %v\n", duration)
@@ -629,6 +630,20 @@ func evaluatePerformance(duration time.Duration, resultCount int) string {
 }
 
 // formatRowForDisplay formats row data for display
+// formatTypedRowForDisplay formats a TypedRow for display using type-safe API
+func formatTypedRowForDisplay(typedRow *typedbclient.TypedRow, columnNames []string) string {
+	parts := make([]string, len(columnNames))
+	for i, colName := range columnNames {
+		if val, err := typedRow.GetValue(colName); err == nil {
+			parts[i] = fmt.Sprintf("%s=%v", colName, val)
+		} else {
+			parts[i] = fmt.Sprintf("%s=<error>", colName)
+		}
+	}
+	return strings.Join(parts, ", ")
+}
+
+// formatRowForDisplay formats a row for display (kept for backward compatibility)
 func formatRowForDisplay(row []interface{}, columnNames []string) string {
 	if len(row) != len(columnNames) {
 		return fmt.Sprintf("Data format error: %v", row)

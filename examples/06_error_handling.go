@@ -223,7 +223,7 @@ func demonstrateQuerySyntaxErrors() {
 	// Demonstrate correct SELECT syntax as replacement for deprecated GET
 	fmt.Println("\nCorrect SELECT syntax verification:")
 	// First define a simple schema for testing
-	_, err = database.ExecuteSchema(context.Background(), "define entity test_entity, owns test_name; attribute test_name, value string;")
+	_, err = database.ExecuteSchema(context.Background(), "define entity test_entity, owns test_name; attribute test_name value string;")
 	if err != nil {
 		fmt.Printf("   Schema setup failed: %v\n", err)
 	} else {
@@ -324,7 +324,7 @@ func demonstrateTransactionErrors() {
 		define
 		person sub entity,
 			owns name;
-		name sub attribute, value string;
+		name sub attribute value string;
 	`
 
 	schemaCtx, cancel := context.WithTimeout(ctx, 10*time.Second)

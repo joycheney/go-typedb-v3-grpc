@@ -69,7 +69,7 @@ func demonstrateConvenienceRead(ctx context.Context, database *typedbclient.Data
 	schemaQuery := `
 		define
 		entity person, owns name;
-		attribute name, value string;
+		attribute name value string;
 	`
 	_, err := database.ExecuteSchema(readCtx, schemaQuery)
 	if err != nil {
@@ -86,15 +86,20 @@ func demonstrateConvenienceRead(ctx context.Context, database *typedbclient.Data
 	} else {
 		fmt.Printf("   ✓ Query successful, result type: %v\n", getResultTypeDescription(result1))
 		fmt.Printf("   query type: %v\n", getQueryTypeDescription(result1.QueryType))
-		if result1.IsRowStream && len(result1.Rows) > 0 {
-			fmt.Printf("   Found %d results\n", len(result1.Rows))
-			// Show first few results
-			maxShow := 3
-			for i := 0; i < len(result1.Rows) && i < maxShow; i++ {
-				fmt.Printf("     Result %d: %v\n", i+1, result1.Rows[i])
-			}
-			if len(result1.Rows) > maxShow {
-				fmt.Printf("     ... (%d more results)\n", len(result1.Rows)-maxShow)
+		if result1.IsRowStream {
+			// Demonstrate how to safely get row count
+			rowCount := result1.GetRowCount()
+			fmt.Printf("   Found %d results (GetRowCount() = %d)\n", len(result1.TypedRows), rowCount)
+
+			if len(result1.TypedRows) > 0 {
+				// Show first few results
+				maxShow := 3
+				for i := 0; i < len(result1.TypedRows) && i < maxShow; i++ {
+					fmt.Printf("     Result %d: TypedRow with %d columns\n", i+1, len(result1.ColumnNames))
+				}
+				if len(result1.TypedRows) > maxShow {
+					fmt.Printf("     ... (%d more results)\n", len(result1.TypedRows)-maxShow)
+				}
 			}
 		} else {
 			fmt.Printf("   No matching results found\n")
@@ -122,8 +127,25 @@ func demonstrateConvenienceRead(ctx context.Context, database *typedbclient.Data
 		fmt.Printf("   Query failed: %v\n", err)
 	} else {
 		fmt.Printf("   ✓ Query successful, result type: %v\n", getResultTypeDescription(result2))
-		if result2.IsRowStream && len(result2.Rows) > 0 {
-			fmt.Printf("   Found %d person instances\n", len(result2.Rows))
+		if result2.IsRowStream {
+			// Demonstrate safe access to row count and typed values
+			rowCount := result2.GetRowCount()
+			fmt.Printf("   Found %d person instances (raw rows: %d)\n", len(result2.TypedRows), rowCount)
+
+			// Demonstrate accessing specific values from TypedRows
+			if len(result2.TypedRows) > 0 {
+				fmt.Println("   Demonstrating person concept retrieval:")
+				for i, row := range result2.TypedRows {
+					if i >= 3 { break } // Show first 3
+
+					// Demonstrate getting concept value
+					if concept, err := row.GetConcept("x"); err == nil {
+						fmt.Printf("     Person %d: Type=%s, IID=%s\n", i+1, concept.Type, concept.IID)
+					} else {
+						fmt.Printf("     Person %d: not a concept type\n", i+1)
+					}
+				}
+			}
 		} else {
 			fmt.Printf("   No person instances found\n")
 		}
@@ -137,8 +159,29 @@ func demonstrateConvenienceRead(ctx context.Context, database *typedbclient.Data
 		fmt.Printf("   Query failed: %v\n", err)
 	} else {
 		fmt.Printf("   ✓ Query successful, result type: %v\n", getResultTypeDescription(result3))
-		if result3.IsRowStream && len(result3.Rows) > 0 {
-			fmt.Printf("   Found %d attribute instances\n", len(result3.Rows))
+		if result3.IsRowStream && len(result3.TypedRows) > 0 {
+			fmt.Printf("   Found %d attribute instances\n", len(result3.TypedRows))
+
+			// Demonstrate accessing string values
+			fmt.Println("   Demonstrating safe name attribute retrieval:")
+			for i, row := range result3.TypedRows {
+				if i >= 3 { break } // Show first 3
+
+				// Demonstrate safe string access - GetString()
+				if name, err := row.GetString("n"); err == nil {
+					fmt.Printf("     Name %d: \"%s\" (using GetString())\n", i+1, name)
+				} else {
+					// If not a string, try generic value access
+					if val, err2 := row.GetValue("n"); err2 == nil {
+						fmt.Printf("     Name %d: %v (raw type: %T)\n", i+1, val, val)
+					}
+				}
+
+				// Demonstrate getting person concept
+				if person, err := row.GetConcept("p"); err == nil {
+					fmt.Printf("       Associated Person: IID=%s\n", person.IID)
+				}
+			}
 		} else {
 			fmt.Printf("   No attribute instances found\n")
 		}
@@ -195,8 +238,8 @@ func demonstrateConvenienceSchema(ctx context.Context, database *typedbclient.Da
 	defineEntityQuery := `
 		define
 		entity employee, owns emp_name, owns emp_age;
-		attribute emp_name, value string;
-		attribute emp_age, value integer;
+		attribute emp_name value string;
+		attribute emp_age value integer;
 	`
 
 	result1, err := database.ExecuteSchema(schemaCtx, defineEntityQuery)
@@ -306,10 +349,13 @@ func getResultTypeDescription(result *typedbclient.QueryResult) string {
 		return "Done (operation completed)"
 	}
 	if result.IsRowStream {
-		return fmt.Sprintf("RowStream (%d rows, %d columns)", len(result.Rows), len(result.ColumnNames))
+		// Use safe GetRowCount() method
+		return fmt.Sprintf("RowStream (%d typed rows, %d raw rows, %d columns)",
+			len(result.TypedRows), result.GetRowCount(), len(result.ColumnNames))
 	}
 	if result.IsDocumentStream {
-		return fmt.Sprintf("DocumentStream (%d documents)", len(result.Documents))
+		// Use safe GetDocumentCount() method
+		return fmt.Sprintf("DocumentStream (%d documents)", result.GetDocumentCount())
 	}
 	return "Unknown (unknown type)"
 }

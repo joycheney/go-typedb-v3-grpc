@@ -3,14 +3,14 @@ package typedbclient
 import (
 	"context"
 	"crypto/rand"
-	"encoding/binary"
 	"fmt"
 	"io"
 	"sync/atomic"
-	"time"
 
 	pb "github.com/joycheney/go-typedb-v3-grpc/pb/proto"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
 )
 
 // TransactionType transaction type
@@ -51,10 +51,14 @@ type QueryResult struct {
 
 	// Row stream results
 	ColumnNames []string        // Column names
-	Rows        [][]interface{} // Row data
+	rows        [][]interface{} // Row data (private for safety, use TypedRows)
+
+	// Strongly-typed row results
+	TypedRows   []*TypedRow     // Type-safe row data
 
 	// Document stream results
-	Documents []map[string]interface{} // Document list
+	documents       []map[string]interface{} // Document list (private for safety, use TypedDocuments)
+	TypedDocuments  []*TypedDocument         // Type-safe document data
 }
 
 // GetColumnIndex returns the index of a column by name
@@ -72,7 +76,7 @@ func (qr *QueryResult) Get(columnName string) (interface{}, error) {
 	if !qr.IsRowStream {
 		return nil, fmt.Errorf("Get() can only be used with row stream results")
 	}
-	if len(qr.Rows) == 0 {
+	if len(qr.rows) == 0 {
 		return nil, fmt.Errorf("no rows in result")
 	}
 	return qr.GetFromRow(0, columnName)
@@ -83,8 +87,8 @@ func (qr *QueryResult) GetFromRow(rowIndex int, columnName string) (interface{},
 	if !qr.IsRowStream {
 		return nil, fmt.Errorf("GetFromRow() can only be used with row stream results")
 	}
-	if rowIndex < 0 || rowIndex >= len(qr.Rows) {
-		return nil, fmt.Errorf("row index %d out of range (0-%d)", rowIndex, len(qr.Rows)-1)
+	if rowIndex < 0 || rowIndex >= len(qr.rows) {
+		return nil, fmt.Errorf("row index %d out of range (0-%d)", rowIndex, len(qr.rows)-1)
 	}
 
 	columnIndex, err := qr.GetColumnIndex(columnName)
@@ -92,12 +96,116 @@ func (qr *QueryResult) GetFromRow(rowIndex int, columnName string) (interface{},
 		return nil, err
 	}
 
-	row := qr.Rows[rowIndex]
+	row := qr.rows[rowIndex]
 	if columnIndex >= len(row) {
 		return nil, fmt.Errorf("column index %d out of range for row with %d columns", columnIndex, len(row))
 	}
 
 	return row[columnIndex], nil
+}
+
+// GetRowCount returns the number of rows in the result
+func (qr *QueryResult) GetRowCount() int {
+	if !qr.IsRowStream {
+		return 0
+	}
+	return len(qr.rows)
+}
+
+// GetDocumentCount returns the number of documents in the result
+func (qr *QueryResult) GetDocumentCount() int {
+	if !qr.IsDocumentStream {
+		return 0
+	}
+	return len(qr.documents)
+}
+
+// GetDocument returns a document at the specified index (safe copy)
+func (qr *QueryResult) GetDocument(index int) (map[string]interface{}, error) {
+	if !qr.IsDocumentStream {
+		return nil, fmt.Errorf("GetDocument() can only be used with document stream results")
+	}
+	if index < 0 || index >= len(qr.documents) {
+		return nil, fmt.Errorf("document index %d out of range (0-%d)", index, len(qr.documents)-1)
+	}
+
+	// Return a copy to maintain immutability
+	doc := make(map[string]interface{})
+	for k, v := range qr.documents[index] {
+		doc[k] = v
+	}
+	return doc, nil
+}
+
+// GetAllDocuments returns all documents (safe copies)
+func (qr *QueryResult) GetAllDocuments() []map[string]interface{} {
+	if !qr.IsDocumentStream || len(qr.documents) == 0 {
+		return nil
+	}
+
+	// Return copies to maintain immutability
+	docs := make([]map[string]interface{}, len(qr.documents))
+	for i, d := range qr.documents {
+		doc := make(map[string]interface{})
+		for k, v := range d {
+			doc[k] = v
+		}
+		docs[i] = doc
+	}
+	return docs
+}
+
+// extractErrorDetails extracts detailed error information from gRPC status
+func extractErrorDetails(err error) string {
+	st, ok := status.FromError(err)
+	if !ok {
+		return err.Error()
+	}
+
+	// Start with the basic error message
+	result := fmt.Sprintf("Error: %s", st.Message())
+
+	// Try to extract error details
+	for _, detail := range st.Details() {
+		switch d := detail.(type) {
+		case *errdetails.ErrorInfo:
+			// Add error code and domain if available
+			if d.Reason != "" {
+				result = fmt.Sprintf("%s\nError Code: %s", result, d.Reason)
+			}
+			if d.Domain != "" {
+				result = fmt.Sprintf("%s\nDomain: %s", result, d.Domain)
+			}
+			// Add metadata if available
+			if len(d.Metadata) > 0 {
+				result = fmt.Sprintf("%s\nMetadata:", result)
+				for k, v := range d.Metadata {
+					result = fmt.Sprintf("%s\n  %s: %s", result, k, v)
+				}
+			}
+		case *errdetails.DebugInfo:
+			// Add stack trace if available
+			if len(d.StackEntries) > 0 {
+				result = fmt.Sprintf("%s\nStack Trace:", result)
+				for _, entry := range d.StackEntries {
+					result = fmt.Sprintf("%s\n  %s", result, entry)
+				}
+			}
+			if d.Detail != "" {
+				result = fmt.Sprintf("%s\nDebug Detail: %s", result, d.Detail)
+			}
+		case *errdetails.BadRequest:
+			// Add field violations if any
+			if len(d.FieldViolations) > 0 {
+				result = fmt.Sprintf("%s\nField Violations:", result)
+				for _, violation := range d.FieldViolations {
+					result = fmt.Sprintf("%s\n  %s: %s", result, violation.Field, violation.Description)
+				}
+			}
+		}
+	}
+
+	return result
 }
 
 // StreamOperation defines operation types for the worker
@@ -227,7 +335,8 @@ func (db *Database) BeginTransaction(ctx context.Context, txType TransactionType
 	openReq := pb.Transaction_Client{
 		Reqs: []*pb.Transaction_Req{
 			{
-				ReqId: reqID,
+				ReqId:    reqID,
+				Metadata: make(map[string]string),
 				Req: &pb.Transaction_Req_OpenReq{
 					OpenReq: &pb.Transaction_Open_Req{
 						Database:             db.name,
@@ -336,15 +445,20 @@ func (tx *Transaction) processBundle(operations []BundleOperation) BundleRespons
 
 // handleExecute processes query execution in worker goroutine (lock-free)
 func (tx *Transaction) handleExecute(requestID []byte, query string) StreamResponse {
-	// Build query request
+
+	// Build query request with required metadata field
 	queryReq := pb.Transaction_Client{
 		Reqs: []*pb.Transaction_Req{
 			{
-				ReqId: requestID,
+				ReqId:    requestID,
+				Metadata: make(map[string]string),
 				Req: &pb.Transaction_Req_QueryReq{
 					QueryReq: &pb.Query_Req{
-						Query:   query,
-						Options: &pb.Options_Query{}, // Use default options
+						Query: query,
+						Options: &pb.Options_Query{
+							IncludeInstanceTypes: nil,
+							PrefetchSize:        &[]uint64{32}[0], // TypeDB DEFAULT_PREFETCH_SIZE, must be >= 1
+						},
 					},
 				},
 			},
@@ -358,10 +472,25 @@ func (tx *Transaction) handleExecute(requestID []byte, query string) StreamRespo
 	// Receive initial response
 	resp, err := tx.stream.Recv()
 	if err != nil {
-		return StreamResponse{Error: fmt.Errorf("failed to receive query response: %w", err)}
+		// Extract detailed error information
+		detailedError := extractErrorDetails(err)
+		return StreamResponse{Error: fmt.Errorf("failed to receive query response.\nQuery:\n%s\n%s", query, detailedError)}
 	}
 
+
+
 	result := &QueryResult{}
+
+	// 详细检查错误响应 - 添加深度错误解析
+	if res := resp.GetRes(); res != nil {
+		// 检查是否有错误响应
+		if queryInitRes := res.GetQueryInitialRes(); queryInitRes != nil {
+			if errorRes := queryInitRes.GetError(); errorRes != nil {
+				return StreamResponse{Error: fmt.Errorf("TypeDB Query Error - Code: %s, Domain: %s, StackTrace: %v",
+					errorRes.GetErrorCode(), errorRes.GetDomain(), errorRes.GetStackTrace())}
+			}
+		}
+	}
 
 	// Check if it's a direct response (for schema/write queries)
 	if res := resp.GetRes(); res != nil {
@@ -392,7 +521,8 @@ func (tx *Transaction) handleExecute(requestID []byte, query string) StreamRespo
 							if err == io.EOF {
 								break
 							}
-							return StreamResponse{Error: fmt.Errorf("failed to receive stream part: %w", err)}
+							detailedError := extractErrorDetails(err)
+							return StreamResponse{Error: fmt.Errorf("failed to receive stream part: %s", detailedError)}
 						}
 
 						if tx.processQueryResponse(resp, result) {
@@ -414,7 +544,8 @@ func (tx *Transaction) handleExecute(requestID []byte, query string) StreamRespo
 							if err == io.EOF {
 								break
 							}
-							return StreamResponse{Error: fmt.Errorf("failed to receive stream part: %w", err)}
+							detailedError := extractErrorDetails(err)
+							return StreamResponse{Error: fmt.Errorf("failed to receive stream part: %s", detailedError)}
 						}
 
 						if tx.processQueryResponse(resp, result) {
@@ -426,8 +557,26 @@ func (tx *Transaction) handleExecute(requestID []byte, query string) StreamRespo
 
 			// Check if it's an error response
 			if errRes := queryInitRes.GetError(); errRes != nil {
-				// Error struct has ErrorCode field, not Message
-				return StreamResponse{Error: fmt.Errorf("query error: %s", errRes.GetErrorCode())}
+				// Build comprehensive error message with all available details
+				errMsg := fmt.Sprintf("query error: %s", errRes.GetErrorCode())
+				if errRes.GetDomain() != "" {
+					errMsg += fmt.Sprintf(" (domain: %s)", errRes.GetDomain())
+				}
+				// Include the failing query for debugging
+				errMsg += fmt.Sprintf("\n\nFailing query:\n%s", query)
+				// Include stack trace for debugging if available
+				if stackTrace := errRes.GetStackTrace(); len(stackTrace) > 0 {
+					errMsg += "\nStack trace:\n"
+					for i, line := range stackTrace {
+						if i < 5 { // Limit to first 5 lines to avoid overwhelming output
+							errMsg += fmt.Sprintf("  %s\n", line)
+						}
+					}
+					if len(stackTrace) > 5 {
+						errMsg += fmt.Sprintf("  ... and %d more lines\n", len(stackTrace)-5)
+					}
+				}
+				return StreamResponse{Error: fmt.Errorf("%s", errMsg)}
 			}
 		}
 	}
@@ -461,7 +610,8 @@ func (tx *Transaction) handleCommit(requestID []byte) StreamResponse {
 	commitReq := pb.Transaction_Client{
 		Reqs: []*pb.Transaction_Req{
 			{
-				ReqId: requestID,
+				ReqId:    requestID,
+				Metadata: make(map[string]string),
 				Req: &pb.Transaction_Req_CommitReq{
 					CommitReq: &pb.Transaction_Commit_Req{},
 				},
@@ -492,7 +642,8 @@ func (tx *Transaction) handleRollback(requestID []byte) StreamResponse {
 	rollbackReq := pb.Transaction_Client{
 		Reqs: []*pb.Transaction_Req{
 			{
-				ReqId: requestID,
+				ReqId:    requestID,
+				Metadata: make(map[string]string),
 				Req: &pb.Transaction_Req_RollbackReq{
 					RollbackReq: &pb.Transaction_Rollback_Req{},
 				},
@@ -606,7 +757,7 @@ func (tx *Transaction) receiveRowStream(result *QueryResult) error {
 						for i, entry := range row.GetRow() {
 							rowData[i] = convertRowEntry(entry)
 						}
-						result.Rows = append(result.Rows, rowData)
+						result.rows = append(result.rows, rowData)
 					}
 				}
 			}
@@ -648,7 +799,7 @@ func (tx *Transaction) receiveDocumentStream(result *QueryResult) error {
 					// Add document data to results
 					for _, doc := range docsRes.GetDocuments() {
 						docMap := convertDocument(doc)
-						result.Documents = append(result.Documents, docMap)
+						result.documents = append(result.documents, docMap)
 					}
 				}
 			}
@@ -668,88 +819,67 @@ func (tx *Transaction) receiveDocumentStream(result *QueryResult) error {
 	}
 }
 
-// convertConcept convert Concept to generic interface{}
-func convertConcept(concept *pb.Concept) interface{} {
+// convertConcept converts protobuf Concept to strongly-typed TypedValue
+// This returns a TypedValue with TypeConcept containing structured concept data
+func convertConcept(concept *pb.Concept) *TypedValue {
 	if concept == nil {
-		return nil
+		return &TypedValue{valueType: TypeNull, isNull: true}
 	}
 
-	// Return corresponding value based on concept specific type
+	// Create Concept structure based on concept specific type
+	var conceptVal *Concept
+
 	switch c := concept.GetConcept().(type) {
 	case *pb.Concept_Entity:
-		return map[string]interface{}{
-			"type": "entity",
-			"iid":  c.Entity.GetIid(),
+		conceptVal = &Concept{
+			Type: "entity",
+			IID:  string(c.Entity.GetIid()),
 		}
 	case *pb.Concept_Relation:
-		return map[string]interface{}{
-			"type": "relation",
-			"iid":  c.Relation.GetIid(),
+		conceptVal = &Concept{
+			Type: "relation",
+			IID:  string(c.Relation.GetIid()),
 		}
 	case *pb.Concept_Attribute:
-		attr := map[string]interface{}{
-			"type": "attribute",
-			"iid":  c.Attribute.GetIid(),
+		conceptVal = &Concept{
+			Type: "attribute",
+			IID:  string(c.Attribute.GetIid()),
 		}
-		// Process attribute value
+		// Process attribute value if present
 		if value := c.Attribute.GetValue(); value != nil {
-			switch v := value.GetValue().(type) {
-			case *pb.Value_String_:
-				attr["value"] = v.String_
-			case *pb.Value_Boolean:
-				attr["value"] = v.Boolean
-			case *pb.Value_Integer:
-				attr["value"] = v.Integer
-			case *pb.Value_Double:
-				attr["value"] = v.Double
-			case *pb.Value_Date_:
-				attr["value"] = v.Date.NumDaysSinceCe
-			case *pb.Value_Datetime_:
-				attr["value"] = map[string]interface{}{
-					"seconds": v.Datetime.Seconds,
-					"nanos":   v.Datetime.Nanos,
-				}
-			case *pb.Value_DatetimeTz:
-				attr["value"] = map[string]interface{}{
-					"datetime": v.DatetimeTz.GetDatetime(),
-				}
-			case *pb.Value_Duration_:
-				attr["value"] = map[string]interface{}{
-					"months": v.Duration.Months,
-					"days":   v.Duration.Days,
-					"nanos":  v.Duration.Nanos,
-				}
-			case *pb.Value_Decimal_:
-				attr["value"] = map[string]interface{}{
-					"integer":    v.Decimal.Integer,
-					"fractional": v.Decimal.Fractional,
-				}
-			}
+			conceptVal.Value = convertValue(value)
 		}
-		return attr
 	case *pb.Concept_EntityType:
-		return map[string]interface{}{
-			"type":  "entity_type",
-			"label": c.EntityType.GetLabel(),
+		conceptVal = &Concept{
+			Type:  "entity_type",
+			Label: c.EntityType.GetLabel(),
 		}
 	case *pb.Concept_RelationType:
-		return map[string]interface{}{
-			"type":  "relation_type",
-			"label": c.RelationType.GetLabel(),
+		conceptVal = &Concept{
+			Type:  "relation_type",
+			Label: c.RelationType.GetLabel(),
 		}
 	case *pb.Concept_AttributeType:
-		return map[string]interface{}{
-			"type":  "attribute_type",
-			"label": c.AttributeType.GetLabel(),
+		conceptVal = &Concept{
+			Type:  "attribute_type",
+			Label: c.AttributeType.GetLabel(),
 		}
 	case *pb.Concept_RoleType:
-		return map[string]interface{}{
-			"type":  "role_type",
-			"label": c.RoleType.GetLabel(),
+		conceptVal = &Concept{
+			Type:  "role_type",
+			Label: c.RoleType.GetLabel(),
 		}
 	default:
-		// For unknown types, return string representation
-		return concept.String()
+		// For unknown types, return as unknown with raw value
+		return &TypedValue{
+			valueType: TypeUnknown,
+			rawValue:  concept.String(),
+		}
+	}
+
+	return &TypedValue{
+		valueType:  TypeConcept,
+		conceptVal: conceptVal,
 	}
 }
 
@@ -836,11 +966,70 @@ func (tx *Transaction) processQueryResponse(resp *pb.Transaction_Server, result 
 			if rowsRes := queryRes.GetRowsRes(); rowsRes != nil {
 				// Add row data to results
 				for _, row := range rowsRes.GetRows() {
+					// Build legacy interface{} row for backward compatibility
 					rowData := make([]interface{}, len(row.GetRow()))
-					for i, entry := range row.GetRow() {
-						rowData[i] = convertRowEntry(entry)
+
+					// Build strongly-typed row
+					typedRow := &TypedRow{
+						columns: make(map[string]*TypedValue),
 					}
-					result.Rows = append(result.Rows, rowData)
+
+					for i, entry := range row.GetRow() {
+						// Convert entry to TypedValue
+						typedVal := convertRowEntry(entry)
+
+						// For backward compatibility, extract the raw value
+						if typedVal.valueType == TypeInt64 {
+							rowData[i] = typedVal.int64Val
+						} else if typedVal.valueType == TypeString {
+							rowData[i] = typedVal.stringVal
+						} else if typedVal.valueType == TypeBool {
+							rowData[i] = typedVal.boolVal
+						} else if typedVal.valueType == TypeFloat64 {
+							rowData[i] = typedVal.float64Val
+						} else if typedVal.valueType == TypeConcept {
+							// For concepts, create backward-compatible map
+							if typedVal.conceptVal != nil {
+								conceptMap := map[string]interface{}{
+									"type": typedVal.conceptVal.Type,
+								}
+								if typedVal.conceptVal.IID != "" {
+									conceptMap["iid"] = typedVal.conceptVal.IID
+								}
+								if typedVal.conceptVal.Label != "" {
+									conceptMap["label"] = typedVal.conceptVal.Label
+								}
+								if typedVal.conceptVal.Value != nil && typedVal.conceptVal.Value.valueType == TypeInt64 {
+									conceptMap["value"] = typedVal.conceptVal.Value.int64Val
+								} else if typedVal.conceptVal.Value != nil && typedVal.conceptVal.Value.valueType == TypeString {
+									conceptMap["value"] = typedVal.conceptVal.Value.stringVal
+								} else if typedVal.conceptVal.Value != nil {
+									// Handle other value types
+									conceptMap["value"] = typedVal.conceptVal.Value.rawValue
+								}
+								rowData[i] = conceptMap
+							} else {
+								rowData[i] = nil
+							}
+						} else if typedVal.isNull {
+							rowData[i] = nil
+						} else {
+							// For complex types, use raw value
+							rowData[i] = typedVal.rawValue
+						}
+
+						// Store typed value with column name if available
+						if i < len(result.ColumnNames) {
+							typedRow.columns[result.ColumnNames[i]] = typedVal
+						} else {
+							// If no column name, use index as key
+							typedRow.columns[fmt.Sprintf("col_%d", i)] = typedVal
+						}
+					}
+
+					// Append both for backward compatibility and new type-safe access
+					result.rows = append(result.rows, rowData)
+					result.TypedRows = append(result.TypedRows, typedRow)
 				}
 			}
 
@@ -849,7 +1038,10 @@ func (tx *Transaction) processQueryResponse(resp *pb.Transaction_Server, result 
 				// Add document data to results
 				for _, doc := range documentsRes.GetDocuments() {
 					docData := convertDocument(doc)
-					result.Documents = append(result.Documents, docData)
+					result.documents = append(result.documents, docData)
+
+					// TODO: Add TypedDocument conversion when document structure is updated
+					// For now, just maintain backward compatibility
 				}
 			}
 		}
@@ -860,8 +1052,30 @@ func (tx *Transaction) processQueryResponse(resp *pb.Transaction_Server, result 
 			if streamRes.GetDone() != nil {
 				return true // Query complete
 			}
-			// If it's a Continue signal, continue receiving
+			// If it's a Continue signal, send StreamSignal.Req and continue receiving
 			if streamRes.GetContinue() != nil {
+
+				// Generate request ID for StreamSignal
+				streamReqID := tx.generateRequestID()
+
+				// Build StreamSignal request (参考Rust实现: TransactionRequest::Stream { request_id })
+				streamSignalReq := pb.Transaction_Client{
+					Reqs: []*pb.Transaction_Req{
+						{
+							ReqId:    streamReqID,
+							Metadata: make(map[string]string),
+							Req: &pb.Transaction_Req_StreamReq{
+								StreamReq: &pb.Transaction_StreamSignal_Req{}, // Empty message as per proto definition
+							},
+						},
+					},
+				}
+
+				// Send StreamSignal request to server
+				if err := tx.stream.Send(&streamSignalReq); err != nil {
+					return true // Error occurred, stop processing
+				}
+
 				return false // Continue receiving
 			}
 		}
@@ -870,75 +1084,128 @@ func (tx *Transaction) processQueryResponse(resp *pb.Transaction_Server, result 
 	return false // Continue receiving
 }
 
-// convertRowEntry convert row entry
-func convertRowEntry(entry *pb.RowEntry) interface{} {
+// convertRowEntry converts protobuf RowEntry to strongly-typed TypedValue
+// Handles single values, concepts, and lists
+func convertRowEntry(entry *pb.RowEntry) *TypedValue {
 	if entry == nil {
-		return nil
+		return &TypedValue{valueType: TypeNull, isNull: true}
 	}
 
 	switch e := entry.GetEntry().(type) {
 	case *pb.RowEntry_Empty_:
-		return nil
+		return &TypedValue{valueType: TypeNull, isNull: true}
 	case *pb.RowEntry_Concept:
 		return convertConcept(e.Concept)
 	case *pb.RowEntry_Value:
 		return convertValue(e.Value)
 	case *pb.RowEntry_ConceptList_:
-		items := make([]interface{}, 0, len(e.ConceptList.GetConcepts()))
+		// Convert concept list to TypedValue list
+		items := make([]TypedValue, 0, len(e.ConceptList.GetConcepts()))
 		for _, c := range e.ConceptList.GetConcepts() {
-			items = append(items, convertConcept(c))
+			if typedVal := convertConcept(c); typedVal != nil {
+				items = append(items, *typedVal)
+			}
 		}
-		return items
+		return &TypedValue{
+			valueType: TypeConceptList,
+			listVal:   items,
+		}
 	case *pb.RowEntry_ValueList_:
-		items := make([]interface{}, 0, len(e.ValueList.GetValues()))
+		// Convert value list to TypedValue list
+		items := make([]TypedValue, 0, len(e.ValueList.GetValues()))
 		for _, v := range e.ValueList.GetValues() {
-			items = append(items, convertValue(v))
+			if typedVal := convertValue(v); typedVal != nil {
+				items = append(items, *typedVal)
+			}
 		}
-		return items
+		return &TypedValue{
+			valueType: TypeValueList,
+			listVal:   items,
+		}
 	default:
-		return nil
+		return &TypedValue{valueType: TypeNull, isNull: true}
 	}
 }
 
-// convertValue convert Value to basic types
-func convertValue(value *pb.Value) interface{} {
+// convertValue converts protobuf Value to strongly-typed TypedValue
+// This ensures type safety by returning TypedValue instead of interface{}
+func convertValue(value *pb.Value) *TypedValue {
 	if value == nil {
-		return nil
+		return &TypedValue{valueType: TypeNull, isNull: true}
 	}
 
 	switch v := value.GetValue().(type) {
 	case *pb.Value_String_:
-		return v.String_
+		return &TypedValue{
+			valueType: TypeString,
+			stringVal: v.String_,
+		}
 	case *pb.Value_Boolean:
-		return v.Boolean
+		return &TypedValue{
+			valueType: TypeBool,
+			boolVal:   v.Boolean,
+		}
 	case *pb.Value_Integer:
-		return v.Integer
+		// All integer types (integer, count, long) map to int64
+		return &TypedValue{
+			valueType: TypeInt64,
+			int64Val:  v.Integer,
+		}
 	case *pb.Value_Double:
-		return v.Double
+		return &TypedValue{
+			valueType:  TypeFloat64,
+			float64Val: v.Double,
+		}
 	case *pb.Value_Date_:
-		return v.Date.NumDaysSinceCe
+		return &TypedValue{
+			valueType: TypeDate,
+			dateVal: &Date{
+				NumDaysSinceCE: v.Date.NumDaysSinceCe,
+			},
+		}
 	case *pb.Value_Datetime_:
-		return map[string]interface{}{
-			"seconds": v.Datetime.Seconds,
-			"nanos":   v.Datetime.Nanos,
+		return &TypedValue{
+			valueType: TypeDateTime,
+			dateTimeVal: &DateTime{
+				Seconds: v.Datetime.Seconds,
+				Nanos:   int32(v.Datetime.Nanos),
+			},
 		}
 	case *pb.Value_DatetimeTz:
-		return map[string]interface{}{
-			"datetime": v.DatetimeTz.GetDatetime(),
+		// DateTimeTz is mapped to DateTime (ignoring timezone for now)
+		if v.DatetimeTz.GetDatetime() != nil {
+			return &TypedValue{
+				valueType: TypeDateTime,
+				dateTimeVal: &DateTime{
+					Seconds: v.DatetimeTz.GetDatetime().Seconds,
+					Nanos:   int32(v.DatetimeTz.GetDatetime().Nanos),
+				},
+			}
 		}
+		return &TypedValue{valueType: TypeNull, isNull: true}
 	case *pb.Value_Duration_:
-		return map[string]interface{}{
-			"months": v.Duration.Months,
-			"days":   v.Duration.Days,
-			"nanos":  v.Duration.Nanos,
+		return &TypedValue{
+			valueType: TypeDuration,
+			durationVal: &Duration{
+				Months: int32(v.Duration.Months),
+				Days:   int32(v.Duration.Days),
+				Nanos:  int64(v.Duration.Nanos),
+			},
 		}
 	case *pb.Value_Decimal_:
-		return map[string]interface{}{
-			"integer":    v.Decimal.Integer,
-			"fractional": v.Decimal.Fractional,
+		return &TypedValue{
+			valueType: TypeDecimal,
+			decimalVal: &Decimal{
+				Integer:    v.Decimal.Integer,
+				Fractional: int32(v.Decimal.Fractional),
+			},
 		}
 	default:
-		return value.String()
+		// Unknown type - store raw value for debugging
+		return &TypedValue{
+			valueType: TypeUnknown,
+			rawValue:  value.String(),
+		}
 	}
 }
 
@@ -958,24 +1225,19 @@ func convertQueryType(queryType pb.Query_Type) QueryType {
 
 
 
-// generateRequestID generate unique request ID (must be 16-byte UUID format)
+// generateRequestID generate unique request ID (must be 16-byte UUID v4 format like Rust implementation)
 func (tx *Transaction) generateRequestID() []byte {
-	id := tx.requestID.Add(1)
-	reqID := make([]byte, 16) // TypeDB requires 16 bytes
+	// Generate standard UUID v4 (16 bytes) exactly like Rust: Uuid::new_v4().as_bytes().to_vec()
+	uuid := make([]byte, 16)
+	rand.Read(uuid)
 
-	// Generate UUID v4 format
-	// First 8 bytes use timestamp and incremental ID
-	binary.BigEndian.PutUint32(reqID[0:4], uint32(time.Now().Unix()))
-	binary.BigEndian.PutUint32(reqID[4:8], uint32(id))
+	// Set version (4) in bits 12-15 of the 6th byte
+	uuid[6] = (uuid[6] & 0x0f) | 0x40
 
-	// Last 8 bytes use random numbers
-	rand.Read(reqID[8:16])
+	// Set variant (10) in bits 6-7 of the 8th byte
+	uuid[8] = (uuid[8] & 0x3f) | 0x80
 
-	// Set UUID v4 version bits (RFC 4122)
-	reqID[6] = (reqID[6] & 0x0f) | 0x40 // Version 4
-	reqID[8] = (reqID[8] & 0x3f) | 0x80 // Variant 10
-
-	return reqID
+	return uuid
 }
 
 // convertTxTypeToPB convert transaction type to protobuf enum
