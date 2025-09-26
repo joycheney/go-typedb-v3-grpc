@@ -2,7 +2,7 @@
 
 **The most advanced Go client for TypeDB v3** - Connect your Go applications to the world's most powerful conceptual graph database with ease.
 
-> 🎆 **New to TypeDB v3 with Go?** Jump straight to our [`examples/`](examples/) directory! We have 7 comprehensive, runnable examples that teach you everything step-by-step.
+> 🎆 **New to TypeDB v3 with Go?** Jump straight to our [`examples/`](examples/) directory! We have 9 comprehensive, runnable examples that teach you everything step-by-step.
 
 ## 🚀 Quick Start
 
@@ -37,13 +37,15 @@ This is the **official, production-ready Go client** for TypeDB v3, designed fro
 ### 🚀 **Simplified APIs**
 Instead of complex transaction management, use our convenience methods:
 ```go
-// Old way: Manual transaction lifecycle
-tx := db.BeginWrite()
-tx.Execute(query)
-tx.Commit()
-tx.Close()
+// Manual way: Full transaction control with bundles
+tx, _ := db.BeginTransaction(ctx, typedbclient.Write)
+results, _ := tx.ExecuteBundle(ctx, []typedbclient.BundleOperation{
+    {Type: typedbclient.OpExecute, Query: query},
+    {Type: typedbclient.OpCommit},
+    {Type: typedbclient.OpClose},
+})
 
-// New way: One line
+// Simplified way: One line with automatic transaction management
 db.ExecuteWrite(ctx, query)
 ```
 
@@ -85,16 +87,48 @@ db := client.GetDatabase("your_database")
 
 // 3. Query immediately
 result, _ := db.ExecuteRead(ctx, `match $person isa person;`)
-fmt.Printf("Found %d people\n", len(result.Rows))
+fmt.Printf("Found %d people\n", len(result.TypedRows))
 ```
 
 **That's it!** No complex configuration, no connection string parsing, no driver setup.
 
 > 📁 **See real examples:** Check [`examples/01_client_basics.go`](examples/01_client_basics.go) for the complete working version!
 
+### Configuration Options
+
+The client supports flexible configuration through the `Options` struct:
+
+```go
+// Using nil - automatically uses DefaultOptions()
+client, _ := typedbclient.NewClient(nil)
+
+// Using explicit default options
+client, _ := typedbclient.NewClient(typedbclient.DefaultOptions())
+
+// Using custom options
+client, _ := typedbclient.NewClient(&typedbclient.Options{
+    Address:  "192.168.1.100:1729",  // TypeDB server address
+    Username: "admin",                // Authentication username
+    Password: "password",             // Authentication password
+    KeepAliveTime:    30 * time.Second,  // TCP keep-alive interval
+    KeepAliveTimeout: 10 * time.Second,  // TCP keep-alive timeout
+    MaxRecvMsgSize:   16 * 1024 * 1024,  // Max receive message size (16MB)
+    MaxSendMsgSize:   16 * 1024 * 1024,  // Max send message size (16MB)
+})
+```
+
+**Default values:**
+- Address: `127.0.0.1:1729`
+- Username: `admin`
+- Password: `password`
+- KeepAliveTime: 30 seconds
+- KeepAliveTimeout: 10 seconds
+- MaxRecvMsgSize: 16MB
+- MaxSendMsgSize: 16MB
+
 ## 📚 Complete Learning Examples
 
-**Start here!** Our `examples/` directory contains 7 comprehensive, runnable programs that teach you everything from basics to advanced patterns. Each example is self-contained and thoroughly documented:
+**Start here!** Our `examples/` directory contains 9 comprehensive, runnable programs that teach you everything from basics to advanced patterns. Each example is self-contained and thoroughly documented:
 
 | Example | What It Shows | Use Case |
 |---------|---------------|----------|
@@ -105,6 +139,8 @@ fmt.Printf("Found %d people\n", len(result.Rows))
 | [**05_query_results.go**](examples/05_query_results.go) | Result processing patterns | Data analysis, reporting |
 | [**06_error_handling.go**](examples/06_error_handling.go) | Production error strategies | Robust production systems |
 | [**07_comprehensive_demo.go**](examples/07_comprehensive_demo.go) | Complete application flow | Architecture reference |
+| [**08_data_persistence.go**](examples/08_data_persistence.go) | Persistent storage with TypeDB | Data persistence patterns |
+| [**09_cleanup.go**](examples/09_cleanup.go) | Database cleanup utilities | Testing and development |
 
 **Run any example:**
 ```bash
@@ -162,7 +198,7 @@ define
 match
   $person isa person, has name $name;
   $company isa company, has name "TechCorp";
-  ($person, $company) isa employment;
+  $emp isa employment, links (employee: $person, employer: $company);
 ```
 
 **Key improvements over TypeDB 2.x:**
