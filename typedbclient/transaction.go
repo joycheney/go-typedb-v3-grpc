@@ -406,14 +406,23 @@ func (tx *Transaction) worker() {
 // processBundle executes a complete bundle of operations atomically
 func (tx *Transaction) processBundle(operations []BundleOperation) BundleResponse {
 	var results []*QueryResult
+	var hasExecutedCommit bool
 
 	// Execute each operation in sequence
-	for _, op := range operations {
+	for i, op := range operations {
 		switch op.Type {
 		case OpExecute:
 			reqID := tx.generateRequestID()
 			resp := tx.handleExecute(reqID, op.Query)
 			if resp.Error != nil {
+				// On error, automatically rollback if we haven't committed yet
+				// and this isn't a read-only transaction
+				if !hasExecutedCommit && tx.txType != Read {
+					rollbackReqID := tx.generateRequestID()
+					tx.handleRollback(rollbackReqID)
+				}
+				// Always close the transaction on error
+				tx.handleClose()
 				return BundleResponse{Error: resp.Error}
 			}
 			results = append(results, resp.Result)
@@ -422,15 +431,24 @@ func (tx *Transaction) processBundle(operations []BundleOperation) BundleRespons
 			reqID := tx.generateRequestID()
 			resp := tx.handleCommit(reqID)
 			if resp.Error != nil {
+				// If commit fails, try to rollback and close
+				rollbackReqID := tx.generateRequestID()
+				tx.handleRollback(rollbackReqID)
+				tx.handleClose()
 				return BundleResponse{Error: resp.Error}
 			}
+			hasExecutedCommit = true
 
 		case OpRollback:
 			reqID := tx.generateRequestID()
 			resp := tx.handleRollback(reqID)
 			if resp.Error != nil {
+				// If rollback fails, still try to close
+				tx.handleClose()
 				return BundleResponse{Error: resp.Error}
 			}
+			// autoCompleteBundle has already ensured OpClose follows OpRollback
+			// No need to check or add close here
 
 		case OpClose:
 			resp := tx.handleClose()
@@ -683,11 +701,19 @@ func (tx *Transaction) handleClose() StreamResponse {
 // ExecuteBundle executes a complete bundle of operations atomically
 // This is the ONLY public method for executing transaction operations
 // Ensures atomic execution with no possibility of interleaving
+//
+// The method automatically handles transaction lifecycle:
+// - For Write/Schema transactions: automatically adds OpCommit and OpClose if not present
+// - For Read transactions: automatically adds OpClose if not present
+// - Ensures correct operation order (Commit before Close)
 func (tx *Transaction) ExecuteBundle(ctx context.Context, operations []BundleOperation) ([]*QueryResult, error) {
 	// Check if already closed
 	if tx.closed.Load() {
 		return nil, fmt.Errorf("transaction is closed")
 	}
+
+	// Intelligently complete the bundle with necessary operations
+	operations = tx.autoCompleteBundle(operations)
 
 	// Create response channel
 	responseChan := make(chan BundleResponse, 1)
@@ -729,6 +755,66 @@ func (tx *Transaction) ExecuteBundle(ctx context.Context, operations []BundleOpe
 		}
 		return nil, fmt.Errorf("worker goroutine exited unexpectedly")
 	}
+}
+
+// autoCompleteBundle intelligently adds missing commit/close operations
+func (tx *Transaction) autoCompleteBundle(operations []BundleOperation) []BundleOperation {
+	if len(operations) == 0 {
+		return operations
+	}
+
+	lastOpIndex := len(operations) - 1
+	lastOp := operations[lastOpIndex].Type
+
+	// Case 1: Last operation is Execute - need to add commit (if needed) and close
+	if lastOp == OpExecute {
+		// Write/Schema transactions need commit
+		if tx.txType == Write || tx.txType == Schema {
+			operations = append(operations, BundleOperation{Type: OpCommit})
+		}
+		operations = append(operations, BundleOperation{Type: OpClose})
+		return operations
+	}
+
+	// Case 2: Last operation is Commit - only need to add close
+	if lastOp == OpCommit {
+		operations = append(operations, BundleOperation{Type: OpClose})
+		return operations
+	}
+
+	// Case 3: Last operation is Rollback - only need to add close
+	if lastOp == OpRollback {
+		operations = append(operations, BundleOperation{Type: OpClose})
+		return operations
+	}
+
+	// Case 4: Last operation is Close - check if commit is needed before close
+	if lastOp == OpClose {
+		// Only Write/Schema transactions need commit
+		if tx.txType == Write || tx.txType == Schema {
+			// Look backwards to see if there's already a commit or rollback
+			hasCommitOrRollback := false
+			for i := lastOpIndex - 1; i >= 0; i-- {
+				if operations[i].Type == OpCommit || operations[i].Type == OpRollback {
+					hasCommitOrRollback = true
+					break
+				}
+			}
+
+			// If no commit/rollback found, insert commit before close
+			if !hasCommitOrRollback {
+				// Create new slice with commit inserted before close
+				newOps := make([]BundleOperation, 0, len(operations)+1)
+				newOps = append(newOps, operations[:lastOpIndex]...)
+				newOps = append(newOps, BundleOperation{Type: OpCommit})
+				newOps = append(newOps, operations[lastOpIndex])
+				return newOps
+			}
+		}
+	}
+
+	// Bundle is already complete
+	return operations
 }
 
 

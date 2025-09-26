@@ -12,10 +12,15 @@ import (
 // Example 4: Full Transaction API with Bundles
 // This example demonstrates the full transaction management API using atomic bundles:
 // - BeginTransaction: Start different types of transactions (Read/Write/Schema)
-// - Transaction.ExecuteBundle: Execute atomic bundles of operations
-// - Bundle operations: OpExecute, OpCommit, OpRollback, OpClose
-// - Multi-query transaction management with atomic bundles
-// - Bundle-based error handling and resource management
+// - Transaction.ExecuteBundle: Execute atomic bundles with automatic lifecycle management
+//
+// Automatic Lifecycle Management:
+// 1. Normal flow: ExecuteBundle automatically adds required operations
+//    - Write/Schema transactions: adds OpCommit and OpClose
+//    - Read transactions: adds OpClose only
+// 2. Error flow: ExecuteBundle automatically handles cleanup
+//    - Write/Schema transactions: executes rollback and close on failure
+//    - Read transactions: executes close on failure
 
 func main() {
 	fmt.Println("=== TypeDB v3 gRPC Full Transaction API Example ===")
@@ -75,10 +80,10 @@ func demonstrateReadTransaction(ctx context.Context, database *typedbclient.Data
 	fmt.Println("✓ Read transaction started")
 
 	// Create a bundle with multiple read queries
+	// ExecuteBundle will automatically add OpClose for read transactions
 	bundle := []typedbclient.BundleOperation{
 		{Type: typedbclient.OpExecute, Query: "match $p isa person; limit 3;"},
 		{Type: typedbclient.OpExecute, Query: "match $c isa company; limit 3;"},
-		{Type: typedbclient.OpClose}, // Read transactions just need close
 	}
 
 	fmt.Println("\nExecuting bundle with 2 queries...")
@@ -98,10 +103,10 @@ func demonstrateReadTransaction(ctx context.Context, database *typedbclient.Data
 		}
 	}
 
-	// Read transactions don't need to commit, only close
+	// Read transactions don't need to commit
 	fmt.Println("\nRead transaction characteristics:")
 	fmt.Printf("  - Does not modify data, only reads data\n")
-	fmt.Printf("  - Does not need to call Commit(), only Close()\n")
+	fmt.Printf("  - Automatic lifecycle: ExecuteBundle adds OpClose\n")
 	fmt.Printf("  - Can execute multiple queries maintaining consistent read view\n")
 }
 
@@ -129,18 +134,17 @@ func demonstrateSchemaTransaction(ctx context.Context, database *typedbclient.Da
 		attribute name value string;
 		attribute companyname value string;`
 
-	// Create bundle with schema definition and commit
+	// Create bundle with schema definition
+	// ExecuteBundle will automatically add OpCommit and OpClose for schema transactions
 	bundle := []typedbclient.BundleOperation{
 		{Type: typedbclient.OpExecute, Query: schemaQuery},
-		{Type: typedbclient.OpCommit}, // Schema transactions need commit
-		{Type: typedbclient.OpClose},
 	}
 
 	fmt.Println("\nExecuting schema bundle...")
 	results, err := tx.ExecuteBundle(schemaCtx, bundle)
 	if err != nil {
 		fmt.Printf("  Schema bundle failed: %v\n", err)
-		// Bundle automatically handles rollback on error
+		// On error: ExecuteBundle has already executed rollback and close
 		return
 	}
 
@@ -151,8 +155,8 @@ func demonstrateSchemaTransaction(ctx context.Context, database *typedbclient.Da
 	fmt.Println("\n✓ Schema transaction successfully committed")
 	fmt.Println("Schema transaction features:")
 	fmt.Printf("  - Used for defining or modifying database schema\n")
-	fmt.Printf("  - Must call Commit() to persist changes\n")
-	fmt.Printf("  - Should call Rollback() on failure to avoid partial changes\n")
+	fmt.Printf("  - Automatic lifecycle: ExecuteBundle adds OpCommit and OpClose\n")
+	fmt.Printf("  - Error handling: automatic rollback and close on failure\n")
 	fmt.Printf("  - Can perform multiple schema operations in one transaction\n")
 }
 
@@ -174,25 +178,22 @@ func demonstrateWriteTransaction(ctx context.Context, database *typedbclient.Dat
 	fmt.Println("✓ Write transaction started")
 
 	// Create bundle with insert and verification operations
+	// ExecuteBundle will automatically add OpCommit and OpClose for write transactions
 	bundle := []typedbclient.BundleOperation{
 		// Insert operations
 		{Type: typedbclient.OpExecute, Query: `insert
 		$p1 isa person, has name "Alice";
 		$p2 isa person, has name "Bob";
 		$c1 isa company, has companyname "TechCorp";`},
-		// Verification query before commit
+		// Verification query (will run before auto-added commit)
 		{Type: typedbclient.OpExecute, Query: "match $p isa person; reduce $count = count($p);"},
-		// Commit the transaction
-		{Type: typedbclient.OpCommit},
-		// Close the transaction
-		{Type: typedbclient.OpClose},
 	}
 
 	fmt.Println("\nExecuting write bundle with insert and verification...")
 	results, err := tx.ExecuteBundle(writeCtx, bundle)
 	if err != nil {
 		fmt.Printf("  Write bundle failed: %v\n", err)
-		// Bundle automatically handles rollback on error
+		// On error: ExecuteBundle has already executed rollback and close
 		return
 	}
 
@@ -209,8 +210,8 @@ func demonstrateWriteTransaction(ctx context.Context, database *typedbclient.Dat
 	fmt.Println("\n✓ Write transaction successfully committed")
 	fmt.Println("Write transaction features:")
 	fmt.Printf("  - Used for inserting, updating, or deleting data\n")
-	fmt.Printf("  - Bundle includes commit operation for persistence\n")
-	fmt.Printf("  - Can include verification queries in same bundle\n")
+	fmt.Printf("  - Automatic lifecycle: ExecuteBundle adds OpCommit and OpClose\n")
+	fmt.Printf("  - Verification queries run before auto-added commit\n")
 	fmt.Printf("  - Atomic execution ensures all-or-nothing semantics\n")
 }
 
@@ -231,12 +232,12 @@ func demonstrateTransactionRollback(ctx context.Context, database *typedbclient.
 
 	fmt.Println("✓ Write transaction started (for rollback demonstration)")
 
-	// Create bundle with insert followed by rollback (no commit)
+	// Create bundle with insert followed by explicit rollback
+	// This demonstrates business logic validation failure scenario
+	// ExecuteBundle will automatically add OpClose after OpRollback
 	bundle := []typedbclient.BundleOperation{
 		{Type: typedbclient.OpExecute, Query: `insert $p isa person, has name "TestPerson";`},
-		// Simulate business logic failure - rollback instead of commit
-		{Type: typedbclient.OpRollback},
-		{Type: typedbclient.OpClose},
+		{Type: typedbclient.OpRollback}, // Explicit rollback for business logic failure
 	}
 
 	fmt.Println("\nExecuting bundle with insert followed by rollback...")
@@ -255,9 +256,10 @@ func demonstrateTransactionRollback(ctx context.Context, database *typedbclient.
 
 	// Verify that data was not persisted
 	fmt.Println("\nVerifying rollback effect:")
+	// Verification query in read transaction
+	// ExecuteBundle will automatically add OpClose
 	verifyBundle := []typedbclient.BundleOperation{
 		{Type: typedbclient.OpExecute, Query: `match $p isa person, has name "TestPerson";`},
-		{Type: typedbclient.OpClose},
 	}
 
 	readTx, err := database.BeginTransaction(writeCtx, typedbclient.Read)
@@ -282,7 +284,7 @@ func demonstrateTransactionRollback(ctx context.Context, database *typedbclient.
 	fmt.Printf("  - OpRollback in bundle undoes all changes in the transaction\n")
 	fmt.Printf("  - Database state is restored to before transaction began\n")
 	fmt.Printf("  - Suitable for error handling and business logic validation\n")
-	fmt.Printf("  - Bundle ensures atomic rollback operation\n")
+	fmt.Printf("  - Automatic lifecycle: ExecuteBundle adds OpClose after OpRollback\n")
 }
 
 // demonstrateBatchTransaction demonstrates batch operation transaction
@@ -313,6 +315,7 @@ func demonstrateBatchTransaction(ctx context.Context, database *typedbclient.Dat
 	`
 
 	// Create bundle with multiple batch operations
+	// ExecuteBundle will automatically add OpCommit and OpClose for atomicity
 	bundle := []typedbclient.BundleOperation{
 		// Batch insert multiple persons
 		{Type: typedbclient.OpExecute, Query: batchInsert},
@@ -322,20 +325,16 @@ func demonstrateBatchTransaction(ctx context.Context, database *typedbclient.Dat
 		$c1 isa company, has companyname "InnovateTech";
 		$c2 isa company, has companyname "DataCorp";
 		`},
-
-		// Perform data statistics before commit
+		// Statistics queries (will run before auto-added commit)
 		{Type: typedbclient.OpExecute, Query: "match $p isa person; reduce $count = count($p);"},
 		{Type: typedbclient.OpExecute, Query: "match $c isa company; reduce $count = count($c);"},
-		// Commit all batch operations
-		{Type: typedbclient.OpCommit},
-		{Type: typedbclient.OpClose},
 	}
 
 	fmt.Println("\nExecuting batch bundle with multiple operations...")
 	results, err := tx.ExecuteBundle(batchCtx, bundle)
 	if err != nil {
 		fmt.Printf("  Batch bundle failed: %v\n", err)
-		// Bundle automatically handles rollback on error
+		// On error: ExecuteBundle has already executed rollback and close
 		return
 	}
 
@@ -361,7 +360,7 @@ func demonstrateBatchTransaction(ctx context.Context, database *typedbclient.Dat
 	fmt.Printf("  - Execute multiple related operations in a single atomic bundle\n")
 	fmt.Printf("  - Guarantee atomicity of all operations (all succeed or all fail)\n")
 	fmt.Printf("  - Suitable for complex data import and update scenarios\n")
-	fmt.Printf("  - Can include validation and statistics in same bundle\n")
+	fmt.Printf("  - Automatic lifecycle: ExecuteBundle adds OpCommit and OpClose\n")
 }
 
 // Helper functions
@@ -426,22 +425,23 @@ func getQueryTypeDescription(queryType typedbclient.QueryType) string {
 // 3. Observe complete lifecycle management of different transaction types
 //
 // APIs covered in this example:
-// - database.BeginTransaction(ctx, txType)  // Begin transaction
-// - transaction.Execute(ctx, query)        // Execute query
-// - transaction.Commit(ctx)                // Commit transaction
-// - transaction.Rollback(ctx)              // Rollback transaction
-// - transaction.Close(ctx)                 // Close transaction
+// - database.BeginTransaction(ctx, txType)    // Begin transaction
+// - transaction.ExecuteBundle(ctx, operations) // Execute bundle with automatic lifecycle
+//
+// Automatic lifecycle management:
+// - Normal flow: adds OpCommit (Write/Schema) and OpClose as needed
+// - Error flow: executes rollback (Write/Schema) and close automatically
 //
 // Transaction types:
 // - typedbclient.Read: Read-only transaction for querying data
 // - typedbclient.Write: Write transaction for modifying data
 // - typedbclient.Schema: Schema transaction for modifying schema
 //
-// Transaction management best practices:
-// 1. Use defer to ensure transactions are closed
-// 2. Write/Schema transactions must be explicitly committed to persist
-// 3. Should call Rollback() on errors
-// 4. Read transactions don't need commit, just Close()
+// Best practices:
+// 1. Let ExecuteBundle handle transaction lifecycle - just provide OpExecute operations
+// 2. Use explicit OpRollback only for business logic validation failures
+// 3. Error handling is automatic - no need to manually rollback or close on errors
+// 4. Bundle operations execute atomically - all succeed or all fail
 
 func init() {
 	// Configure log format

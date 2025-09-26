@@ -431,16 +431,12 @@ func demonstrateComplexTransaction(ctx context.Context, database *typedbclient.D
 			Query: op,
 		})
 	}
-	// Add commit and close to bundle
-	bundle = append(bundle,
-		typedbclient.BundleOperation{Type: typedbclient.OpCommit},
-		typedbclient.BundleOperation{Type: typedbclient.OpClose},
-	)
+	// Note: ExecuteBundle automatically adds OpCommit and OpClose for write transactions
 
 	// Execute bundle atomically
 	results, err := tx.ExecuteBundle(txCtx, bundle)
 	if err != nil {
-		// Bundle automatically handles rollback on error
+		// ExecuteBundle has already performed rollback and close on error
 		return fmt.Errorf("bundle execution failed: %w", err)
 	}
 
@@ -518,11 +514,7 @@ func demonstrateBatchOperations(ctx context.Context, database *typedbclient.Data
 			Query: skillQuery,
 		})
 	}
-	// Add commit and close to bundle
-	batchBundle = append(batchBundle,
-		typedbclient.BundleOperation{Type: typedbclient.OpCommit},
-		typedbclient.BundleOperation{Type: typedbclient.OpClose},
-	)
+	// Note: ExecuteBundle automatically adds OpCommit and OpClose for write transactions
 
 	// Execute batch bundle atomically
 	batchResults, err := tx.ExecuteBundle(batchCtx, batchBundle)

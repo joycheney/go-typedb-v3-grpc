@@ -37,12 +37,12 @@ This is the **official, production-ready Go client** for TypeDB v3, designed fro
 ### 🚀 **Simplified APIs**
 Instead of complex transaction management, use our convenience methods:
 ```go
-// Manual way: Full transaction control with bundles
+// Advanced way: Full transaction control with automatic lifecycle management
 tx, _ := db.BeginTransaction(ctx, typedbclient.Write)
+// ExecuteBundle automatically adds OpCommit and OpClose for you!
 results, _ := tx.ExecuteBundle(ctx, []typedbclient.BundleOperation{
     {Type: typedbclient.OpExecute, Query: query},
-    {Type: typedbclient.OpCommit},
-    {Type: typedbclient.OpClose},
+    // No need to add OpCommit and OpClose - they're automatic!
 })
 
 // Simplified way: One line with automatic transaction management
@@ -50,6 +50,8 @@ db.ExecuteWrite(ctx, query)
 ```
 
 ### 🔄 **Automatic Everything**
+- **Transaction lifecycle** - ExecuteBundle automatically adds OpCommit/OpClose as needed
+- **Error recovery** - Automatic rollback and cleanup on failures
 - **Connection management** - Automatic reconnection, pooling, and load balancing
 - **Authentication** - Built-in token management and renewal
 - **Error handling** - Smart retry logic for network issues
@@ -180,6 +182,71 @@ Or programmatic configuration for complex setups.
 - Structured logging for operations monitoring
 - Configurable log levels and formats
 - Integration-ready for your monitoring stack
+
+## 🎯 Automatic Transaction Lifecycle Management
+
+One of the most powerful features of this client is **automatic transaction lifecycle management**. You no longer need to manually add `OpCommit` and `OpClose` operations - the client handles this intelligently for you.
+
+### How It Works
+
+When you use `ExecuteBundle`, the client automatically:
+1. **Analyzes your operations** to understand what you're trying to do
+2. **Adds the right operations** based on transaction type:
+   - For **Write/Schema transactions**: adds `OpCommit` then `OpClose`
+   - For **Read transactions**: adds `OpClose` only (no commit needed)
+3. **Handles errors gracefully**:
+   - On failure in Write/Schema transactions: executes rollback then close
+   - On failure in Read transactions: executes close
+   - Always ensures proper cleanup
+
+### Examples
+
+```go
+// Before: Manual lifecycle management (tedious and error-prone)
+tx, _ := db.BeginTransaction(ctx, typedbclient.Write)
+results, _ := tx.ExecuteBundle(ctx, []typedbclient.BundleOperation{
+    {Type: typedbclient.OpExecute, Query: insertQuery},
+    {Type: typedbclient.OpCommit},   // Had to remember this
+    {Type: typedbclient.OpClose},    // And this too
+})
+
+// Now: Automatic lifecycle management (clean and simple)
+tx, _ := db.BeginTransaction(ctx, typedbclient.Write)
+results, _ := tx.ExecuteBundle(ctx, []typedbclient.BundleOperation{
+    {Type: typedbclient.OpExecute, Query: insertQuery},
+    // That's it! OpCommit and OpClose are added automatically
+})
+
+// Error handling is also automatic
+tx, _ := db.BeginTransaction(ctx, typedbclient.Write)
+results, err := tx.ExecuteBundle(ctx, []typedbclient.BundleOperation{
+    {Type: typedbclient.OpExecute, Query: badQuery},
+})
+if err != nil {
+    // Transaction already rolled back and closed automatically!
+    // No manual cleanup needed
+}
+```
+
+### Explicit Control When Needed
+
+You can still explicitly control transaction flow for special cases:
+
+```go
+// Explicit rollback for business logic validation
+bundle := []typedbclient.BundleOperation{
+    {Type: typedbclient.OpExecute, Query: insertQuery},
+    // Business logic check fails - explicit rollback
+    {Type: typedbclient.OpRollback},  // ExecuteBundle adds OpClose after this
+}
+```
+
+This automatic lifecycle management:
+- ✅ **Reduces boilerplate** - Write less code
+- ✅ **Prevents errors** - Never forget to close transactions
+- ✅ **Ensures consistency** - Always commit before close
+- ✅ **Handles failures** - Automatic rollback on errors
+- ✅ **Maintains compatibility** - Existing code with manual operations still works
 
 ## TypeDB v3 Simplified Syntax
 

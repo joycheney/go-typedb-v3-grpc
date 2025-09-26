@@ -244,14 +244,12 @@ func (db *Database) ExecuteRead(ctx context.Context, query string) (*QueryResult
 			return fmt.Errorf("failed to begin read transaction: %w", err)
 		}
 
-		// Create bundle with complete transaction lifecycle
-		// Read transactions don't need explicit commit
+		// Create bundle - ExecuteBundle will automatically add close
 		bundle := []BundleOperation{
 			{Type: OpExecute, Query: query},
-			{Type: OpClose},
 		}
 
-		// Execute bundle atomically
+		// Execute bundle atomically (close will be added automatically)
 		results, err := tx.ExecuteBundle(ctx, bundle)
 		if err != nil {
 			return fmt.Errorf("failed to execute bundle: %w", err)
@@ -278,15 +276,12 @@ func (db *Database) ExecuteWrite(ctx context.Context, query string) (*QueryResul
 			return fmt.Errorf("failed to begin write transaction: %w", err)
 		}
 
-		// Create bundle with complete transaction lifecycle
-		// Write transactions need explicit commit
+		// Create bundle - ExecuteBundle will automatically add commit and close
 		bundle := []BundleOperation{
 			{Type: OpExecute, Query: query},
-			{Type: OpCommit},
-			{Type: OpClose},
 		}
 
-		// Execute bundle atomically
+		// Execute bundle atomically (commit and close will be added automatically)
 		results, err := tx.ExecuteBundle(ctx, bundle)
 		if err != nil {
 			return fmt.Errorf("failed to execute bundle: %w", err)
@@ -313,15 +308,12 @@ func (db *Database) ExecuteSchema(ctx context.Context, query string) (*QueryResu
 			return fmt.Errorf("failed to begin schema transaction: %w", err)
 		}
 
-		// Create bundle with complete transaction lifecycle
-		// Schema transactions need explicit commit
+		// Create bundle - ExecuteBundle will automatically add commit and close
 		bundle := []BundleOperation{
 			{Type: OpExecute, Query: query},
-			{Type: OpCommit},
-			{Type: OpClose},
 		}
 
-		// Execute bundle atomically
+		// Execute bundle atomically (commit and close will be added automatically)
 		results, err := tx.ExecuteBundle(ctx, bundle)
 		if err != nil {
 			return fmt.Errorf("failed to execute bundle: %w", err)

@@ -388,17 +388,19 @@ func demonstrateTransactionErrors() {
 	}
 
 	// Execute a bundle with an operation that will fail
+	// ExecuteBundle behavior on error:
+	// - Automatically executes rollback for Write/Schema transactions
+	// - Automatically closes the transaction
+	// - Returns the error to the caller
 	bundle := []typedbclient.BundleOperation{
 		{Type: typedbclient.OpExecute, Query: "insert $x isa nonexistent_type;"},
-		{Type: typedbclient.OpCommit}, // Won't reach here due to error
-		{Type: typedbclient.OpClose},
 	}
 
 	_, execErr := tx.ExecuteBundle(txCtx, bundle)
 	if execErr != nil {
 		fmt.Printf("   ✓ Operation error in bundle: %v\n", execErr)
-		// Bundle automatically handles rollback on error
-		fmt.Printf("   ✓ Bundle automatically rolled back on error\n")
+		fmt.Printf("   ✓ ExecuteBundle has already executed rollback and close on error\n")
+		fmt.Printf("   Note: No manual cleanup needed after ExecuteBundle errors\n")
 	} else {
 		fmt.Printf("   Unexpected: error operation executed successfully\n")
 	}
@@ -642,15 +644,21 @@ func isTimeoutError(err error) bool {
 // - typedbclient.CreateAuthToken() authentication errors
 // - database.ExecuteRead/Write/Schema() query errors
 // - context.WithTimeout() timeout errors
-// - transaction.Execute() transaction errors
+// - transaction.ExecuteBundle() automatic error recovery
 // - Custom retry logic and error classification
+//
+// Automatic error handling in ExecuteBundle:
+// - On operation failure: automatically executes rollback (Write/Schema only)
+// - Always closes transaction on error
+// - Returns error to caller for handling
+// - No manual cleanup needed after ExecuteBundle errors
 //
 // Error handling principles:
 // 1. Error classification: distinguish different types of errors
 // 2. Graceful degradation: provide alternative solutions
 // 3. Fail fast: return immediately for non-recoverable errors
 // 4. Smart retry: retry for recoverable errors
-// 5. Resource cleanup: ensure resources are properly released
+// 5. Resource cleanup: ExecuteBundle handles this automatically
 // 6. User friendly: provide clear error information
 
 func init() {

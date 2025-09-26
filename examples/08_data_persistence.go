@@ -71,10 +71,9 @@ func main() {
 		attribute position_level value string @values("Junior", "Mid", "Senior", "Lead", "Manager");`
 
 	// Execute attributes definition first - must be done before entities can reference them
+	// Note: ExecuteBundle automatically adds OpCommit and OpClose for schema transactions
 	attributesBundle := []typedbclient.BundleOperation{
 		{Type: typedbclient.OpExecute, Query: attributesSchema},
-		{Type: typedbclient.OpCommit},
-		{Type: typedbclient.OpClose},
 	}
 
 	if _, err := schemaTx.ExecuteBundle(ctx, attributesBundle); err != nil {
@@ -119,10 +118,9 @@ func main() {
 		company plays employment:employer;`
 
 	// Execute entity/relation schema
+	// Note: ExecuteBundle automatically adds OpCommit and OpClose for schema transactions
 	basicBundle := []typedbclient.BundleOperation{
 		{Type: typedbclient.OpExecute, Query: basicSchema},
-		{Type: typedbclient.OpCommit},
-		{Type: typedbclient.OpClose},
 	}
 
 	if _, err := schemaTx2.ExecuteBundle(ctx, basicBundle); err != nil {
@@ -147,10 +145,9 @@ func main() {
 	// Test 2: Add @unique constraint
 	constraintsSchema2 := `define person owns email @unique;`
 	fmt.Println("Testing @unique constraint on person email...")
+	// Note: ExecuteBundle automatically adds OpCommit and OpClose for schema transactions
 	constraintsBundle2 := []typedbclient.BundleOperation{
 		{Type: typedbclient.OpExecute, Query: constraintsSchema2},
-		{Type: typedbclient.OpCommit},
-		{Type: typedbclient.OpClose},
 	}
 
 	if _, err := schemaTx4.ExecuteBundle(ctx, constraintsBundle2); err != nil {
@@ -168,10 +165,9 @@ func main() {
 		company owns company_name @key;
 		employment owns position_level @card(1);`
 	fmt.Println("Testing company @key and employment @card constraints...")
+	// Note: ExecuteBundle automatically adds OpCommit and OpClose for schema transactions
 	constraintsBundle3 := []typedbclient.BundleOperation{
 		{Type: typedbclient.OpExecute, Query: constraintsSchema3},
-		{Type: typedbclient.OpCommit},
-		{Type: typedbclient.OpClose},
 	}
 
 	if _, err := schemaTx5.ExecuteBundle(ctx, constraintsBundle3); err != nil {
@@ -249,9 +245,7 @@ func main() {
 			has contract_active false,
 			has position_level "Lead";`},
 
-		// Commit all changes
-		{Type: typedbclient.OpCommit},
-		{Type: typedbclient.OpClose},
+		// Note: ExecuteBundle automatically adds OpCommit and OpClose for write transactions
 	}
 
 	results, err := writeTx.ExecuteBundle(ctx, insertBundle)
@@ -280,7 +274,7 @@ func main() {
 		{Type: typedbclient.OpExecute, Query: "match\n\t$p isa person;\nreduce\n\t$count = count($p);"},
 		{Type: typedbclient.OpExecute, Query: "match\n\t$c isa company;\nreduce\n\t$count = count($c);"},
 		{Type: typedbclient.OpExecute, Query: "match\n\t$e isa employment;\nreduce\n\t$count = count($e);"},
-		{Type: typedbclient.OpClose},
+		// Note: ExecuteBundle automatically adds OpClose for read transactions
 	}
 
 	verifyResults, err := readTx.ExecuteBundle(ctx, verifyBundle)
@@ -545,8 +539,7 @@ func main() {
 					has birth_date 1995-06-15,        # date type
 					has last_login 2024-01-02T14:30:00, # datetime type
 					has registration_time 2023-06-01T15:00:00Z; # datetime-tz type (UTC)`},
-			{Type: typedbclient.OpCommit},
-			{Type: typedbclient.OpClose},
+			// Note: ExecuteBundle automatically adds OpCommit and OpClose for write transactions
 		}
 
 		if _, err := newWriteTx.ExecuteBundle(ctx, newDataBundle); err != nil {
@@ -561,9 +554,9 @@ func main() {
 	if err != nil {
 		fmt.Printf("❌ Failed to begin verification transaction: %v\n", err)
 	} else {
+		// Note: ExecuteBundle automatically adds OpClose for read transactions
 		verifyNewBundle := []typedbclient.BundleOperation{
 			{Type: typedbclient.OpExecute, Query: `match $p isa person, has name "Diana Prince";`},
-			{Type: typedbclient.OpClose},
 		}
 
 		verifyNewRes, err := verifyNewTx.ExecuteBundle(ctx, verifyNewBundle)
@@ -582,9 +575,9 @@ func main() {
 	if err != nil {
 		fmt.Printf("Failed to begin final read transaction: %v\n", err)
 	} else {
+		// Note: ExecuteBundle automatically adds OpClose for read transactions
 		finalCountBundle := []typedbclient.BundleOperation{
 			{Type: typedbclient.OpExecute, Query: "match\n\t\t$p isa person;\n\treduce\n\t\t$count = count($p);"},
-			{Type: typedbclient.OpClose},
 		}
 
 		finalResults, err := finalReadTx.ExecuteBundle(ctx, finalCountBundle)
