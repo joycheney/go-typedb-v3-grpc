@@ -43,15 +43,14 @@ func main() {
 func demonstrateDefaultConfig() {
 	fmt.Println("\n--- Demo 1: Default Configuration Client ---")
 
-	// Get default configuration
+	// Get default configuration (simplified with 3 essential parameters)
 	config := typedbclient.DefaultOptions()
-	fmt.Printf("Default configuration:\n")
+	fmt.Printf("Default configuration (TypeDB official standards applied automatically):\n")
 	fmt.Printf("  Address: %s\n", config.Address)
 	fmt.Printf("  Username: %s\n", config.Username)
-	fmt.Printf("  Keep-alive time: %v\n", config.KeepAliveTime)
-	fmt.Printf("  Keep-alive timeout: %v\n", config.KeepAliveTimeout)
-	fmt.Printf("  Max receive message size: %d bytes\n", config.MaxRecvMsgSize)
-	fmt.Printf("  Max send message size: %d bytes\n", config.MaxSendMsgSize)
+	fmt.Printf("  Password: %s\n", config.Password)
+	fmt.Printf("  ✓ gRPC keep-alive: 2 hours (matches TypeDB server)\n")
+	fmt.Printf("  ✓ Message size limits: gRPC defaults (no artificial restrictions)\n")
 
 	// Try to create client (Note: TypeDB server needs to be running)
 	client, err := typedbclient.NewClient(config)
@@ -74,23 +73,18 @@ func demonstrateDefaultConfig() {
 func demonstrateCustomConfig() {
 	fmt.Println("\n--- Demo 2: Custom Configuration Client ---")
 
-	// Create custom configuration
+	// Create custom configuration (only essential parameters - advanced settings use TypeDB standards)
 	config := &typedbclient.Options{
-		Address:          "127.0.0.1:1729", // TypeDB v3 default port
-		Username:         "admin",
-		Password:         "password",
-		KeepAliveTime:    60 * time.Second, // Longer keep-alive time
-		KeepAliveTimeout: 15 * time.Second, // Longer keep-alive timeout
-		MaxRecvMsgSize:   32 * 1024 * 1024, // 32MB receive message limit
-		MaxSendMsgSize:   32 * 1024 * 1024, // 32MB send message limit
+		Address:  "127.0.0.1:1729", // TypeDB v3 default port
+		Username: "admin",
+		Password: "password",
 	}
 
-	fmt.Printf("Custom configuration:\n")
+	fmt.Printf("Custom configuration (simplified API):\n")
 	fmt.Printf("  Address: %s\n", config.Address)
-	fmt.Printf("  Keep-alive time: %v\n", config.KeepAliveTime)
-	fmt.Printf("  Keep-alive timeout: %v\n", config.KeepAliveTimeout)
-	fmt.Printf("  Max receive message size: %d bytes\n", config.MaxRecvMsgSize)
-	fmt.Printf("  Max send message size: %d bytes\n", config.MaxSendMsgSize)
+	fmt.Printf("  Username: %s\n", config.Username)
+	fmt.Printf("  Password: %s\n", config.Password)
+	fmt.Printf("  ✓ All other parameters automatically use TypeDB official standards\n")
 
 	// Try to create client
 	client, err := typedbclient.NewClient(config)
@@ -200,11 +194,10 @@ func demonstrateNewAPIFeatures() {
 	// Demonstrate Options pattern: Go standard library convention
 	fmt.Println("\n3. Using Options pattern (Go standard library convention):")
 	opts := &typedbclient.Options{
-		Address:          "127.0.0.1:1729",
-		Username:         "admin",
-		Password:         "password",
-		KeepAliveTime:    30 * time.Second,
-		KeepAliveTimeout: 10 * time.Second,
+		Address:  "127.0.0.1:1729",
+		Username: "admin",
+		Password: "password",
+		// Advanced parameters automatically use TypeDB official standards
 	}
 	client3, err := typedbclient.NewClient(opts)
 	if err != nil {
@@ -225,11 +218,12 @@ func demonstrateNewAPIFeatures() {
 		defer client4.Close()
 	}
 
-	fmt.Println("\n✓ Advantages of new API design:")
-	fmt.Println("   - Solves variable shadowing: Using typedbclient package name avoids naming conflicts")
+	fmt.Println("\n✓ Advantages of simplified API design:")
+	fmt.Println("   - Zero-config design: Only 3 essential parameters needed")
+	fmt.Println("   - Official standards: All advanced parameters automatically use TypeDB server settings")
 	fmt.Println("   - Options pattern follows Go standard library conventions, easy to understand and use")
 	fmt.Println("   - Convenience functions simplify common use cases")
-	fmt.Println("   - Explicit pointer types avoid type semantic confusion")
+	fmt.Println("   - No complex parameter tuning - works optimally out-of-the-box")
 }
 
 // min returns the minimum of two integers

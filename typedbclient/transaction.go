@@ -212,7 +212,8 @@ func extractErrorDetails(err error) string {
 type StreamOperation int
 
 const (
-	OpExecute StreamOperation = iota
+	OpOpen StreamOperation = iota // Open transaction (must be first operation in bundle)
+	OpExecute
 	OpCommit
 	OpRollback
 	OpClose
@@ -259,6 +260,7 @@ type Transaction struct {
 	// gRPC stream (only accessed by worker goroutine)
 	stream grpc.BidiStreamingClient[pb.Transaction_Client, pb.Transaction_Server]
 	closed atomic.Bool
+	opened atomic.Bool // Track if transaction has been opened
 
 	// Producer/consumer channels for lock-free bundle communication
 	bundleChan chan BundleRequest
@@ -269,8 +271,8 @@ type Transaction struct {
 	requestID atomic.Uint64
 }
 
-// BeginTransaction begin transaction
-func (db *Database) BeginTransaction(ctx context.Context, txType TransactionType) (*Transaction, error) {
+// BeginTransaction begin transaction (delayed initialization - stream created in worker)
+func (db *Database) beginTransaction(ctx context.Context, txType TransactionType) (*Transaction, error) {
 	tx := &Transaction{
 		client:     db.client,
 		database:   db.name,
@@ -279,93 +281,8 @@ func (db *Database) BeginTransaction(ctx context.Context, txType TransactionType
 		workerDone: make(chan struct{}),
 	}
 
-	// Try to create transaction stream with authentication error retry mechanism
-	var stream grpc.BidiStreamingClient[pb.Transaction_Client, pb.Transaction_Server]
-	var err error
-
-	maxRetries := 2 // Maximum 2 retries
-	for attempt := 0; attempt < maxRetries; attempt++ {
-		// Get gRPC client atomically
-		connRef := db.client.connRef.Load()
-		if connRef == nil {
-			return nil, fmt.Errorf("gRPC client not initialized")
-		}
-
-		wrapper := connRef.(*connWrapper)
-		grpcClient := wrapper.grpcClient
-
-		// Create transaction stream (using authentication context)
-		authCtx := db.client.withAuth(ctx)
-		stream, err = grpcClient.Transaction(authCtx)
-		if err == nil {
-			break // Successfully created stream
-		}
-
-		// Check if authentication error
-		if isAuthError(err) {
-			// Try to reauthenticate
-			if authErr := db.client.authenticate(); authErr != nil {
-				return nil, fmt.Errorf("reauthentication failed: %w", authErr)
-			}
-			continue // Retry
-		}
-
-		// Check if connection error
-		if isConnectionError(err) {
-			// Try to reconnect
-			if reconnErr := db.client.tryReconnect(); reconnErr != nil {
-				return nil, fmt.Errorf("reconnection failed: %w", reconnErr)
-			}
-			continue // Retry
-		}
-
-		// Return other errors directly
-		return nil, fmt.Errorf("failed to create transaction stream: %w", err)
-	}
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to create transaction stream after %d attempts: %w", maxRetries, err)
-	}
-	tx.stream = stream
-
-	// Generate request ID
-	reqID := tx.generateRequestID()
-
-	// Send transaction open request (including required options field)
-	openReq := pb.Transaction_Client{
-		Reqs: []*pb.Transaction_Req{
-			{
-				ReqId:    reqID,
-				Metadata: make(map[string]string),
-				Req: &pb.Transaction_Req_OpenReq{
-					OpenReq: &pb.Transaction_Open_Req{
-						Database:             db.name,
-						Type:                 convertTxTypeToPB(txType),
-						Options:              &pb.Options_Transaction{}, // Add required options field
-						NetworkLatencyMillis: 0,                          // Add required network latency field
-					},
-				},
-			},
-		},
-	}
-
-	if err := stream.Send(&openReq); err != nil {
-		return nil, fmt.Errorf("failed to send open request: %w", err)
-	}
-
-	// Wait for open response
-	resp, err := stream.Recv()
-	if err != nil {
-		return nil, fmt.Errorf("failed to receive open response: %w", err)
-	}
-
-	// Validate response
-	if resp.GetRes() == nil || resp.GetRes().GetOpenRes() == nil {
-		return nil, fmt.Errorf("invalid open response")
-	}
-
-	// Store stream and start worker goroutine
-	tx.stream = stream
+	// Start worker goroutine (no stream yet - will be created on first bundle)
+	// This ensures all stream operations happen only in the worker goroutine
 	go tx.worker()
 
 	return tx, nil
@@ -409,8 +326,15 @@ func (tx *Transaction) processBundle(operations []BundleOperation) BundleRespons
 	var hasExecutedCommit bool
 
 	// Execute each operation in sequence
-	for i, op := range operations {
+	for _, op := range operations {
 		switch op.Type {
+		case OpOpen:
+			// Handle transaction open (creates stream and sends open request)
+			if err := tx.handleOpen(); err != nil {
+				return BundleResponse{Error: err}
+			}
+			tx.opened.Store(true)
+
 		case OpExecute:
 			reqID := tx.generateRequestID()
 			resp := tx.handleExecute(reqID, op.Query)
@@ -459,6 +383,95 @@ func (tx *Transaction) processBundle(operations []BundleOperation) BundleRespons
 	}
 
 	return BundleResponse{Results: results, Error: nil}
+}
+
+// handleOpen creates stream and sends open request (must be called from worker goroutine only)
+func (tx *Transaction) handleOpen() error {
+	// Try to create transaction stream with retry mechanism
+	var stream grpc.BidiStreamingClient[pb.Transaction_Client, pb.Transaction_Server]
+	var err error
+
+	maxRetries := 2
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		// Get gRPC client atomically
+		connRef := tx.client.connRef.Load()
+		if connRef == nil {
+			return fmt.Errorf("gRPC client not initialized")
+		}
+
+		wrapper := connRef.(*connWrapper)
+		grpcClient := wrapper.grpcClient
+
+		// Create transaction stream with authentication
+		authCtx := tx.client.withAuth(context.Background())
+		stream, err = grpcClient.Transaction(authCtx)
+		if err == nil {
+			break // Success
+		}
+
+		// Handle authentication error
+		if isAuthError(err) {
+			if authErr := tx.client.authenticate(); authErr != nil {
+				return fmt.Errorf("reauthentication failed: %w", authErr)
+			}
+			continue
+		}
+
+		// Handle connection error
+		if isConnectionError(err) {
+			if reconnErr := tx.client.tryReconnect(); reconnErr != nil {
+				return fmt.Errorf("reconnection failed: %w", reconnErr)
+			}
+			continue
+		}
+
+		return fmt.Errorf("failed to create transaction stream: %w", err)
+	}
+
+	if err != nil {
+		return fmt.Errorf("failed to create transaction stream after %d attempts: %w", maxRetries, err)
+	}
+
+	// Store the stream
+	tx.stream = stream
+
+	// Generate request ID
+	reqID := tx.generateRequestID()
+
+	// Send transaction open request
+	openReq := pb.Transaction_Client{
+		Reqs: []*pb.Transaction_Req{
+			{
+				ReqId:    reqID,
+				Metadata: make(map[string]string),
+				Req: &pb.Transaction_Req_OpenReq{
+					OpenReq: &pb.Transaction_Open_Req{
+						Database:             tx.database,
+						Type:                 convertTxTypeToPB(tx.txType),
+						Options:              &pb.Options_Transaction{},
+						NetworkLatencyMillis: 0,
+					},
+				},
+			},
+		},
+	}
+
+	if err := stream.Send(&openReq); err != nil {
+		return fmt.Errorf("failed to send open request: %w", err)
+	}
+
+	// Wait for open response
+	resp, err := stream.Recv()
+	if err != nil {
+		return fmt.Errorf("failed to receive open response: %w", err)
+	}
+
+	// Validate response
+	if resp.GetRes() == nil || resp.GetRes().GetOpenRes() == nil {
+		return fmt.Errorf("invalid open response")
+	}
+
+	return nil
 }
 
 // handleExecute processes query execution in worker goroutine (lock-free)
@@ -706,10 +719,16 @@ func (tx *Transaction) handleClose() StreamResponse {
 // - For Write/Schema transactions: automatically adds OpCommit and OpClose if not present
 // - For Read transactions: automatically adds OpClose if not present
 // - Ensures correct operation order (Commit before Close)
-func (tx *Transaction) ExecuteBundle(ctx context.Context, operations []BundleOperation) ([]*QueryResult, error) {
+func (tx *Transaction) executeBundle(ctx context.Context, operations []BundleOperation) ([]*QueryResult, error) {
 	// Check if already closed
 	if tx.closed.Load() {
 		return nil, fmt.Errorf("transaction is closed")
+	}
+
+	// Automatically add OpOpen if transaction hasn't been opened yet
+	// This ensures Bundle is a complete atomic unit from Open to Close
+	if !tx.opened.Load() {
+		operations = append([]BundleOperation{{Type: OpOpen}}, operations...)
 	}
 
 	// Intelligently complete the bundle with necessary operations

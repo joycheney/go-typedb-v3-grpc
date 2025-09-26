@@ -398,16 +398,11 @@ func demonstrateAdvancedFeatures(ctx context.Context, database *typedbclient.Dat
 func demonstrateComplexTransaction(ctx context.Context, database *typedbclient.Database) error {
 	fmt.Printf("   Executing complex business transaction...\n")
 
-	// Start write transaction
+	// Setup context with timeout
 	txCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
-	tx, err := database.BeginTransaction(txCtx, typedbclient.Write)
-	if err != nil {
-		return fmt.Errorf("failed to start transaction: %w", err)
-	}
-
-	// Multiple operations in transaction - TypeDB 3.x simplified version
+	// Multiple operations in transaction - TypeDB 3.x simplified API
 	operations := []string{
 		// 1. Add new employee
 		`insert $new_emp isa person,
@@ -433,10 +428,10 @@ func demonstrateComplexTransaction(ctx context.Context, database *typedbclient.D
 	}
 	// Note: ExecuteBundle automatically adds OpCommit and OpClose for write transactions
 
-	// Execute bundle atomically
-	results, err := tx.ExecuteBundle(txCtx, bundle)
+	// Execute bundle atomically using simplified API
+	// Automatically handles transaction open, commit, close, and error rollback
+	results, err := database.ExecuteBundle(txCtx, typedbclient.Write, bundle)
 	if err != nil {
-		// ExecuteBundle has already performed rollback and close on error
 		return fmt.Errorf("bundle execution failed: %w", err)
 	}
 
@@ -497,14 +492,9 @@ func demonstrateBatchOperations(ctx context.Context, database *typedbclient.Data
 		`insert $agile isa skill, has skillname "Agile Development";`,
 	}
 
-	// Use transaction for batch operations
+	// Setup context for batch operations
 	batchCtx, cancel := context.WithTimeout(ctx, 20*time.Second)
 	defer cancel()
-
-	tx, err := database.BeginTransaction(batchCtx, typedbclient.Write)
-	if err != nil {
-		return fmt.Errorf("failed to start batch transaction: %w", err)
-	}
 
 	// Create bundle with all batch operations
 	batchBundle := []typedbclient.BundleOperation{}
@@ -514,10 +504,10 @@ func demonstrateBatchOperations(ctx context.Context, database *typedbclient.Data
 			Query: skillQuery,
 		})
 	}
-	// Note: ExecuteBundle automatically adds OpCommit and OpClose for write transactions
 
-	// Execute batch bundle atomically
-	batchResults, err := tx.ExecuteBundle(batchCtx, batchBundle)
+	// Execute batch bundle atomically using simplified API
+	// Automatically handles transaction open, commit, close, and error rollback
+	batchResults, err := database.ExecuteBundle(batchCtx, typedbclient.Write, batchBundle)
 	if err != nil {
 		return fmt.Errorf("failed to execute batch bundle: %w", err)
 	}

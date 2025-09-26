@@ -2,34 +2,26 @@ package typedbclient
 
 import (
 	"net/url"
-	"strconv"
-	"time"
 )
 
-// Options TypeDB client configuration options (follows Go standard library conventions)
+// Options TypeDB client configuration options (simplified for ease of use)
 type Options struct {
-	// Connection configuration
+	// Core connection configuration (user must configure these)
 	Address  string // TypeDB server address (default: 127.0.0.1:1729)
 	Username string // Username (default: admin)
 	Password string // Password (default: password)
 
-	// Performance configuration
-	KeepAliveTime    time.Duration // TCP keep-alive time (default: 30s)
-	KeepAliveTimeout time.Duration // TCP keep-alive timeout (default: 10s)
-	MaxRecvMsgSize   int           // Maximum receive message size (default: 16MB)
-	MaxSendMsgSize   int           // Maximum send message size (default: 16MB)
+	// Note: Other gRPC parameters (KeepAliveTime, KeepAliveTimeout, MaxRecvMsgSize, MaxSendMsgSize)
+	// are now internal and use official TypeDB standards to reduce configuration complexity
 }
 
 // DefaultOptions returns default configuration options
 func DefaultOptions() *Options {
 	return &Options{
-		Address:          "127.0.0.1:1729",
-		Username:         "admin",
-		Password:         "password",
-		KeepAliveTime:    30 * time.Second,
-		KeepAliveTimeout: 10 * time.Second,
-		MaxRecvMsgSize:   16 * 1024 * 1024, // 16MB
-		MaxSendMsgSize:   16 * 1024 * 1024, // 16MB
+		Address:  "127.0.0.1:1729",
+		Username: "admin",
+		Password: "password",
+		// gRPC parameters are now internal and use TypeDB official standards
 	}
 }
 
@@ -41,7 +33,8 @@ func LocalOptions() *Options {
 }
 
 // ParseURL parses configuration options from URL string
-// Supported format: typedb://username:password@host:port?keepalive=30s&timeout=10s
+// Supported format: typedb://username:password@host:port
+// Note: Advanced gRPC parameters are now internal to simplify configuration
 func ParseURL(rawurl string) (*Options, error) {
 	u, err := url.Parse(rawurl)
 	if err != nil {
@@ -63,28 +56,8 @@ func ParseURL(rawurl string) (*Options, error) {
 		}
 	}
 
-	// Parse query parameters
-	query := u.Query()
-	if keepalive := query.Get("keepalive"); keepalive != "" {
-		if duration, err := time.ParseDuration(keepalive); err == nil {
-			opts.KeepAliveTime = duration
-		}
-	}
-	if timeout := query.Get("timeout"); timeout != "" {
-		if duration, err := time.ParseDuration(timeout); err == nil {
-			opts.KeepAliveTimeout = duration
-		}
-	}
-	if maxrecv := query.Get("max_recv_size"); maxrecv != "" {
-		if size, err := strconv.Atoi(maxrecv); err == nil {
-			opts.MaxRecvMsgSize = size
-		}
-	}
-	if maxsend := query.Get("max_send_size"); maxsend != "" {
-		if size, err := strconv.Atoi(maxsend); err == nil {
-			opts.MaxSendMsgSize = size
-		}
-	}
+	// Advanced gRPC parameters are no longer configurable via URL to reduce complexity
+	// They use TypeDB official standards internally
 
 	return opts, nil
 }
@@ -102,16 +75,5 @@ func (opts *Options) fillDefaults() {
 	if opts.Password == "" {
 		opts.Password = defaults.Password
 	}
-	if opts.KeepAliveTime == 0 {
-		opts.KeepAliveTime = defaults.KeepAliveTime
-	}
-	if opts.KeepAliveTimeout == 0 {
-		opts.KeepAliveTimeout = defaults.KeepAliveTimeout
-	}
-	if opts.MaxRecvMsgSize == 0 {
-		opts.MaxRecvMsgSize = defaults.MaxRecvMsgSize
-	}
-	if opts.MaxSendMsgSize == 0 {
-		opts.MaxSendMsgSize = defaults.MaxSendMsgSize
-	}
+	// gRPC parameters are now handled internally with TypeDB official standards
 }

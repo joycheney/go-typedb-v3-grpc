@@ -239,7 +239,7 @@ func (db *Database) ExecuteRead(ctx context.Context, query string) (*QueryResult
 
 	err := db.client.executeWithRetry(ctx, func(ctx context.Context) error {
 		// Begin read-only transaction
-		tx, err := db.BeginTransaction(ctx, Read)
+		tx, err := db.beginTransaction(ctx, Read)
 		if err != nil {
 			return fmt.Errorf("failed to begin read transaction: %w", err)
 		}
@@ -250,7 +250,7 @@ func (db *Database) ExecuteRead(ctx context.Context, query string) (*QueryResult
 		}
 
 		// Execute bundle atomically (close will be added automatically)
-		results, err := tx.ExecuteBundle(ctx, bundle)
+		results, err := tx.executeBundle(ctx, bundle)
 		if err != nil {
 			return fmt.Errorf("failed to execute bundle: %w", err)
 		}
@@ -271,7 +271,7 @@ func (db *Database) ExecuteWrite(ctx context.Context, query string) (*QueryResul
 
 	err := db.client.executeWithRetry(ctx, func(ctx context.Context) error {
 		// Begin write transaction
-		tx, err := db.BeginTransaction(ctx, Write)
+		tx, err := db.beginTransaction(ctx, Write)
 		if err != nil {
 			return fmt.Errorf("failed to begin write transaction: %w", err)
 		}
@@ -282,7 +282,7 @@ func (db *Database) ExecuteWrite(ctx context.Context, query string) (*QueryResul
 		}
 
 		// Execute bundle atomically (commit and close will be added automatically)
-		results, err := tx.ExecuteBundle(ctx, bundle)
+		results, err := tx.executeBundle(ctx, bundle)
 		if err != nil {
 			return fmt.Errorf("failed to execute bundle: %w", err)
 		}
@@ -303,7 +303,7 @@ func (db *Database) ExecuteSchema(ctx context.Context, query string) (*QueryResu
 
 	err := db.client.executeWithRetry(ctx, func(ctx context.Context) error {
 		// Begin schema transaction
-		tx, err := db.BeginTransaction(ctx, Schema)
+		tx, err := db.beginTransaction(ctx, Schema)
 		if err != nil {
 			return fmt.Errorf("failed to begin schema transaction: %w", err)
 		}
@@ -314,7 +314,7 @@ func (db *Database) ExecuteSchema(ctx context.Context, query string) (*QueryResu
 		}
 
 		// Execute bundle atomically (commit and close will be added automatically)
-		results, err := tx.ExecuteBundle(ctx, bundle)
+		results, err := tx.executeBundle(ctx, bundle)
 		if err != nil {
 			return fmt.Errorf("failed to execute bundle: %w", err)
 		}
@@ -327,4 +327,29 @@ func (db *Database) ExecuteSchema(ctx context.Context, query string) (*QueryResu
 	})
 
 	return result, err
+}
+
+// ExecuteBundle executes a complete bundle with automatic transaction management
+// This is the simplest API - creates transaction, executes bundle, and closes automatically
+// The bundle will be automatically completed with OpOpen (if needed), OpCommit, and OpClose
+func (db *Database) ExecuteBundle(ctx context.Context, txType TransactionType, operations []BundleOperation) ([]*QueryResult, error) {
+	var results []*QueryResult
+
+	err := db.client.executeWithRetry(ctx, func(ctx context.Context) error {
+		// Begin transaction (delayed initialization)
+		tx, err := db.beginTransaction(ctx, txType)
+		if err != nil {
+			return fmt.Errorf("failed to begin transaction: %w", err)
+		}
+
+		// ExecuteBundle will automatically add OpOpen (if needed), OpCommit and OpClose
+		results, err = tx.executeBundle(ctx, operations)
+		if err != nil {
+			return fmt.Errorf("failed to execute bundle: %w", err)
+		}
+
+		return nil
+	})
+
+	return results, err
 }

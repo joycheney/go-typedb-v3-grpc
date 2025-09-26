@@ -375,20 +375,14 @@ func demonstrateTransactionErrors() {
 		}
 	}
 
-	// Test 2: Error handling in manual transaction management
-	fmt.Println("\n2. Manual transaction management error handling:")
+	// Test 2: Error handling with automatic transaction management
+	fmt.Println("\n2. Automatic transaction error handling:")
 
 	txCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	tx, err := database.BeginTransaction(txCtx, typedbclient.Write)
-	if err != nil {
-		fmt.Printf("   Failed to create transaction: %v\n", err)
-		return
-	}
-
 	// Execute a bundle with an operation that will fail
-	// ExecuteBundle behavior on error:
+	// Database.ExecuteBundle behavior on error:
 	// - Automatically executes rollback for Write/Schema transactions
 	// - Automatically closes the transaction
 	// - Returns the error to the caller
@@ -396,11 +390,11 @@ func demonstrateTransactionErrors() {
 		{Type: typedbclient.OpExecute, Query: "insert $x isa nonexistent_type;"},
 	}
 
-	_, execErr := tx.ExecuteBundle(txCtx, bundle)
+	_, execErr := database.ExecuteBundle(txCtx, typedbclient.Write, bundle)
 	if execErr != nil {
 		fmt.Printf("   ✓ Operation error in bundle: %v\n", execErr)
-		fmt.Printf("   ✓ ExecuteBundle has already executed rollback and close on error\n")
-		fmt.Printf("   Note: No manual cleanup needed after ExecuteBundle errors\n")
+		fmt.Printf("   ✓ Transaction automatically rolled back and closed on error\n")
+		fmt.Printf("   Note: No manual cleanup needed - all automatic\n")
 	} else {
 		fmt.Printf("   Unexpected: error operation executed successfully\n")
 	}

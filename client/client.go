@@ -35,29 +35,23 @@ type Client struct {
 	lastConnTime   atomic.Value // time.Time
 }
 
-// Config client configuration
+// Config client configuration (simplified)
 type Config struct {
 	Address  string
 	Username string
 	Password string
 
-	// gRPC specific configuration
-	KeepAliveTime    time.Duration
-	KeepAliveTimeout time.Duration
-	MaxRecvMsgSize   int
-	MaxSendMsgSize   int
+	// Note: gRPC specific configuration now uses TypeDB official standards internally
+	// to reduce configuration complexity for users
 }
 
 // DefaultConfig returns default configuration
 func DefaultConfig() *Config {
 	return &Config{
-		Address:          "127.0.0.1:1729", // TypeDB gRPC default port
-		Username:         "admin",
-		Password:         "password",
-		KeepAliveTime:    30 * time.Second,
-		KeepAliveTimeout: 10 * time.Second,
-		MaxRecvMsgSize:   16 * 1024 * 1024, // 16MB
-		MaxSendMsgSize:   16 * 1024 * 1024, // 16MB
+		Address:  "127.0.0.1:1729", // TypeDB gRPC default port
+		Username: "admin",
+		Password: "password",
+		// gRPC parameters now use TypeDB official standards internally
 	}
 }
 
@@ -77,18 +71,7 @@ func NewClient(config *Config) (*Client, error) {
 	if config.Password == "" {
 		config.Password = "password"
 	}
-	if config.KeepAliveTime == 0 {
-		config.KeepAliveTime = 30 * time.Second
-	}
-	if config.KeepAliveTimeout == 0 {
-		config.KeepAliveTimeout = 10 * time.Second
-	}
-	if config.MaxRecvMsgSize == 0 {
-		config.MaxRecvMsgSize = 16 * 1024 * 1024 // 16MB
-	}
-	if config.MaxSendMsgSize == 0 {
-		config.MaxSendMsgSize = 16 * 1024 * 1024 // 16MB
-	}
+	// gRPC parameters now use TypeDB official standards internally
 
 	client := &Client{
 		address:  config.Address,
@@ -112,18 +95,15 @@ func NewClient(config *Config) (*Client, error) {
 
 // connect establishes gRPC connection
 func (c *Client) connect(config *Config) error {
-	// gRPC connection options
+	// gRPC connection options with TypeDB official standards
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithKeepaliveParams(keepalive.ClientParameters{
-			Time:                config.KeepAliveTime,
-			Timeout:             config.KeepAliveTimeout,
+			Time:                2 * time.Hour, // TypeDB official GRPC_CONNECTION_KEEPALIVE
+			Timeout:             0,             // Use gRPC default (no custom timeout)
 			PermitWithoutStream: true,
 		}),
-		grpc.WithDefaultCallOptions(
-			grpc.MaxCallRecvMsgSize(config.MaxRecvMsgSize),
-			grpc.MaxCallSendMsgSize(config.MaxSendMsgSize),
-		),
+		// Use gRPC default message size limits (no custom limits)
 	}
 
 	// Establish connection

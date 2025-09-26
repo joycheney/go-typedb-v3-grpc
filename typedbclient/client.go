@@ -73,18 +73,15 @@ func NewClient(opts *Options) (*Client, error) {
 
 // connect establishes gRPC connection
 func (c *Client) connect(opts *Options) error {
-	// gRPC connection options
+	// gRPC connection options with TypeDB official standards
 	dialOpts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithKeepaliveParams(keepalive.ClientParameters{
-			Time:                opts.KeepAliveTime,
-			Timeout:             opts.KeepAliveTimeout,
+			Time:                2 * time.Hour, // TypeDB official GRPC_CONNECTION_KEEPALIVE
+			Timeout:             0,             // Use gRPC default (no custom timeout)
 			PermitWithoutStream: true,
 		}),
-		grpc.WithDefaultCallOptions(
-			grpc.MaxCallRecvMsgSize(opts.MaxRecvMsgSize),
-			grpc.MaxCallSendMsgSize(opts.MaxSendMsgSize),
-		),
+		// Use gRPC default message size limits (no custom limits)
 	}
 
 	// Establish connection
@@ -247,7 +244,7 @@ func (c *Client) tryReconnect() error {
 		Username: c.username,
 		Password: c.password,
 	}
-	opts.fillDefaults()
+	opts.fillDefaults() // Still need to fill basic defaults
 
 	if err := c.connect(opts); err != nil {
 		return err

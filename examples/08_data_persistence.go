@@ -35,15 +35,9 @@ func main() {
 	}
 	fmt.Printf("✓ Database '%s' created\n", testDbName)
 
-	// Define schema using transaction API
+	// Define schema using simplified API
 	fmt.Println("\nDefining schema...")
 	database1 := client1.GetDatabase(testDbName)
-
-	// Begin schema transaction
-	schemaTx, err := database1.BeginTransaction(ctx, typedbclient.Schema)
-	if err != nil {
-		log.Fatalf("Failed to begin schema transaction: %v", err)
-	}
 
 	// Define schema with ALL TypeQL v3 data types and constraints for comprehensive testing
 	// TypeQL v3 requires attributes to be defined BEFORE they can be used in entities/relations
@@ -71,22 +65,12 @@ func main() {
 		attribute position_level value string @values("Junior", "Mid", "Senior", "Lead", "Manager");`
 
 	// Execute attributes definition first - must be done before entities can reference them
-	// Note: ExecuteBundle automatically adds OpCommit and OpClose for schema transactions
-	attributesBundle := []typedbclient.BundleOperation{
-		{Type: typedbclient.OpExecute, Query: attributesSchema},
-	}
-
-	if _, err := schemaTx.ExecuteBundle(ctx, attributesBundle); err != nil {
+	if _, err := database1.ExecuteSchema(ctx, attributesSchema); err != nil {
 		log.Fatalf("Failed to define attributes schema: %v", err)
 	}
 	fmt.Println("✓ Attributes with constraints defined")
 
 	// Step 2: Define entities and relations (now that attributes exist)
-	schemaTx2, err := database1.BeginTransaction(ctx, typedbclient.Schema)
-	if err != nil {
-		log.Fatalf("Failed to begin second schema transaction: %v", err)
-	}
-
 	basicSchema := `define
 		entity person,
 			owns name,
@@ -118,12 +102,7 @@ func main() {
 		company plays employment:employer;`
 
 	// Execute entity/relation schema
-	// Note: ExecuteBundle automatically adds OpCommit and OpClose for schema transactions
-	basicBundle := []typedbclient.BundleOperation{
-		{Type: typedbclient.OpExecute, Query: basicSchema},
-	}
-
-	if _, err := schemaTx2.ExecuteBundle(ctx, basicBundle); err != nil {
+	if _, err := database1.ExecuteSchema(ctx, basicSchema); err != nil {
 		log.Fatalf("Failed to define basic schema: %v", err)
 	}
 	fmt.Println("✓ Entities and relations defined")
@@ -136,55 +115,30 @@ func main() {
 	// Note: @key makes the attribute unique, which would conflict with duplicate inserts
 	fmt.Println("Skipping @key constraint on person name to avoid duplicate conflicts...")
 
-	// Create transaction for remaining constraints
-	schemaTx4, err := database1.BeginTransaction(ctx, typedbclient.Schema)
-	if err != nil {
-		log.Fatalf("Failed to begin fourth schema transaction: %v", err)
-	}
-
 	// Test 2: Add @unique constraint
 	constraintsSchema2 := `define person owns email @unique;`
 	fmt.Println("Testing @unique constraint on person email...")
-	// Note: ExecuteBundle automatically adds OpCommit and OpClose for schema transactions
-	constraintsBundle2 := []typedbclient.BundleOperation{
-		{Type: typedbclient.OpExecute, Query: constraintsSchema2},
-	}
 
-	if _, err := schemaTx4.ExecuteBundle(ctx, constraintsBundle2); err != nil {
+	if _, err := database1.ExecuteSchema(ctx, constraintsSchema2); err != nil {
 		log.Fatalf("❌ Failed to define @unique constraint: %v", err)
 	}
 	fmt.Println("✓ @unique constraint defined successfully")
 
 	// Test 3: Add remaining constraints
-	schemaTx5, err := database1.BeginTransaction(ctx, typedbclient.Schema)
-	if err != nil {
-		log.Fatalf("Failed to begin fifth schema transaction: %v", err)
-	}
-
 	constraintsSchema3 := `define
 		company owns company_name @key;
 		employment owns position_level @card(1);`
 	fmt.Println("Testing company @key and employment @card constraints...")
-	// Note: ExecuteBundle automatically adds OpCommit and OpClose for schema transactions
-	constraintsBundle3 := []typedbclient.BundleOperation{
-		{Type: typedbclient.OpExecute, Query: constraintsSchema3},
-	}
 
-	if _, err := schemaTx5.ExecuteBundle(ctx, constraintsBundle3); err != nil {
+	if _, err := database1.ExecuteSchema(ctx, constraintsSchema3); err != nil {
 		log.Fatalf("❌ Failed to define company/employment constraints: %v", err)
 	}
 	fmt.Println("✓ All constraint types defined successfully")
 	fmt.Println("✓ Constraints schema defined")
 	fmt.Println("✓ Complete schema with all TypeQL v3 features defined successfully")
 
-	// Insert test data using transaction API
+	// Insert test data using simplified API
 	fmt.Println("\nInserting test data...")
-
-	// Begin write transaction for all inserts
-	writeTx, err := database1.BeginTransaction(ctx, typedbclient.Write)
-	if err != nil {
-		log.Fatalf("Failed to begin write transaction: %v", err)
-	}
 
 	// Create bundle with insert operations demonstrating ALL TypeQL v3 data types
 	insertBundle := []typedbclient.BundleOperation{
@@ -244,11 +198,9 @@ func main() {
 			has start_date 2019-01-10,
 			has contract_active false,
 			has position_level "Lead";`},
-
-		// Note: ExecuteBundle automatically adds OpCommit and OpClose for write transactions
 	}
 
-	results, err := writeTx.ExecuteBundle(ctx, insertBundle)
+	results, err := database1.ExecuteBundle(ctx, typedbclient.Write, insertBundle)
 	if err != nil {
 		log.Fatalf("Failed to insert data: %v", err)
 	}
@@ -260,24 +212,17 @@ func main() {
 		}
 	}
 
-	// Verify data in first session using transaction API
+	// Verify data in first session using simplified API
 	fmt.Println("\nVerifying data in first session...")
-
-	// Begin read transaction for verification
-	readTx, err := database1.BeginTransaction(ctx, typedbclient.Read)
-	if err != nil {
-		log.Fatalf("Failed to begin read transaction: %v", err)
-	}
 
 	// Create bundle with count queries
 	verifyBundle := []typedbclient.BundleOperation{
 		{Type: typedbclient.OpExecute, Query: "match\n\t$p isa person;\nreduce\n\t$count = count($p);"},
 		{Type: typedbclient.OpExecute, Query: "match\n\t$c isa company;\nreduce\n\t$count = count($c);"},
 		{Type: typedbclient.OpExecute, Query: "match\n\t$e isa employment;\nreduce\n\t$count = count($e);"},
-		// Note: ExecuteBundle automatically adds OpClose for read transactions
 	}
 
-	verifyResults, err := readTx.ExecuteBundle(ctx, verifyBundle)
+	verifyResults, err := database1.ExecuteBundle(ctx, typedbclient.Read, verifyBundle)
 	if err != nil {
 		log.Fatalf("Failed to verify data: %v", err)
 	}
@@ -522,71 +467,40 @@ func main() {
 	fmt.Println("\n📝 Phase 3: Add More Data in Second Session")
 	fmt.Println("----------------------------------------")
 
-	// Begin write transaction for new data with all data types
-	newWriteTx, err := database2.BeginTransaction(ctx, typedbclient.Write)
-	if err != nil {
-		fmt.Printf("❌ Failed to begin write transaction: %v\n", err)
-	} else {
-		// Insert person with all attribute types for comprehensive testing
-		newDataBundle := []typedbclient.BundleOperation{
-			{Type: typedbclient.OpExecute, Query: `insert
-				$p isa person,
-					has name "Diana Prince",
-					has age 28,
-					has email "diana@example.com",
-					has salary 95000.75,              # double type
-					has is_active true,               # boolean type
-					has birth_date 1995-06-15,        # date type
-					has last_login 2024-01-02T14:30:00, # datetime type
-					has registration_time 2023-06-01T15:00:00Z; # datetime-tz type (UTC)`},
-			// Note: ExecuteBundle automatically adds OpCommit and OpClose for write transactions
-		}
+	// Insert person with all attribute types for comprehensive testing
+	newPersonQuery := `insert
+		$p isa person,
+			has name "Diana Prince",
+			has age 28,
+			has email "diana@example.com",
+			has salary 95000.75,              # double type
+			has is_active true,               # boolean type
+			has birth_date 1995-06-15,        # date type
+			has last_login 2024-01-02T14:30:00, # datetime type
+			has registration_time 2023-06-01T15:00:00Z; # datetime-tz type (UTC)`
 
-		if _, err := newWriteTx.ExecuteBundle(ctx, newDataBundle); err != nil {
-			fmt.Printf("❌ Failed to insert new data: %v\n", err)
-		} else {
-			fmt.Println("✓ New person 'Diana Prince' inserted with all data types")
-		}
+	if _, err := database2.ExecuteWrite(ctx, newPersonQuery); err != nil {
+		fmt.Printf("❌ Failed to insert new data: %v\n", err)
+	} else {
+		fmt.Println("✓ New person 'Diana Prince' inserted with all data types")
 	}
 
-	// Verify new data using transaction API
-	verifyNewTx, err := database2.BeginTransaction(ctx, typedbclient.Read)
+	// Verify new data using simplified API
+	verifyNewRes, err := database2.ExecuteRead(ctx, `match $p isa person, has name "Diana Prince";`)
 	if err != nil {
-		fmt.Printf("❌ Failed to begin verification transaction: %v\n", err)
-	} else {
-		// Note: ExecuteBundle automatically adds OpClose for read transactions
-		verifyNewBundle := []typedbclient.BundleOperation{
-			{Type: typedbclient.OpExecute, Query: `match $p isa person, has name "Diana Prince";`},
-		}
-
-		verifyNewRes, err := verifyNewTx.ExecuteBundle(ctx, verifyNewBundle)
-		if err != nil {
-			fmt.Printf("❌ Failed to verify new data: %v\n", err)
-		} else if len(verifyNewRes) > 0 && verifyNewRes[0] != nil &&
-			verifyNewRes[0].IsRowStream && len(verifyNewRes[0].TypedRows) > 0 {
-			fmt.Println("✓ New data successfully verified")
-		}
+		fmt.Printf("❌ Failed to verify new data: %v\n", err)
+	} else if verifyNewRes.IsRowStream && len(verifyNewRes.TypedRows) > 0 {
+		fmt.Println("✓ New data successfully verified")
 	}
 
-	// Final count verification using transaction API
+	// Final count verification using simplified API
 	fmt.Println("\nFinal data counts:")
 	finalPersonCount := 0
-	finalReadTx, err := database2.BeginTransaction(ctx, typedbclient.Read)
-	if err != nil {
-		fmt.Printf("Failed to begin final read transaction: %v\n", err)
-	} else {
-		// Note: ExecuteBundle automatically adds OpClose for read transactions
-		finalCountBundle := []typedbclient.BundleOperation{
-			{Type: typedbclient.OpExecute, Query: "match\n\t\t$p isa person;\n\treduce\n\t\t$count = count($p);"},
-		}
-
-		finalResults, err := finalReadTx.ExecuteBundle(ctx, finalCountBundle)
-		if err == nil && len(finalResults) > 0 && finalResults[0] != nil &&
-			finalResults[0].IsRowStream && len(finalResults[0].TypedRows) > 0 {
-			// Use type-safe GetCount() method
-			if count, err := finalResults[0].TypedRows[0].GetCount(); err == nil {
-				finalPersonCount = int(count)
-			}
+	finalResult, err := database2.ExecuteRead(ctx, "match\n\t\t$p isa person;\n\treduce\n\t\t$count = count($p);")
+	if err == nil && finalResult.IsRowStream && len(finalResult.TypedRows) > 0 {
+		// Use type-safe GetCount() method
+		if count, err := finalResult.TypedRows[0].GetCount(); err == nil {
+			finalPersonCount = int(count)
 		}
 	}
 	fmt.Printf("  • Total persons: %d (was %d, added 1)\n", finalPersonCount, personCount)
