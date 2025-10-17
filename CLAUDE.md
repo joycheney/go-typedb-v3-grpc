@@ -196,3 +196,5 @@ for docs.Next() {
 |----------------|---------------|-------|
 | v3.0.x - v3.x.x | ✅ Fully Supported | All features work |
 | v2.x | ❌ Not Supported | Use TypeDB v2 client |
+- ~/github.com/typedb-driver/ 中rust driver是完整实现的, 其他语言并不完整
+  ~/github.com/typedb/ 中有typedb源代码

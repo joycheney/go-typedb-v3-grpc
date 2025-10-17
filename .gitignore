@@ -17,3 +17,15 @@ examples/09_cleanup
 07_comprehensive_demo
 08_data_persistence
 09_cleanup
+
+# Temporary test files
+test_*.go
+reproduce_*.go
+*_test.go
+testhelper/
+
+# Log files
+*.log
+
+# Windows Zone.Identifier files
+*.Zone.Identifier

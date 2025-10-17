@@ -171,15 +171,19 @@ func (db *Database) BeginTransaction(ctx context.Context, txType TransactionType
 
 // Execute executes query
 func (tx *Transaction) Execute(ctx context.Context, query string) (*QueryResult, error) {
+	log.Printf("[DEBUG] Execute: Entry, query length=%d", len(query))
+
 	if tx.closed.Load() {
 		return nil, fmt.Errorf("transaction is closed")
 	}
 
 	tx.streamMu.Lock()
 	defer tx.streamMu.Unlock()
+	log.Printf("[DEBUG] Execute: Acquired stream lock")
 
 	// Generate request ID
 	reqID := tx.generateRequestID()
+	log.Printf("[DEBUG] Execute: Generated reqID=%x", reqID)
 
 	// Build query request
 	queryReq := pb.Transaction_Client{
@@ -327,43 +331,80 @@ func (tx *Transaction) receiveRowStream(result *QueryResult) error {
 
 // receiveDocumentStream receives document streaming results
 func (tx *Transaction) receiveDocumentStream(result *QueryResult) error {
+	log.Printf("[DEBUG] receiveDocumentStream: Starting to receive document stream")
+	loopCount := 0
+
 	// Continue receiving streaming responses until completion
 	for {
+		loopCount++
+		log.Printf("[DEBUG] receiveDocumentStream: Loop iteration %d, calling stream.Recv()...", loopCount)
+
 		resp, err := tx.stream.Recv()
 		if err != nil {
 			// io.EOF indicates normal stream termination
 			if err == io.EOF {
+				log.Printf("[DEBUG] receiveDocumentStream: Received io.EOF after %d iterations", loopCount)
 				return nil
 			}
+			log.Printf("[DEBUG] receiveDocumentStream: stream.Recv() error after %d iterations: %v", loopCount, err)
 			return fmt.Errorf("failed to receive stream part: %w", err)
 		}
 
+		log.Printf("[DEBUG] receiveDocumentStream: Received response in iteration %d", loopCount)
+
+		// Log response structure
+		log.Printf("[DEBUG] receiveDocumentStream: Response has Res=%v, ResPart=%v",
+			resp.GetRes() != nil, resp.GetResPart() != nil)
+
 		// Check if this is a ResPart response
 		if resPart := resp.GetResPart(); resPart != nil {
+			log.Printf("[DEBUG] receiveDocumentStream: Processing ResPart")
+
 			// Check QueryRes section
 			if queryRes := resPart.GetQueryRes(); queryRes != nil {
+				log.Printf("[DEBUG] receiveDocumentStream: Found QueryRes")
 				// Check if contains document data
 				if docsRes := queryRes.GetDocumentsRes(); docsRes != nil {
+					docCount := len(docsRes.GetDocuments())
+					log.Printf("[DEBUG] receiveDocumentStream: Found DocumentsRes with %d documents", docCount)
 					// Add document data to results
 					for _, doc := range docsRes.GetDocuments() {
 						docMap := convertDocument(doc)
 						result.Documents = append(result.Documents, docMap)
 					}
+				} else {
+					log.Printf("[DEBUG] receiveDocumentStream: QueryRes has no DocumentsRes")
 				}
+			} else {
+				log.Printf("[DEBUG] receiveDocumentStream: ResPart has no QueryRes")
 			}
 
 			// Check StreamRes section (stream control signals)
 			if streamRes := resPart.GetStreamRes(); streamRes != nil {
+				log.Printf("[DEBUG] receiveDocumentStream: Found StreamRes")
+
 				// Check if stream is finished
 				if streamRes.GetDone() != nil {
+					log.Printf("[DEBUG] receiveDocumentStream: Received Done signal after %d iterations, returning", loopCount)
 					return nil
 				}
 				// If it's a Continue signal, keep receiving
 				if streamRes.GetContinue() != nil {
+					log.Printf("[DEBUG] receiveDocumentStream: Received Continue signal, continuing loop")
 					continue
 				}
+				// Check for Error signal
+				if streamRes.GetError() != nil {
+					log.Printf("[DEBUG] receiveDocumentStream: Received Error signal: %v", streamRes.GetError())
+				}
+			} else {
+				log.Printf("[DEBUG] receiveDocumentStream: ResPart has no StreamRes")
 			}
+		} else {
+			log.Printf("[DEBUG] receiveDocumentStream: Response has no ResPart (unexpected)")
 		}
+
+		log.Printf("[DEBUG] receiveDocumentStream: End of iteration %d, continuing to next iteration", loopCount)
 	}
 }
 

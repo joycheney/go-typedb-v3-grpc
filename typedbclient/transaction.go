@@ -569,7 +569,9 @@ func (tx *Transaction) handleExecute(requestID []byte, query string) StreamRespo
 					result.QueryType = convertQueryType(docStream.GetQueryType())
 
 					// Continue processing stream parts
+					loopCount := 0
 					for {
+						loopCount++
 						resp, err := tx.stream.Recv()
 						if err != nil {
 							if err == io.EOF {
@@ -579,7 +581,31 @@ func (tx *Transaction) handleExecute(requestID []byte, query string) StreamRespo
 							return StreamResponse{Error: fmt.Errorf("failed to receive stream part: %s", detailedError)}
 						}
 
-						if tx.processQueryResponse(resp, result) {
+						// CRITICAL: Check for stream error before processing (matching Rust driver behavior)
+						// This prevents hanging when TypeDB returns error responses in stream
+						if resPart := resp.GetResPart(); resPart != nil {
+							if streamRes := resPart.GetStreamRes(); streamRes != nil {
+								if errRes := streamRes.GetError(); errRes != nil {
+									// Stream error detected - return immediately with detailed error message
+									errMsg := fmt.Sprintf("TypeDB stream error: %s", errRes.GetErrorCode())
+									if errRes.GetDomain() != "" {
+										errMsg += fmt.Sprintf(" (domain: %s)", errRes.GetDomain())
+									}
+									if stackTrace := errRes.GetStackTrace(); len(stackTrace) > 0 {
+										errMsg += "\nStack trace:\n"
+										for i, line := range stackTrace {
+											if i < 3 {
+												errMsg += fmt.Sprintf("  %s\n", line)
+											}
+										}
+									}
+									return StreamResponse{Error: fmt.Errorf("%s", errMsg)}
+								}
+							}
+						}
+
+						shouldBreak := tx.processQueryResponse(resp, result)
+						if shouldBreak {
 							break
 						}
 					}
@@ -614,11 +640,37 @@ func (tx *Transaction) handleExecute(requestID []byte, query string) StreamRespo
 
 	// Check if it's a ResPart response (for streaming queries)
 	if resPart := resp.GetResPart(); resPart != nil {
+
+		// CRITICAL: Check for stream error in initial ResPart before entering loop
+		if streamRes := resPart.GetStreamRes(); streamRes != nil {
+			if errRes := streamRes.GetError(); errRes != nil {
+				// Stream error detected in initial response - return immediately
+				errMsg := fmt.Sprintf("TypeDB stream error: %s", errRes.GetErrorCode())
+				if errRes.GetDomain() != "" {
+					errMsg += fmt.Sprintf(" (domain: %s)", errRes.GetDomain())
+				}
+				if stackTrace := errRes.GetStackTrace(); len(stackTrace) > 0 {
+					errMsg += "\nStack trace:\n"
+					for i, line := range stackTrace {
+						if i < 3 {
+							errMsg += fmt.Sprintf("  %s\n", line)
+						}
+					}
+				}
+				return StreamResponse{Error: fmt.Errorf("%s", errMsg)}
+			}
+		}
+
 		// Process first part
-		tx.processQueryResponse(resp, result)
+		shouldStop := tx.processQueryResponse(resp, result)
+		if shouldStop {
+			return StreamResponse{Result: result}
+		}
 
 		// Continue receiving stream responses
+		loopCount := 0
 		for {
+			loopCount++
 			resp, err := tx.stream.Recv()
 			if err != nil {
 				if err == io.EOF {
@@ -627,7 +679,30 @@ func (tx *Transaction) handleExecute(requestID []byte, query string) StreamRespo
 				return StreamResponse{Error: fmt.Errorf("failed to receive stream part: %w", err)}
 			}
 
-			if tx.processQueryResponse(resp, result) {
+			// CRITICAL: Check for stream error before processing (matching Rust driver behavior)
+			if resPart := resp.GetResPart(); resPart != nil {
+				if streamRes := resPart.GetStreamRes(); streamRes != nil {
+					if errRes := streamRes.GetError(); errRes != nil {
+						// Stream error detected - return immediately with detailed error message
+						errMsg := fmt.Sprintf("TypeDB stream error: %s", errRes.GetErrorCode())
+						if errRes.GetDomain() != "" {
+							errMsg += fmt.Sprintf(" (domain: %s)", errRes.GetDomain())
+						}
+						if stackTrace := errRes.GetStackTrace(); len(stackTrace) > 0 {
+							errMsg += "\nStack trace:\n"
+							for i, line := range stackTrace {
+								if i < 3 {
+									errMsg += fmt.Sprintf("  %s\n", line)
+								}
+							}
+						}
+						return StreamResponse{Error: fmt.Errorf("%s", errMsg)}
+					}
+				}
+			}
+
+			shouldBreak := tx.processQueryResponse(resp, result)
+			if shouldBreak {
 				break // Query complete
 			}
 		}
@@ -1153,6 +1228,14 @@ func (tx *Transaction) processQueryResponse(resp *pb.Transaction_Server, result 
 
 		// Check StreamRes section (stream control signals)
 		if streamRes := resPart.GetStreamRes(); streamRes != nil {
+			// CRITICAL: Check for stream error FIRST (before Done/Continue)
+			// This matches Rust driver behavior: QueryResponse::Error handling
+			if errRes := streamRes.GetError(); errRes != nil {
+				// Error in stream - stop processing and let caller handle error
+				// The error will bubble up and be reported to user
+				return true // Stop processing due to error
+			}
+
 			// Check if stream ends
 			if streamRes.GetDone() != nil {
 				return true // Query complete
