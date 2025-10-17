@@ -131,10 +131,18 @@ func (tv *TypedValue) IsNull() bool {
 }
 
 // AsString returns the value as string, or error if not a string
+// If the value is an attribute concept, automatically extracts the attribute's value
 func (tv *TypedValue) AsString() (string, error) {
 	if tv.isNull {
 		return "", fmt.Errorf("value is null")
 	}
+
+	// If it's an attribute concept, extract its value recursively
+	if tv.valueType == TypeConcept && tv.conceptVal != nil &&
+		tv.conceptVal.Type == "attribute" && tv.conceptVal.Value != nil {
+		return tv.conceptVal.Value.AsString()
+	}
+
 	if tv.valueType != TypeString {
 		return "", fmt.Errorf("value is %s, not string", tv.valueType)
 	}
@@ -142,10 +150,18 @@ func (tv *TypedValue) AsString() (string, error) {
 }
 
 // AsBool returns the value as bool, or error if not a bool
+// If the value is an attribute concept, automatically extracts the attribute's value
 func (tv *TypedValue) AsBool() (bool, error) {
 	if tv.isNull {
 		return false, fmt.Errorf("value is null")
 	}
+
+	// If it's an attribute concept, extract its value recursively
+	if tv.valueType == TypeConcept && tv.conceptVal != nil &&
+		tv.conceptVal.Type == "attribute" && tv.conceptVal.Value != nil {
+		return tv.conceptVal.Value.AsBool()
+	}
+
 	if tv.valueType != TypeBool {
 		return false, fmt.Errorf("value is %s, not bool", tv.valueType)
 	}
@@ -153,10 +169,18 @@ func (tv *TypedValue) AsBool() (bool, error) {
 }
 
 // AsInt64 returns the value as int64, or error if not an integer
+// If the value is an attribute concept, automatically extracts the attribute's value
 func (tv *TypedValue) AsInt64() (int64, error) {
 	if tv.isNull {
 		return 0, fmt.Errorf("value is null")
 	}
+
+	// If it's an attribute concept, extract its value recursively
+	if tv.valueType == TypeConcept && tv.conceptVal != nil &&
+		tv.conceptVal.Type == "attribute" && tv.conceptVal.Value != nil {
+		return tv.conceptVal.Value.AsInt64()
+	}
+
 	if tv.valueType != TypeInt64 {
 		return 0, fmt.Errorf("value is %s, not int64", tv.valueType)
 	}
@@ -164,10 +188,18 @@ func (tv *TypedValue) AsInt64() (int64, error) {
 }
 
 // AsFloat64 returns the value as float64, or error if not a float
+// If the value is an attribute concept, automatically extracts the attribute's value
 func (tv *TypedValue) AsFloat64() (float64, error) {
 	if tv.isNull {
 		return 0, fmt.Errorf("value is null")
 	}
+
+	// If it's an attribute concept, extract its value recursively
+	if tv.valueType == TypeConcept && tv.conceptVal != nil &&
+		tv.conceptVal.Type == "attribute" && tv.conceptVal.Value != nil {
+		return tv.conceptVal.Value.AsFloat64()
+	}
+
 	if tv.valueType != TypeFloat64 {
 		return 0, fmt.Errorf("value is %s, not float64", tv.valueType)
 	}
@@ -447,21 +479,23 @@ type TypedDocument struct {
 }
 
 // GetString returns a string value from the specified field
+// If the value is an attribute concept, automatically extracts the attribute's value
 func (td *TypedDocument) GetString(field string) (string, error) {
 	val, ok := td.fields[field]
 	if !ok {
 		return "", fmt.Errorf("field %q not found", field)
 	}
-	return val.AsString()
+	return val.AsString() // AsString now handles attribute concept extraction
 }
 
 // GetInt64 returns an int64 value from the specified field
+// If the value is an attribute concept, automatically extracts the attribute's value
 func (td *TypedDocument) GetInt64(field string) (int64, error) {
 	val, ok := td.fields[field]
 	if !ok {
 		return 0, fmt.Errorf("field %q not found", field)
 	}
-	return val.AsInt64()
+	return val.AsInt64() // AsInt64 now handles attribute concept extraction
 }
 
 // GetValue returns the raw TypedValue from the specified field
