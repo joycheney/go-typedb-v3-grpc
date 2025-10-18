@@ -581,29 +581,6 @@ func (tx *Transaction) handleExecute(requestID []byte, query string) StreamRespo
 							return StreamResponse{Error: fmt.Errorf("failed to receive stream part: %s", detailedError)}
 						}
 
-						// CRITICAL: Check for stream error before processing (matching Rust driver behavior)
-						// This prevents hanging when TypeDB returns error responses in stream
-						if resPart := resp.GetResPart(); resPart != nil {
-							if streamRes := resPart.GetStreamRes(); streamRes != nil {
-								if errRes := streamRes.GetError(); errRes != nil {
-									// Stream error detected - return immediately with detailed error message
-									errMsg := fmt.Sprintf("TypeDB stream error: %s", errRes.GetErrorCode())
-									if errRes.GetDomain() != "" {
-										errMsg += fmt.Sprintf(" (domain: %s)", errRes.GetDomain())
-									}
-									if stackTrace := errRes.GetStackTrace(); len(stackTrace) > 0 {
-										errMsg += "\nStack trace:\n"
-										for i, line := range stackTrace {
-											if i < 3 {
-												errMsg += fmt.Sprintf("  %s\n", line)
-											}
-										}
-									}
-									return StreamResponse{Error: fmt.Errorf("%s", errMsg)}
-								}
-							}
-						}
-
 						shouldBreak := tx.processQueryResponse(resp, result)
 						if shouldBreak {
 							break
@@ -1138,6 +1115,14 @@ func convertDocumentNode(node *pb.ConceptDocument_Node) interface{} {
 
 // processQueryResponse processes a single query response and returns true if query is complete
 func (tx *Transaction) processQueryResponse(resp *pb.Transaction_Server, result *QueryResult) bool {
+	// IMPORTANT: Document streams may receive Res messages (not just ResPart)
+	// When receiving Res in document stream, it typically signals query completion
+	if res := resp.GetRes(); res != nil {
+		// Res message in stream context means query is done
+		// Rust driver: when Done is received, stream is closed (no more messages)
+		return true
+	}
+
 	// Check if it's a ResPart response
 	if resPart := resp.GetResPart(); resPart != nil {
 		// Check QueryRes section
