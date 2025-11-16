@@ -881,7 +881,11 @@ func (tx *Transaction) handleExecute(requestID []byte, query string) StreamRespo
 							return StreamResponse{Error: fmt.Errorf("failed to receive stream part: %s", detailedError)}
 						}
 
-						if tx.processQueryResponse(resp, result) {
+						shouldBreak, processErr := tx.processQueryResponse(resp, result)
+						if processErr != nil {
+							return StreamResponse{Error: processErr}
+						}
+						if shouldBreak {
 							break
 						}
 					}
@@ -894,9 +898,7 @@ func (tx *Transaction) handleExecute(requestID []byte, query string) StreamRespo
 					result.QueryType = convertQueryType(docStream.GetQueryType())
 
 					// Continue processing stream parts
-					loopCount := 0
 					for {
-						loopCount++
 						resp, err := tx.stream.Recv()
 						if err != nil {
 							if err == io.EOF {
@@ -906,7 +908,10 @@ func (tx *Transaction) handleExecute(requestID []byte, query string) StreamRespo
 							return StreamResponse{Error: fmt.Errorf("failed to receive stream part: %s", detailedError)}
 						}
 
-						shouldBreak := tx.processQueryResponse(resp, result)
+						shouldBreak, processErr := tx.processQueryResponse(resp, result)
+						if processErr != nil {
+							return StreamResponse{Error: processErr}
+						}
 						if shouldBreak {
 							break
 						}
@@ -964,15 +969,16 @@ func (tx *Transaction) handleExecute(requestID []byte, query string) StreamRespo
 		}
 
 		// Process first part
-		shouldStop := tx.processQueryResponse(resp, result)
+		shouldStop, processErr := tx.processQueryResponse(resp, result)
+		if processErr != nil {
+			return StreamResponse{Error: processErr}
+		}
 		if shouldStop {
 			return StreamResponse{Result: result}
 		}
 
 		// Continue receiving stream responses
-		loopCount := 0
 		for {
-			loopCount++
 			resp, err := tx.stream.Recv()
 			if err != nil {
 				if err == io.EOF {
@@ -1003,7 +1009,10 @@ func (tx *Transaction) handleExecute(requestID []byte, query string) StreamRespo
 				}
 			}
 
-			shouldBreak := tx.processQueryResponse(resp, result)
+			shouldBreak, processErr := tx.processQueryResponse(resp, result)
+			if processErr != nil {
+				return StreamResponse{Error: processErr}
+			}
 			if shouldBreak {
 				break // Query complete
 			}
@@ -1483,18 +1492,25 @@ func convertDocumentNode(node *pb.ConceptDocument_Node) interface{} {
 	return nil
 }
 
-// processQueryResponse processes a single query response and returns true if query is complete
-func (tx *Transaction) processQueryResponse(resp *pb.Transaction_Server, result *QueryResult) bool {
-	// IMPORTANT: Document streams may receive Res messages (not just ResPart)
-	// When receiving Res in document stream, it typically signals query completion
+// processQueryResponse processes a single query response and returns (shouldStop, error)
+// shouldStop=true means query is complete or error occurred
+// error!=nil means a fatal error occurred during processing
+func (tx *Transaction) processQueryResponse(resp *pb.Transaction_Server, result *QueryResult) (bool, error) {
+	// IMPORTANT: Res messages during streaming are acknowledgments, not data
+	// According to Rust driver (transaction.rs:374-380):
+	// - Res with QueryResponse → sent to stream, callback stays active
+	// - Res without QueryResponse → finishes the callback
+	// In Go's synchronous model, we ignore Res and only process ResPart data
+	// The ONLY way to stop is receiving ResPart/StreamRes/Done signal
 	if res := resp.GetRes(); res != nil {
-		// Res message in stream context means query is done
-		// Rust driver: when Done is received, stream is closed (no more messages)
-		return true
+		return false, nil // Don't stop on Res messages during streaming
 	}
 
 	// Check if it's a ResPart response
 	if resPart := resp.GetResPart(); resPart != nil {
+		// Extract original request ID from ResPart for StreamSignal use
+		originalReqID := resPart.GetReqId()
+
 		// Check QueryRes section
 		if queryRes := resPart.GetQueryRes(); queryRes != nil {
 			// Check if contains row data
@@ -1586,24 +1602,25 @@ func (tx *Transaction) processQueryResponse(resp *pb.Transaction_Server, result 
 			if errRes := streamRes.GetError(); errRes != nil {
 				// Error in stream - stop processing and let caller handle error
 				// The error will bubble up and be reported to user
-				return true // Stop processing due to error
+				return true, nil // Stop processing due to error
 			}
 
 			// Check if stream ends
 			if streamRes.GetDone() != nil {
-				return true // Query complete
+				result.IsDone = true
+				return true, nil // Query complete
 			}
 			// If it's a Continue signal, send StreamSignal.Req and continue receiving
 			if streamRes.GetContinue() != nil {
-
-				// Generate request ID for StreamSignal
-				streamReqID := tx.generateRequestID()
+				// 🔧 CRITICAL FIX: Use ORIGINAL request ID from ResPart, not a new generated ID
+				// The Rust driver does: TransactionRequest::Stream { request_id }
+				// where request_id is the original query request ID, not a new one
 
 				// Build StreamSignal request (参考Rust实现: TransactionRequest::Stream { request_id })
 				streamSignalReq := pb.Transaction_Client{
 					Reqs: []*pb.Transaction_Req{
 						{
-							ReqId:    streamReqID,
+							ReqId:    originalReqID, // ← Use original req_id, not new generated ID!
 							Metadata: make(map[string]string),
 							Req: &pb.Transaction_Req_StreamReq{
 								StreamReq: &pb.Transaction_StreamSignal_Req{}, // Empty message as per proto definition
@@ -1612,17 +1629,17 @@ func (tx *Transaction) processQueryResponse(resp *pb.Transaction_Server, result 
 					},
 				}
 
-				// Send StreamSignal request to server
+				// Send StreamSignal request and return error if failed
 				if err := tx.stream.Send(&streamSignalReq); err != nil {
-					return true // Error occurred, stop processing
+					return true, fmt.Errorf("failed to send stream continuation signal: %w", err)
 				}
 
-				return false // Continue receiving
+				return false, nil // Continue receiving
 			}
 		}
 	}
 
-	return false // Continue receiving
+	return false, nil // Continue receiving
 }
 
 // convertRowEntry converts protobuf RowEntry to strongly-typed TypedValue
