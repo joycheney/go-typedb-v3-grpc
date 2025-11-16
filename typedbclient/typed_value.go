@@ -589,6 +589,102 @@ func (td *TypedDocument) HasField(field string) bool {
 	return ok
 }
 
+// ToMap converts TypedDocument to map[string]interface{} for backward compatibility
+func (td *TypedDocument) ToMap() map[string]interface{} {
+	result := make(map[string]interface{})
+	for key, val := range td.fields {
+		result[key] = typedValueToInterface(val)
+	}
+	return result
+}
+
+// typedValueToInterface converts TypedValue to interface{} for backward compatibility
+func typedValueToInterface(tv *TypedValue) interface{} {
+	if tv.isNull {
+		return nil
+	}
+
+	switch tv.valueType {
+	case TypeString:
+		return tv.stringVal
+	case TypeBool:
+		return tv.boolVal
+	case TypeInt64:
+		return tv.int64Val
+	case TypeFloat64:
+		return tv.float64Val
+	case TypeDate:
+		if tv.dateVal != nil {
+			return map[string]interface{}{
+				"type":            "date",
+				"num_days_since_ce": tv.dateVal.NumDaysSinceCE,
+			}
+		}
+	case TypeDateTime:
+		if tv.dateTimeVal != nil {
+			return map[string]interface{}{
+				"type":    "datetime",
+				"seconds": tv.dateTimeVal.Seconds,
+				"nanos":   tv.dateTimeVal.Nanos,
+			}
+		}
+	case TypeDuration:
+		if tv.durationVal != nil {
+			return map[string]interface{}{
+				"type":   "duration",
+				"months": tv.durationVal.Months,
+				"days":   tv.durationVal.Days,
+				"nanos":  tv.durationVal.Nanos,
+			}
+		}
+	case TypeDecimal:
+		if tv.decimalVal != nil {
+			return tv.decimalVal.ToFloat64()
+		}
+	case TypeConcept:
+		if tv.conceptVal != nil {
+			conceptMap := map[string]interface{}{
+				"type": tv.conceptVal.Type,
+			}
+			if tv.conceptVal.IID != "" {
+				conceptMap["iid"] = tv.conceptVal.IID
+			}
+			if tv.conceptVal.Label != "" {
+				conceptMap["label"] = tv.conceptVal.Label
+			}
+			if tv.conceptVal.Value != nil {
+				conceptMap["value"] = typedValueToInterface(tv.conceptVal.Value)
+			}
+			if len(tv.conceptVal.Links) > 0 {
+				links := make(map[string]interface{})
+				for role, concepts := range tv.conceptVal.Links {
+					conceptList := make([]interface{}, len(concepts))
+					for i, c := range concepts {
+						conceptList[i] = map[string]interface{}{
+							"type":  c.Type,
+							"iid":   c.IID,
+							"label": c.Label,
+						}
+					}
+					links[role] = conceptList
+				}
+				conceptMap["links"] = links
+			}
+			return conceptMap
+		}
+	case TypeValueList:
+		list := make([]interface{}, len(tv.listVal))
+		for i, item := range tv.listVal {
+			list[i] = typedValueToInterface(&item)
+		}
+		return list
+	case TypeUnknown:
+		return tv.rawValue
+	}
+
+	return nil
+}
+
 // sortStrings is a simple bubble sort for string slices (avoiding external dependencies)
 func sortStrings(s []string) {
 	for i := 0; i < len(s); i++ {

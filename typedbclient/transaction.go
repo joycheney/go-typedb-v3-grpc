@@ -57,7 +57,6 @@ type QueryResult struct {
 	TypedRows   []*TypedRow     // Type-safe row data
 
 	// Document stream results
-	documents       []map[string]interface{} // Document list (private for safety, use TypedDocuments)
 	TypedDocuments  []*TypedDocument         // Type-safe document data
 }
 
@@ -192,37 +191,31 @@ func (qr *QueryResult) GetDocumentCount() int {
 	return 0
 }
 
-// GetDocument returns a document at the specified index (safe copy)
+// GetDocument returns a document at the specified index as map[string]interface{}
+// Lazily converts from TypedDocument to maintain backward compatibility
 func (qr *QueryResult) GetDocument(index int) (map[string]interface{}, error) {
 	if !qr.IsDocumentStream {
 		return nil, fmt.Errorf("GetDocument() can only be used with document stream results")
 	}
-	if index < 0 || index >= len(qr.documents) {
-		return nil, fmt.Errorf("document index %d out of range (0-%d)", index, len(qr.documents)-1)
+	if index < 0 || index >= len(qr.TypedDocuments) {
+		return nil, fmt.Errorf("document index %d out of range (0-%d)", index, len(qr.TypedDocuments)-1)
 	}
 
-	// Return a copy to maintain immutability
-	doc := make(map[string]interface{})
-	for k, v := range qr.documents[index] {
-		doc[k] = v
-	}
-	return doc, nil
+	// Convert TypedDocument to map[string]interface{}
+	return qr.TypedDocuments[index].ToMap(), nil
 }
 
-// GetAllDocuments returns all documents (safe copies)
+// GetAllDocuments returns all documents as []map[string]interface{}
+// Lazily converts from TypedDocuments to maintain backward compatibility
 func (qr *QueryResult) GetAllDocuments() []map[string]interface{} {
-	if !qr.IsDocumentStream || len(qr.documents) == 0 {
+	if !qr.IsDocumentStream || len(qr.TypedDocuments) == 0 {
 		return nil
 	}
 
-	// Return copies to maintain immutability
-	docs := make([]map[string]interface{}, len(qr.documents))
-	for i, d := range qr.documents {
-		doc := make(map[string]interface{})
-		for k, v := range d {
-			doc[k] = v
-		}
-		docs[i] = doc
+	// Convert all TypedDocuments to maps
+	docs := make([]map[string]interface{}, len(qr.TypedDocuments))
+	for i, td := range qr.TypedDocuments {
+		docs[i] = td.ToMap()
 	}
 	return docs
 }
@@ -247,6 +240,9 @@ func convertInterfaceToTypedValue(val interface{}) *TypedValue {
 	}
 
 	switch v := val.(type) {
+	case *TypedValue:
+		// Already a TypedValue - return as-is
+		return v
 	case string:
 		return &TypedValue{valueType: TypeString, stringVal: v}
 	case int64:
@@ -1298,8 +1294,8 @@ func (tx *Transaction) receiveDocumentStream(result *QueryResult) error {
 				if docsRes := queryRes.GetDocumentsRes(); docsRes != nil {
 					// Add document data to results
 					for _, doc := range docsRes.GetDocuments() {
-						docMap := convertDocument(doc)
-						result.documents = append(result.documents, docMap)
+						typedDoc := convertDocument(doc)
+						result.TypedDocuments = append(result.TypedDocuments, typedDoc)
 					}
 				}
 			}
@@ -1383,25 +1379,34 @@ func convertConcept(concept *pb.Concept) *TypedValue {
 	}
 }
 
-// convertDocument convert ConceptDocument to map
-func convertDocument(doc *pb.ConceptDocument) map[string]interface{} {
+// convertDocument convert ConceptDocument directly to TypedDocument
+// Optimized with fast path for standard data sources
+func convertDocument(doc *pb.ConceptDocument) *TypedDocument {
 	if doc == nil {
-		return nil
+		return &TypedDocument{fields: make(map[string]*TypedValue)}
 	}
 
 	if root := doc.GetRoot(); root != nil {
 		if converted := convertDocumentNode(root); converted != nil {
-			if m, ok := converted.(map[string]interface{}); ok {
-				return m
+			// Fast path: already map[string]*TypedValue (standard DocumentStream)
+			if m, ok := converted.(map[string]*TypedValue); ok {
+				return &TypedDocument{fields: m}
 			}
-			// If not a map, wrap in one
-			return map[string]interface{}{"value": converted}
+			// Fast path: single TypedValue (simple value document)
+			if tv, ok := converted.(*TypedValue); ok {
+				return &TypedDocument{fields: map[string]*TypedValue{"value": tv}}
+			}
+			// Robust fallback: mixed types in map[string]interface{}
+			if m, ok := converted.(map[string]interface{}); ok {
+				return convertMapToTypedDocument(m)
+			}
 		}
 	}
-	return make(map[string]interface{})
+	return &TypedDocument{fields: make(map[string]*TypedValue)}
 }
 
 // convertDocumentNode recursively convert document nodes
+// Returns *TypedValue for leaf nodes, map[string]*TypedValue for maps (optimized for standard path)
 func convertDocumentNode(node *pb.ConceptDocument_Node) interface{} {
 	if node == nil {
 		return nil
@@ -1410,6 +1415,28 @@ func convertDocumentNode(node *pb.ConceptDocument_Node) interface{} {
 	// Convert based on node type
 	switch n := node.GetNode().(type) {
 	case *pb.ConceptDocument_Node_Map_:
+		// Optimized path: try to build map[string]*TypedValue directly
+		typedMap := make(map[string]*TypedValue)
+		needFallback := false
+
+		for k, v := range n.Map.Map {
+			converted := convertDocumentNode(v)
+			if tv, ok := converted.(*TypedValue); ok {
+				// Standard case: already a TypedValue
+				typedMap[k] = tv
+			} else {
+				// Non-standard case: need fallback to interface{} path
+				needFallback = true
+				break
+			}
+		}
+
+		// Fast path: all values are TypedValue
+		if !needFallback {
+			return typedMap
+		}
+
+		// Fallback path: mixed types (for robustness)
 		mapData := make(map[string]interface{})
 		for k, v := range n.Map.Map {
 			mapData[k] = convertDocumentNode(v)
@@ -1545,12 +1572,9 @@ func (tx *Transaction) processQueryResponse(resp *pb.Transaction_Server, result 
 			if documentsRes := queryRes.GetDocumentsRes(); documentsRes != nil {
 				// Add document data to results
 				for _, doc := range documentsRes.GetDocuments() {
-					docData := convertDocument(doc)
-					result.documents = append(result.documents, docData)
-
-					// Convert to TypedDocument for type-safe access
-					typedDoc := convertMapToTypedDocument(docData)
+					typedDoc := convertDocument(doc)
 					result.TypedDocuments = append(result.TypedDocuments, typedDoc)
+
 				}
 			}
 		}
