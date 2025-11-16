@@ -11,6 +11,12 @@ type Options struct {
 	Username string // Username (default: admin)
 	Password string // Password (default: password)
 
+	// Worker pool settings (for high-concurrency scenarios)
+	// When enabled, limits concurrent gRPC streams to avoid "connection refused" errors during dense operations
+	EnableWorkerPool bool // Enable worker pool mode (default: false for backward compatibility)
+	WorkerPoolSize   int  // Max concurrent workers (default: 50, recommended: 10-100)
+	QueueSize        int  // Task queue buffer size (default: 100000, increase for very dense writes)
+
 	// Note: Other gRPC parameters (KeepAliveTime, KeepAliveTimeout, MaxRecvMsgSize, MaxSendMsgSize)
 	// are now internal and use official TypeDB standards to reduce configuration complexity
 }
@@ -74,6 +80,16 @@ func (opts *Options) fillDefaults() {
 	}
 	if opts.Password == "" {
 		opts.Password = defaults.Password
+	}
+
+	// Worker pool defaults (only if enabled)
+	if opts.EnableWorkerPool {
+		if opts.WorkerPoolSize == 0 {
+			opts.WorkerPoolSize = 50 // Safe default: well below gRPC's ~100 stream limit
+		}
+		if opts.QueueSize == 0 {
+			opts.QueueSize = 100000 // Large buffer for dense operations
+		}
 	}
 	// gRPC parameters are now handled internally with TypeDB official standards
 }

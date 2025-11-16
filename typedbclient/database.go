@@ -235,6 +235,12 @@ func (db *Database) GetTypeSchema(ctx context.Context) (string, error) {
 
 // ExecuteRead convenience interface for executing read-only queries (automatic transaction management)
 func (db *Database) ExecuteRead(ctx context.Context, query string) (*QueryResult, error) {
+	// Use worker pool if enabled
+	if db.client.poolEnabled.Load() && db.client.workerPool != nil {
+		return db.client.workerPool.Submit(ctx, db.name, Read, query)
+	}
+
+	// Direct execution (original path)
 	var result *QueryResult
 
 	err := db.client.executeWithRetry(ctx, func(ctx context.Context) error {
@@ -267,6 +273,12 @@ func (db *Database) ExecuteRead(ctx context.Context, query string) (*QueryResult
 
 // ExecuteWrite convenience interface for executing write queries (automatic transaction management and commit)
 func (db *Database) ExecuteWrite(ctx context.Context, query string) (*QueryResult, error) {
+	// Use worker pool if enabled
+	if db.client.poolEnabled.Load() && db.client.workerPool != nil {
+		return db.client.workerPool.Submit(ctx, db.name, Write, query)
+	}
+
+	// Direct execution (original path)
 	var result *QueryResult
 
 	err := db.client.executeWithRetry(ctx, func(ctx context.Context) error {
@@ -299,6 +311,12 @@ func (db *Database) ExecuteWrite(ctx context.Context, query string) (*QueryResul
 
 // ExecuteSchema convenience interface for executing schema queries (automatic transaction management and commit)
 func (db *Database) ExecuteSchema(ctx context.Context, query string) (*QueryResult, error) {
+	// Use worker pool if enabled
+	if db.client.poolEnabled.Load() && db.client.workerPool != nil {
+		return db.client.workerPool.Submit(ctx, db.name, Schema, query)
+	}
+
+	// Direct execution (original path)
 	var result *QueryResult
 
 	err := db.client.executeWithRetry(ctx, func(ctx context.Context) error {

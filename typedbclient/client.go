@@ -38,6 +38,10 @@ type Client struct {
 	// Lock-free connection state
 	reconnecting atomic.Bool
 	lastConnTime atomic.Value // time.Time
+
+	// Worker pool for controlling concurrent streams (optional, disabled by default)
+	workerPool *WorkerPool
+	poolEnabled atomic.Bool
 }
 
 
@@ -66,6 +70,12 @@ func NewClient(opts *Options) (*Client, error) {
 	if err := client.authenticate(); err != nil {
 		client.Close()
 		return nil, fmt.Errorf("failed to authenticate: %w", err)
+	}
+
+	// Initialize worker pool if enabled
+	if opts.EnableWorkerPool {
+		client.workerPool = NewWorkerPool(client, opts.QueueSize, opts.WorkerPoolSize)
+		client.poolEnabled.Store(true)
 	}
 
 	return client, nil
@@ -256,6 +266,12 @@ func (c *Client) tryReconnect() error {
 
 // Close closes client connection
 func (c *Client) Close() error {
+	// Shutdown worker pool first
+	if c.poolEnabled.Load() && c.workerPool != nil {
+		c.workerPool.Shutdown()
+	}
+
+	// Then close gRPC connection
 	if connRef := c.connRef.Load(); connRef != nil {
 		if wrapper := connRef.(*connWrapper); wrapper != nil && wrapper.conn != nil {
 			return wrapper.conn.Close()
@@ -272,6 +288,20 @@ func (c *Client) GetConn() *grpc.ClientConn {
 		}
 	}
 	return nil
+}
+
+// GetWorkerPoolStats returns worker pool statistics (queueLen, activeWorkers)
+// Returns (0, 0) if worker pool is not enabled
+func (c *Client) GetWorkerPoolStats() (queueLen int, activeWorkers int32) {
+	if c.poolEnabled.Load() && c.workerPool != nil {
+		return c.workerPool.GetStats()
+	}
+	return 0, 0
+}
+
+// IsWorkerPoolEnabled returns whether worker pool is enabled
+func (c *Client) IsWorkerPoolEnabled() bool {
+	return c.poolEnabled.Load()
 }
 
 // executeWithRetry executor with retry (unified request execution pattern, similar to HTTP client's executeRequest)
