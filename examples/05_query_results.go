@@ -56,7 +56,10 @@ func main() {
 	// Demo 5: Comprehensive Type-Safe Value Access
 	demonstrateComprehensiveValueAccess(ctx, database)
 
-	// Demo 6: Result serialization and formatting
+	// Demo 6: Convenience Methods with Default Values (NEW!)
+	demonstrateConvenienceMethods(ctx, database)
+
+	// Demo 7: Result serialization and formatting
 	demonstrateResultSerialization(ctx, database)
 
 	fmt.Println("=== Query Result Processing Example Completed ===")
@@ -379,9 +382,40 @@ func demonstrateComprehensiveValueAccess(ctx context.Context, database *typedbcl
 	fmt.Println("\n✅ Comprehensive demo completed - demonstrated all type-safe value access methods")
 }
 
+// demonstrateConvenienceMethods shows Get*Or() methods for cleaner code
+func demonstrateConvenienceMethods(ctx context.Context, database *typedbclient.Database) {
+	fmt.Printf("\n--- Demo 6: Convenience Methods (Get*Or) ---\n")
+
+	queryCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	// Old way vs New way comparison
+	query := "match $p isa person, has name $n, has age $a; limit 1;"
+	if result, err := database.ExecuteRead(queryCtx, query); err == nil && len(result.TypedRows) > 0 {
+		row := result.TypedRows[0]
+
+		// Old: verbose with error handling
+		var name string
+		if n, err := row.GetString("n"); err == nil {
+			name = n
+		} else {
+			name = "Unknown"
+		}
+
+		// New: one-liner with default
+		name2 := row.GetStringOr("n", "Unknown")
+		age := row.GetInt64Or("a", 0)
+		premium := row.GetBoolOr("premium", false) // Missing field → default
+
+		fmt.Printf("   Old way (verbose): name='%s'\n", name)
+		fmt.Printf("   New way (concise): name='%s', age=%d, premium=%v\n", name2, age, premium)
+		fmt.Println("   ✅ Automatic defaults for missing fields, no error handling clutter!")
+	}
+}
+
 // demonstrateResultSerialization demonstrates result serialization and formatting
 func demonstrateResultSerialization(ctx context.Context, database *typedbclient.Database) {
-	fmt.Printf("\n--- Demo 6: Result Serialization and Formatting ---\n")
+	fmt.Printf("\n--- Demo 7: Result Serialization and Formatting ---\n")
 
 	queryCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()

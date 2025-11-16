@@ -503,6 +503,50 @@ func (tr *TypedRow) GetValue(column string) (*TypedValue, error) {
 	return val, nil
 }
 
+// GetStringOr returns the string value, or defaultValue if column not found or conversion error
+func (tr *TypedRow) GetStringOr(column string, defaultValue string) string {
+	val, err := tr.GetString(column)
+	if err != nil {
+		return defaultValue
+	}
+	return val
+}
+
+// GetInt64Or returns the int64 value, or defaultValue if column not found or conversion error
+func (tr *TypedRow) GetInt64Or(column string, defaultValue int64) int64 {
+	val, err := tr.GetInt64(column)
+	if err != nil {
+		return defaultValue
+	}
+	return val
+}
+
+// GetBoolOr returns the bool value, or defaultValue if column not found or conversion error
+func (tr *TypedRow) GetBoolOr(column string, defaultValue bool) bool {
+	val, ok := tr.columns[column]
+	if !ok {
+		return defaultValue
+	}
+	b, err := val.AsBool()
+	if err != nil {
+		return defaultValue
+	}
+	return b
+}
+
+// GetFloat64Or returns the float64 value, or defaultValue if column not found or conversion error
+func (tr *TypedRow) GetFloat64Or(column string, defaultValue float64) float64 {
+	val, ok := tr.columns[column]
+	if !ok {
+		return defaultValue
+	}
+	f, err := val.AsFloat64()
+	if err != nil {
+		return defaultValue
+	}
+	return f
+}
+
 // GetColumnNames returns all column names in the row (sorted for consistency)
 func (tr *TypedRow) GetColumnNames() []string {
 	names := make([]string, 0, len(tr.columns))
@@ -552,6 +596,50 @@ func (td *TypedDocument) GetValue(field string) (*TypedValue, error) {
 		return nil, fmt.Errorf("field %q not found", field)
 	}
 	return val, nil
+}
+
+// GetStringOr returns the string value, or defaultValue if field not found or conversion error
+func (td *TypedDocument) GetStringOr(field string, defaultValue string) string {
+	val, err := td.GetString(field)
+	if err != nil {
+		return defaultValue
+	}
+	return val
+}
+
+// GetInt64Or returns the int64 value, or defaultValue if field not found or conversion error
+func (td *TypedDocument) GetInt64Or(field string, defaultValue int64) int64 {
+	val, err := td.GetInt64(field)
+	if err != nil {
+		return defaultValue
+	}
+	return val
+}
+
+// GetBoolOr returns the bool value, or defaultValue if field not found or conversion error
+func (td *TypedDocument) GetBoolOr(field string, defaultValue bool) bool {
+	val, ok := td.fields[field]
+	if !ok {
+		return defaultValue
+	}
+	b, err := val.AsBool()
+	if err != nil {
+		return defaultValue
+	}
+	return b
+}
+
+// GetFloat64Or returns the float64 value, or defaultValue if field not found or conversion error
+func (td *TypedDocument) GetFloat64Or(field string, defaultValue float64) float64 {
+	val, ok := td.fields[field]
+	if !ok {
+		return defaultValue
+	}
+	f, err := val.AsFloat64()
+	if err != nil {
+		return defaultValue
+	}
+	return f
 }
 
 // GetFieldNames returns all field names in the document (sorted for consistency)
