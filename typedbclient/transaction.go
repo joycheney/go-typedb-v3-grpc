@@ -104,20 +104,92 @@ func (qr *QueryResult) GetFromRow(rowIndex int, columnName string) (interface{},
 	return row[columnIndex], nil
 }
 
-// GetRowCount returns the number of rows in the result
-func (qr *QueryResult) GetRowCount() int {
-	if !qr.IsRowStream {
-		return 0
+// GetTypedRows returns the typed rows with automatic conversion if needed
+// This method detects incorrect usage and auto-converts when possible
+func (qr *QueryResult) GetTypedRows() []*TypedRow {
+	// Case 1: User called correctly - RowStream and accessing rows
+	if qr.IsRowStream {
+		return qr.TypedRows
 	}
-	return len(qr.rows)
+
+	// Case 2: User called incorrectly - DocumentStream but accessing rows
+	// Detect the error and try to auto-convert
+	if qr.IsDocumentStream && len(qr.TypedDocuments) > 0 {
+		// Lazy conversion: only convert if not already cached
+		if len(qr.TypedRows) == 0 {
+			if rows, err := qr.convertDocumentsToRows(); err == nil {
+				// Cache the converted result
+				qr.TypedRows = rows
+			}
+			// If conversion fails (nested), TypedRows stays empty
+		}
+		return qr.TypedRows
+	}
+
+	return nil
 }
 
-// GetDocumentCount returns the number of documents in the result
-func (qr *QueryResult) GetDocumentCount() int {
-	if !qr.IsDocumentStream {
-		return 0
+// GetTypedDocuments returns the typed documents with automatic conversion if needed
+// This method detects incorrect usage and auto-converts when possible
+func (qr *QueryResult) GetTypedDocuments() []*TypedDocument {
+	// Case 1: User called correctly - DocumentStream and accessing documents
+	if qr.IsDocumentStream {
+		return qr.TypedDocuments
 	}
-	return len(qr.documents)
+
+	// Case 2: User called incorrectly - RowStream but accessing documents
+	// Detect the error and auto-convert (always succeeds for rows)
+	if qr.IsRowStream && len(qr.TypedRows) > 0 {
+		// Lazy conversion: only convert if not already cached
+		if len(qr.TypedDocuments) == 0 {
+			qr.TypedDocuments = qr.convertRowsToDocuments()
+		}
+		return qr.TypedDocuments
+	}
+
+	return nil
+}
+
+// GetRowCount returns the number of rows in the result (with automatic conversion)
+// If result is DocumentStream but convertible to rows, returns converted count
+func (qr *QueryResult) GetRowCount() int {
+	// Primary path: direct row access
+	if qr.IsRowStream {
+		return len(qr.TypedRows)
+	}
+
+	// Fallback: try converting documents to rows
+	if qr.IsDocumentStream && len(qr.TypedDocuments) > 0 {
+		// Attempt conversion (only succeeds for flat documents)
+		if rows, err := qr.convertDocumentsToRows(); err == nil {
+			// Conversion succeeded - cache the result and return count
+			qr.TypedRows = rows
+			qr.ColumnNames = rows[0].GetColumnNames() // Already set by conversion
+			return len(rows)
+		}
+	}
+
+	return 0
+}
+
+// GetDocumentCount returns the number of documents in the result (with automatic conversion)
+// If result is RowStream, automatically converts and returns count
+func (qr *QueryResult) GetDocumentCount() int {
+	// Primary path: direct document access
+	if qr.IsDocumentStream {
+		return len(qr.TypedDocuments)
+	}
+
+	// Fallback: auto-convert rows to documents (always succeeds)
+	if qr.IsRowStream && len(qr.TypedRows) > 0 {
+		// Lazy conversion: only convert if TypedDocuments is empty
+		if len(qr.TypedDocuments) == 0 {
+			qr.TypedDocuments = qr.convertRowsToDocuments()
+		}
+		return len(qr.TypedDocuments)
+	}
+
+	return 0
 }
 
 // GetDocument returns a document at the specified index (safe copy)
@@ -153,6 +225,263 @@ func (qr *QueryResult) GetAllDocuments() []map[string]interface{} {
 		docs[i] = doc
 	}
 	return docs
+}
+
+// convertMapToTypedDocument converts a map[string]interface{} to *TypedDocument
+// This is used during data ingestion to create TypedDocuments from protobuf data
+func convertMapToTypedDocument(data map[string]interface{}) *TypedDocument {
+	fields := make(map[string]*TypedValue)
+
+	for key, val := range data {
+		fields[key] = convertInterfaceToTypedValue(val)
+	}
+
+	return &TypedDocument{fields: fields}
+}
+
+// convertInterfaceToTypedValue converts an interface{} value to *TypedValue
+// This handles the conversion from generic map data to strongly-typed values
+func convertInterfaceToTypedValue(val interface{}) *TypedValue {
+	if val == nil {
+		return &TypedValue{valueType: TypeNull, isNull: true}
+	}
+
+	switch v := val.(type) {
+	case string:
+		return &TypedValue{valueType: TypeString, stringVal: v}
+	case int64:
+		return &TypedValue{valueType: TypeInt64, int64Val: v}
+	case float64:
+		return &TypedValue{valueType: TypeFloat64, float64Val: v}
+	case bool:
+		return &TypedValue{valueType: TypeBool, boolVal: v}
+	case map[string]interface{}:
+		// Nested map - recursively convert
+		// This might be a concept or nested structure
+		return convertMapToTypedValue(v)
+	case []interface{}:
+		// List - convert each element
+		list := make([]TypedValue, len(v))
+		for i, item := range v {
+			list[i] = *convertInterfaceToTypedValue(item)
+		}
+		return &TypedValue{valueType: TypeValueList, listVal: list}
+	default:
+		// Unknown type - store as raw
+		return &TypedValue{valueType: TypeUnknown, rawValue: val}
+	}
+}
+
+// convertMapToTypedValue converts a map to a TypedValue (for nested structures)
+// This is used when a field contains a nested map (like a concept)
+func convertMapToTypedValue(data map[string]interface{}) *TypedValue {
+	// Check if it looks like a concept
+	if typeStr, ok := data["type"].(string); ok {
+		concept := &Concept{Type: typeStr}
+
+		if iid, ok := data["iid"].(string); ok {
+			concept.IID = iid
+		}
+		if label, ok := data["label"].(string); ok {
+			concept.Label = label
+		}
+		if value, ok := data["value"]; ok {
+			concept.Value = convertInterfaceToTypedValue(value)
+		}
+
+		// Check for links (relations)
+		if links, ok := data["links"].(map[string]interface{}); ok {
+			concept.Links = make(map[string][]*Concept)
+			for role, players := range links {
+				if playerList, ok := players.([]interface{}); ok {
+					concepts := make([]*Concept, 0, len(playerList))
+					for _, player := range playerList {
+						if playerMap, ok := player.(map[string]interface{}); ok {
+							if playerVal := convertMapToTypedValue(playerMap); playerVal.conceptVal != nil {
+								concepts = append(concepts, playerVal.conceptVal)
+							}
+						}
+					}
+					concept.Links[role] = concepts
+				}
+			}
+		}
+
+		return &TypedValue{valueType: TypeConcept, conceptVal: concept}
+	}
+
+	// Not a concept - treat as unknown nested structure
+	return &TypedValue{valueType: TypeUnknown, rawValue: data}
+}
+
+// convertRowsToDocuments converts row stream data to document format (always succeeds)
+// This enables seamless conversion when user calls document methods on row results
+func (qr *QueryResult) convertRowsToDocuments() []*TypedDocument {
+	if len(qr.TypedRows) == 0 {
+		return []*TypedDocument{}
+	}
+
+	docs := make([]*TypedDocument, len(qr.TypedRows))
+	for i, row := range qr.TypedRows {
+		// Create document fields from row columns
+		fields := make(map[string]*TypedValue)
+
+		// Get all column names from the row
+		columnNames := row.GetColumnNames()
+		for _, colName := range columnNames {
+			if val, err := row.GetValue(colName); err == nil {
+				fields[colName] = val
+			}
+		}
+
+		docs[i] = &TypedDocument{fields: fields}
+	}
+
+	return docs
+}
+
+// convertDocumentsToRows converts document stream data to row format (conditional success)
+// Only succeeds if all documents are flat (no nested structures)
+func (qr *QueryResult) convertDocumentsToRows() ([]*TypedRow, error) {
+	if len(qr.TypedDocuments) == 0 {
+		return []*TypedRow{}, nil
+	}
+
+	// Step 1: Extract column names from the first document
+	firstDoc := qr.TypedDocuments[0]
+	columnNames := firstDoc.GetFieldNames() // Already sorted
+
+	// Step 2: Validate all documents are flat and have consistent fields
+	for i, doc := range qr.TypedDocuments {
+		if err := validateFlatDocument(doc, columnNames); err != nil {
+			return nil, fmt.Errorf("document[%d] cannot be converted to row: %w", i, err)
+		}
+	}
+
+	// Step 3: Convert documents to rows
+	rows := make([]*TypedRow, len(qr.TypedDocuments))
+	for i, doc := range qr.TypedDocuments {
+		columns := make(map[string]*TypedValue)
+		for _, colName := range columnNames {
+			if val, err := doc.GetValue(colName); err == nil {
+				columns[colName] = val
+			}
+		}
+		rows[i] = &TypedRow{columns: columns}
+	}
+
+	// Step 4: Update QueryResult metadata
+	qr.ColumnNames = columnNames
+
+	return rows, nil
+}
+
+// validateFlatDocument checks if a document can be flattened to a row
+// Returns error if document has nested structures or field mismatch
+func validateFlatDocument(doc *TypedDocument, expectedFields []string) error {
+	actualFields := doc.GetFieldNames() // Already sorted
+
+	// Check field count consistency
+	if len(actualFields) != len(expectedFields) {
+		return fmt.Errorf("field count mismatch: expected %d fields %v, got %d fields %v",
+			len(expectedFields), expectedFields, len(actualFields), actualFields)
+	}
+
+	// Check field names consistency
+	for i, expected := range expectedFields {
+		if actualFields[i] != expected {
+			return fmt.Errorf("field name mismatch at position %d: expected %q, got %q",
+				i, expected, actualFields[i])
+		}
+	}
+
+	// Check for nested structures
+	for _, fieldName := range actualFields {
+		val, err := doc.GetValue(fieldName)
+		if err != nil {
+			continue // Skip missing fields
+		}
+
+		if val.IsNested() {
+			// Provide helpful error message based on nested type
+			if val.IsList() {
+				return fmt.Errorf("field %q contains a list (nested structure). Use GetDocuments() or modify your fetch query to return flat data", fieldName)
+			}
+			if val.Type() == TypeConcept {
+				concept, _ := val.AsConcept()
+				if concept != nil && len(concept.Links) > 0 {
+					return fmt.Errorf("field %q contains a concept with links/relations (nested structure). Use GetDocuments() or modify your fetch query to return flat data", fieldName)
+				}
+			}
+			return fmt.Errorf("field %q contains nested structure. Use GetDocuments() or modify your fetch query to return flat data", fieldName)
+		}
+	}
+
+	return nil
+}
+
+// GetRowsRobust returns row data with automatic conversion from documents if needed
+// This method provides seamless robustness - users don't need to know the exact result type
+func (qr *QueryResult) GetRowsRobust() ([]*TypedRow, error) {
+	// Case 1: Already have row data, return directly
+	if qr.IsRowStream && len(qr.TypedRows) > 0 {
+		return qr.TypedRows, nil
+	}
+
+	// Case 2: Have document data, attempt conversion
+	if qr.IsDocumentStream && len(qr.TypedDocuments) > 0 {
+		rows, err := qr.convertDocumentsToRows()
+		if err != nil {
+			// Conversion failed - provide helpful error message
+			return nil, fmt.Errorf("cannot convert documents to rows: %w", err)
+		}
+		// Conversion succeeded - return converted rows seamlessly
+		return rows, nil
+	}
+
+	// Case 3: Operation completed with no data
+	if qr.IsDone {
+		return nil, fmt.Errorf("query completed with no result data (IsDone=true)")
+	}
+
+	// Case 4: Unexpected state
+	return nil, fmt.Errorf("no row or document data available")
+}
+
+// GetDocumentsRobust returns document data with automatic conversion from rows if needed
+// This method provides seamless robustness - users don't need to know the exact result type
+func (qr *QueryResult) GetDocumentsRobust() ([]*TypedDocument, error) {
+	// Case 1: Already have document data, return directly
+	if qr.IsDocumentStream && len(qr.TypedDocuments) > 0 {
+		return qr.TypedDocuments, nil
+	}
+
+	// Case 2: Have row data, convert automatically (always succeeds)
+	if qr.IsRowStream && len(qr.TypedRows) > 0 {
+		docs := qr.convertRowsToDocuments()
+		// Row→Document conversion always succeeds, return seamlessly
+		return docs, nil
+	}
+
+	// Case 3: Operation completed with no data
+	if qr.IsDone {
+		return nil, fmt.Errorf("query completed with no result data (IsDone=true)")
+	}
+
+	// Case 4: Unexpected state
+	return nil, fmt.Errorf("no row or document data available")
+}
+
+// CountRobust returns the count of results regardless of result type
+// This method provides seamless counting across row and document streams
+func (qr *QueryResult) CountRobust() int {
+	if qr.IsRowStream {
+		return len(qr.TypedRows)
+	}
+	if qr.IsDocumentStream {
+		return len(qr.TypedDocuments)
+	}
+	return 0
 }
 
 // extractErrorDetails extracts detailed error information from gRPC status
@@ -685,6 +1014,20 @@ func (tx *Transaction) handleExecute(requestID []byte, query string) StreamRespo
 		}
 	}
 
+	// Pre-populate both data formats for user convenience
+	// If RowStream query returns rows, also fill documents for compatibility
+	if result.IsRowStream && len(result.TypedRows) > 0 && len(result.TypedDocuments) == 0 {
+		result.TypedDocuments = result.convertRowsToDocuments()
+	}
+
+	// If DocumentStream query returns documents, try to fill rows (only works for flat documents)
+	if result.IsDocumentStream && len(result.TypedDocuments) > 0 && len(result.TypedRows) == 0 {
+		if rows, err := result.convertDocumentsToRows(); err == nil {
+			result.TypedRows = rows
+		}
+		// Silently fail for nested documents (conversion not possible)
+	}
+
 	return StreamResponse{Result: result}
 }
 
@@ -1205,8 +1548,9 @@ func (tx *Transaction) processQueryResponse(resp *pb.Transaction_Server, result 
 					docData := convertDocument(doc)
 					result.documents = append(result.documents, docData)
 
-					// TODO: Add TypedDocument conversion when document structure is updated
-					// For now, just maintain backward compatibility
+					// Convert to TypedDocument for type-safe access
+					typedDoc := convertMapToTypedDocument(docData)
+					result.TypedDocuments = append(result.TypedDocuments, typedDoc)
 				}
 			}
 		}

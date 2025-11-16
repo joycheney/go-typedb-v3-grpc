@@ -305,6 +305,36 @@ func (tv *TypedValue) String() string {
 	}
 }
 
+// IsList returns true if the value is a list (ConceptList or ValueList)
+func (tv *TypedValue) IsList() bool {
+	return tv.valueType == TypeConceptList || tv.valueType == TypeValueList
+}
+
+// IsNested returns true if the value contains nested structure (lists or concepts with links)
+// This is used to validate whether a document can be flattened to rows
+func (tv *TypedValue) IsNested() bool {
+	if tv.isNull {
+		return false
+	}
+
+	// Lists are nested structures
+	if tv.IsList() {
+		return true
+	}
+
+	// Concepts with Links (relations) are nested
+	if tv.valueType == TypeConcept && tv.conceptVal != nil && len(tv.conceptVal.Links) > 0 {
+		return true
+	}
+
+	// Unknown types might be nested (treat as nested for safety)
+	if tv.valueType == TypeUnknown {
+		return true
+	}
+
+	return false
+}
+
 // TypedRow represents a row with typed columns
 type TypedRow struct {
 	columns map[string]*TypedValue // Column name -> typed value (private for safety)
@@ -473,6 +503,23 @@ func (tr *TypedRow) GetValue(column string) (*TypedValue, error) {
 	return val, nil
 }
 
+// GetColumnNames returns all column names in the row (sorted for consistency)
+func (tr *TypedRow) GetColumnNames() []string {
+	names := make([]string, 0, len(tr.columns))
+	for name := range tr.columns {
+		names = append(names, name)
+	}
+	// Sort to ensure consistent ordering
+	sortStrings(names)
+	return names
+}
+
+// HasColumn returns true if the row has the specified column
+func (tr *TypedRow) HasColumn(column string) bool {
+	_, ok := tr.columns[column]
+	return ok
+}
+
 // TypedDocument represents a document with typed fields
 type TypedDocument struct {
 	fields map[string]*TypedValue // Private for safety
@@ -505,4 +552,32 @@ func (td *TypedDocument) GetValue(field string) (*TypedValue, error) {
 		return nil, fmt.Errorf("field %q not found", field)
 	}
 	return val, nil
+}
+
+// GetFieldNames returns all field names in the document (sorted for consistency)
+func (td *TypedDocument) GetFieldNames() []string {
+	names := make([]string, 0, len(td.fields))
+	for name := range td.fields {
+		names = append(names, name)
+	}
+	// Sort to ensure consistent ordering
+	sortStrings(names)
+	return names
+}
+
+// HasField returns true if the document has the specified field
+func (td *TypedDocument) HasField(field string) bool {
+	_, ok := td.fields[field]
+	return ok
+}
+
+// sortStrings is a simple bubble sort for string slices (avoiding external dependencies)
+func sortStrings(s []string) {
+	for i := 0; i < len(s); i++ {
+		for j := i + 1; j < len(s); j++ {
+			if s[i] > s[j] {
+				s[i], s[j] = s[j], s[i]
+			}
+		}
+	}
 }

@@ -85,6 +85,133 @@ go-typedb-v3-grpc/
    - Automatic type mapping from TypeDB to Go types
    - Memory-efficient processing of large result sets
 
+5. **Robust Result Access (New)**:
+   - Seamless automatic conversion between row and document formats
+   - Users don't need to memorize which queries return rows vs documents
+   - Intelligent error messages when conversion isn't possible
+
+## Robust Query Result Handling
+
+The library provides robust accessor methods that automatically handle result type conversion, making it easier to work with different query types without needing to remember whether a query returns rows or documents.
+
+### Key Features
+
+1. **Automatic Row ↔ Document Conversion**:
+   - Row data can always be converted to documents (column names → field names)
+   - Flat documents can be converted to rows (field names → column names)
+   - Nested documents provide clear error messages with suggestions
+
+2. **Seamless Developer Experience**:
+   - Use `GetRowsRobust()` regardless of query type - it auto-converts if possible
+   - Use `GetDocumentsRobust()` regardless of query type - it auto-converts if possible
+   - Use `CountRobust()` to get result count without checking type flags
+
+3. **Type-Safe with Helpful Errors**:
+   - Nested structures that can't be flattened return descriptive errors
+   - Error messages suggest the correct API or query modification
+
+### Usage Examples
+
+#### Example 1: Seamless Row Access (with auto-conversion)
+```go
+// Query returns documents (fetch query)
+result, _ := db.ExecuteRead(ctx, `
+    match $p isa person;
+    fetch $p: name, age;
+`)
+
+// User calls row accessor (previously would get empty/zero)
+// Now: automatically converts documents to rows if they're flat
+rows, err := result.GetRowsRobust()
+if err != nil {
+    // Only fails if documents have nested structures
+    log.Printf("Cannot convert to rows: %v", err)
+} else {
+    // Successfully converted! User gets the data they expected
+    for _, row := range rows {
+        name, _ := row.GetString("name")
+        age, _ := row.GetInt64("age")
+        fmt.Printf("%s: %d\n", name, age)
+    }
+}
+```
+
+#### Example 2: Seamless Document Access (always succeeds)
+```go
+// Query returns rows (match/select query)
+result, _ := db.ExecuteRead(ctx, `
+    match $p isa person, has name $n, has age $a;
+    select $n, $a;
+`)
+
+// User calls document accessor
+// Automatically converts rows to documents (always succeeds)
+docs, err := result.GetDocumentsRobust()
+// err is always nil for row→document conversion
+for _, doc := range docs {
+    name, _ := doc.GetString("n")
+    age, _ := doc.GetInt64("a")
+    fmt.Printf("%s: %d\n", name, age)
+}
+```
+
+#### Example 3: Universal Counting
+```go
+// Works for any result type
+count := result.CountRobust()  // No need to check IsRowStream/IsDocumentStream
+fmt.Printf("Got %d results\n", count)
+```
+
+#### Example 4: Error Handling for Nested Structures
+```go
+// Query with nested data
+result, _ := db.ExecuteRead(ctx, `
+    match $p isa person;
+    fetch $p: name, hobbies;  // hobbies is a list (nested)
+`)
+
+// Attempt conversion to rows
+rows, err := result.GetRowsRobust()
+if err != nil {
+    // Clear error message:
+    // "field 'hobbies' contains a list (nested structure).
+    //  Use GetDocuments() or modify your fetch query to return flat data"
+
+    // Fallback to documents (always works)
+    docs, _ := result.GetDocumentsRobust()
+    // Process nested structure
+}
+```
+
+### Comparison: Traditional vs Robust APIs
+
+| Scenario | Traditional API | Robust API |
+|----------|----------------|------------|
+| Match query, need documents | Check `IsRowStream`, manually convert | `GetDocumentsRobust()` - auto-converts |
+| Fetch query, need rows | Check `IsDocumentStream`, get confused | `GetRowsRobust()` - auto-converts if flat |
+| Just need count | `if IsRowStream { len(TypedRows) } else if IsDocumentStream { len(TypedDocuments) }` | `CountRobust()` |
+| Wrong accessor called | Silent failure (empty/zero) | Automatic conversion or clear error |
+
+### When Conversion Fails
+
+Document → Row conversion fails only when documents contain:
+- **Lists/Arrays**: Field contains nested list data
+- **Relations with Links**: Concept has relational links
+- **Inconsistent Fields**: Documents have different field sets
+- **Unknown Types**: Field contains unrecognized type
+
+Error messages always include:
+- Which field caused the problem
+- What type of nesting was detected
+- Suggested fix (use `GetDocuments()` or modify query)
+
+### Best Practices
+
+1. **Use Robust APIs by default**: `GetRowsRobust()`, `GetDocumentsRobust()`, `CountRobust()`
+2. **Handle errors gracefully**: Even robust APIs can fail on genuinely incompatible structures
+3. **Trust auto-conversion**: Row→Document always succeeds; Document→Row succeeds for flat data
+4. **Read error messages**: They provide actionable guidance when conversion fails
+
 ## TypeQL v3 Syntax Reference
 
 For TypeQL v3 syntax and query patterns, refer to:
