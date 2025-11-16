@@ -62,7 +62,6 @@ Handle multiple result formats seamlessly:
 - **Row streams** for structured query results
 - **Document streams** for JSON-like data
 - **Operation confirmations** for write operations
-- **Convenience methods** (v1.5.4+): `GetStringOr()`, `GetInt64Or()` etc. - one-liners with automatic defaults, no error handling needed
 
 ## 📖 Documentation
 

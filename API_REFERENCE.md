@@ -102,17 +102,11 @@ type TypedRow struct {
     Columns map[string]*TypedValue  // Column name -> typed value
 }
 
-// Get methods with error handling
 func (row *TypedRow) GetString(column string) (string, error)
 func (row *TypedRow) GetInt64(column string) (int64, error)
 func (row *TypedRow) GetBool(column string) (bool, error)
 func (row *TypedRow) GetFloat64(column string) (float64, error)
-
-// Convenience methods with default values (v1.5.4+)
-func (row *TypedRow) GetStringOr(column string, defaultValue string) string
-func (row *TypedRow) GetInt64Or(column string, defaultValue int64) int64
-func (row *TypedRow) GetBoolOr(column string, defaultValue bool) bool
-func (row *TypedRow) GetFloat64Or(column string, defaultValue float64) float64
+func (row *TypedRow) GetValue(column string) (*TypedValue, error)
 ```
 
 ### TypedDocument
@@ -121,17 +115,11 @@ type TypedDocument struct {
     Fields map[string]*TypedValue  // Field name -> typed value
 }
 
-// Get methods with error handling
 func (doc *TypedDocument) GetString(field string) (string, error)
 func (doc *TypedDocument) GetInt64(field string) (int64, error)
 func (doc *TypedDocument) GetBool(field string) (bool, error)
 func (doc *TypedDocument) GetFloat64(field string) (float64, error)
-
-// Convenience methods with default values (v1.5.4+)
-func (doc *TypedDocument) GetStringOr(field string, defaultValue string) string
-func (doc *TypedDocument) GetInt64Or(field string, defaultValue int64) int64
-func (doc *TypedDocument) GetBoolOr(field string, defaultValue bool) bool
-func (doc *TypedDocument) GetFloat64Or(field string, defaultValue float64) float64
+func (doc *TypedDocument) GetValue(field string) (*TypedValue, error)
 ```
 
 ## Bundle Operations
@@ -195,8 +183,6 @@ results, _ := db.ExecuteBundle(ctx, typedbclient.Write, []typedbclient.BundleOpe
 ```
 
 ### 4. Result Processing
-
-#### Standard approach (with error handling)
 ```go
 result, _ := db.ExecuteRead(ctx, `match $p isa person, has name $n; select $p, $n;`)
 
@@ -206,20 +192,6 @@ for i, row := range result.TypedRows {
         name = "Unknown"
     }
     fmt.Printf("Person %d: %s\n", i+1, name)
-}
-```
-
-#### Convenient approach (with defaults) - v1.5.4+
-```go
-result, _ := db.ExecuteRead(ctx, `match $p isa person, has name $n, has age $a; select $p, $n, $a;`)
-
-for i, row := range result.TypedRows {
-    // One-liner per field, automatic defaults for missing fields
-    name := row.GetStringOr("n", "Unknown")
-    age := row.GetInt64Or("a", 0)
-    premium := row.GetBoolOr("premium", false)
-
-    fmt.Printf("Person %d: %s (age: %d, premium: %v)\n", i+1, name, age, premium)
 }
 ```
 
