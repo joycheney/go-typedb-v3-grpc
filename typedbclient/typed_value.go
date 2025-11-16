@@ -545,6 +545,24 @@ func (td *TypedDocument) GetInt64(field string) (int64, error) {
 	return val.AsInt64() // AsInt64 now handles attribute concept extraction
 }
 
+// GetBool returns the bool value at the specified field
+func (td *TypedDocument) GetBool(field string) (bool, error) {
+	val, ok := td.fields[field]
+	if !ok {
+		return false, fmt.Errorf("field %q not found", field)
+	}
+	return val.AsBool()
+}
+
+// GetFloat64 returns the float64 value at the specified field
+func (td *TypedDocument) GetFloat64(field string) (float64, error) {
+	val, ok := td.fields[field]
+	if !ok {
+		return 0, fmt.Errorf("field %q not found", field)
+	}
+	return val.AsFloat64()
+}
+
 // GetValue returns the raw TypedValue from the specified field
 func (td *TypedDocument) GetValue(field string) (*TypedValue, error) {
 	val, ok := td.fields[field]

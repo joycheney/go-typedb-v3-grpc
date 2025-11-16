@@ -115,11 +115,13 @@ type TypedDocument struct {
     Fields map[string]*TypedValue  // Field name -> typed value
 }
 
+// Basic value accessors
 func (doc *TypedDocument) GetString(field string) (string, error)
 func (doc *TypedDocument) GetInt64(field string) (int64, error)
 func (doc *TypedDocument) GetBool(field string) (bool, error)
 func (doc *TypedDocument) GetFloat64(field string) (float64, error)
 func (doc *TypedDocument) GetValue(field string) (*TypedValue, error)
+func (doc *TypedDocument) GetFieldNames() []string
 ```
 
 ## Bundle Operations
